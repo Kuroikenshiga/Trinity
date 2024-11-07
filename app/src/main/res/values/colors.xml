@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="purple">#931FDE</color>
+    <color name="FullRed">#FF0000</color>
+    <color name="bottonBar">#4B4B4B</color>
+    <color name="FullBlack">#000000</color>
+    <color name="Blue">#578FFF</color>
+    <color name="BackGroundScreen">#272727</color>
+    <color name="light_blue_400">#FF29B6F6</color>
+    <color name="light_blue_600">#FF039BE5</color>
+    <color name="gray_400">#FFBDBDBD</color>
+    <color name="gray_600">#6F6F6F</color>
+    <color name="strong_blue">#0006CB</color>
+    <color name="dark_gray">#474747</color>
+
+
+
+</resources>

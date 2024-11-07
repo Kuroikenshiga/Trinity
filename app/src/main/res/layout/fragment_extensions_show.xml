@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/FullBlack"
+    android:backgroundTint="@color/BackGroundScreen"
+    tools:context=".fragments.ExtensionsShowFragment">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/headerExtensions"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent"
+
+            >
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/titleContainer"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:fontFamily="@font/roboto_black"
+                    android:text="Extensões"
+                    android:textColor="@color/white"
+                    android:textSize="17sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+
+                    />
+
+                <ImageView
+                    android:id="@+id/searchIcon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/search_icon"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <LinearLayout
+                android:id="@+id/searchToolContainer"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+
+                android:gravity="center_horizontal|center_vertical"
+                android:visibility="visible"
+                app:layout_constraintTop_toBottomOf="@+id/titleContainer">
+
+                <EditText
+                    android:id="@+id/searchField"
+                    android:layout_width="300dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/search_field_shape"
+                    android:fontFamily="@font/open_sans"
+                    android:inputType="text"
+                    android:padding="10dp"
+                    android:textColor="@color/white"
+
+
+                    />
+
+                <ImageView
+                    android:id="@+id/search"
+                    android:layout_width="50dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/search_icon_shape"
+                    android:src="@drawable/search_icon"
+
+                    />
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mangaDexClickablePtBr"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:clickable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/headerExtensions">
+
+            <ImageView
+                android:id="@+id/img1"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/mangadex_logo"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:fontFamily="@font/open_sans"
+                android:text="MangaDex - Português Brasileiro"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/img1"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/brazil_flag"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mangaDexClickableEn"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:clickable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/mangaDexClickablePtBr"
+
+            >
+
+            <ImageView
+                android:id="@+id/img2"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/mangadex_logo"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:fontFamily="@font/open_sans"
+                android:text="MangaDex - Inglês"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/img2"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/usa_flag"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mangaDexClickableEs"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:clickable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/mangaDexClickableEn">
+
+            <ImageView
+                android:id="@+id/img3"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/mangadex_logo"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:fontFamily="@font/open_sans"
+                android:text="MangaDex - Espanhol"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/img3"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/spain_flag"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:id="@+id/ptBr"
+            android:layout_width="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/mangaDexClickableEs"
+            android:orientation="vertical"
+            android:visibility="gone"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Português"
+                android:textSize="15sp"
+                android:textColor="@color/white"
+                android:fontFamily="@font/roboto_black"
+                android:layout_marginStart="10dp"
+                />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerPtBr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/en"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/ptBr"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Inglês"
+                android:textSize="15sp"
+                android:textColor="@color/white"
+                android:fontFamily="@font/roboto_black"
+                android:layout_marginStart="10dp"
+                />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerEn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/esLa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/en"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Espanhol"
+                android:textSize="15sp"
+                android:textColor="@color/white"
+                android:fontFamily="@font/roboto_black"
+                android:layout_marginStart="10dp"
+                />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerEsLa"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:indeterminateTint="@color/Blue"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="gone"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_navigation"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/library"
+
+    >
+
+    <fragment
+        android:id="@+id/updates"
+        android:name="com.example.trinity.fragments.UpdatesFragment"
+        android:label="fragment_updates"
+        tools:layout="@layout/fragment_updates"
+
+        >
+        <action
+            android:id="@+id/action_updates_to_readerMangaFragment2"
+            app:destination="@id/readerMangaFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/library"
+        android:name="com.example.trinity.fragments.LibraryFragment"
+        android:label="LibraryFragment"
+        tools:layout="@layout/fragment_library"/>
+    <fragment
+        android:id="@+id/extensions"
+        android:name="com.example.trinity.fragments.ExtensionsShowFragment"
+        tools:layout="@layout/fragment_extensions_show"/>
+    <fragment
+        android:id="@+id/readerMangaFragment2"
+        android:name="com.example.trinity.fragments.ReaderMangaFragment"
+        android:label="ReaderMangaFragment" >
+        <action
+            android:id="@+id/action_readerMangaFragment2_to_updates"
+            app:destination="@id/updates" />
+    </fragment>
+    <fragment
+        android:id="@+id/historyManga"
+        android:name="com.example.trinity.fragments.HistoryMangaFragment"
+        android:label="fragment_history_manga"
+        tools:layout="@layout/fragment_history_manga" />
+    <fragment
+        android:id="@+id/settings"
+        android:name="com.example.trinity.fragments.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" />
+</navigation>

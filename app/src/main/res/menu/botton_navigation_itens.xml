@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <item android:title="@string/biblioteca"
+        android:id="@+id/library"
+        android:icon="@drawable/book_open"
+        
+        />
+
+    <item android:title="@string/updates"
+        android:id="@+id/updates"
+        android:icon="@drawable/refresh_ccw"
+
+        />
+
+    <item android:title="@string/extensoes"
+        android:id="@+id/extensions"
+        android:icon="@drawable/cloud"/>
+
+    <item android:title="Histórico"
+        android:id="@+id/historyManga"
+        android:icon="@drawable/history"/>
+
+    <item android:title="Configurações"
+        android:id="@+id/settings"
+        android:icon="@drawable/configuracoes"/>
+</menu>

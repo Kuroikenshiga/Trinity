@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="preloaded_fonts" translatable="false">
+        <item>@font/noto_sans</item>
+        <item>@font/open_sans</item>
+        <item>@font/open_sans_condensed_light</item>
+        <item>@font/roboto_black</item>
+    </array>
+</resources>

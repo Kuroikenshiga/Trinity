@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:fitsSystemWindows="true"
+    tools:context=".MainActivity"
+    android:background="@color/BackGroundScreen"
+    >
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/hostFragmentMain"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/BackGroundScreen"
+        android:visibility="visible"
+        app:defaultNavHost="true"
+        app:layout_constraintBottom_toTopOf="@id/menuNaviContainer"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navGraph="@navigation/main_navigation_botton"
+
+        />
+
+
+    <LinearLayout
+        android:id="@+id/menuNaviContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent">
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/menuNavi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:background="@drawable/botton_navigator_shape"
+            app:itemActiveIndicatorStyle="@color/item_bottom_navigation_color"
+            app:itemIconTint="@color/item_bottom_navigation_color"
+            app:itemTextColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:menu="@menu/botton_navigation_itens"
+            app:itemIconSize="20dp"
+            />
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

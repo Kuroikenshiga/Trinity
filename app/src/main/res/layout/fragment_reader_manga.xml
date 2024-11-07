@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MangaShowContentActivity"
+    android:background="@color/BackGroundScreen"
+
+    >
+
+   <FrameLayout
+       android:layout_width="match_parent"
+       android:layout_height="match_parent">
+       <androidx.viewpager2.widget.ViewPager2
+           android:id="@+id/pageContainer"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           />
+   </FrameLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/cascadeRead"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/errorContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+        <ImageView
+            android:id="@+id/errorOnLoad"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:src="@drawable/time_out"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/errorText"
+            android:layout_marginTop="-100dp"
+            />
+        <TextView
+            android:id="@+id/errorText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/errorOnLoad"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:text="Erro na conexão"
+            android:fontFamily="@font/roboto_black"
+
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/Header"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="-50dp"
+        >
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/header_and_footer_background_reader"
+            android:alpha="0.6"/>
+        <ImageView
+            android:id="@+id/goBack"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:src="@drawable/back"
+            android:tintMode="src_in"
+            app:tint="@color/white"
+            />
+
+        <TextView
+            android:id="@+id/chapTitle"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/goBack"
+            android:layout_marginStart="5dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:fontFamily="@font/noto_sans"
+            android:textSize="15sp"
+            android:text="Ch. 89"
+            android:textColor="@color/white"
+            android:ellipsize="end"
+            android:maxLines="2"
+            />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/footer"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="-50dp"
+        >
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/header_and_footer_background_reader"
+            android:alpha="0.6"/>
+
+        <ImageView
+            android:id="@+id/alpha"
+            android:layout_width="40dp"
+            android:layout_height="30dp"
+            android:src="@drawable/brilho"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="60dp"
+            />
+        <ImageView
+            android:id="@+id/settings"
+            android:layout_width="40dp"
+            android:layout_height="30dp"
+            android:src="@drawable/configuracoes"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+        <ImageView
+            android:id="@+id/save"
+            android:layout_width="40dp"
+            android:layout_height="30dp"
+            android:src="@drawable/save_page"
+            app:tint="@color/Blue"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="60dp"
+            android:visibility="visible"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <SeekBar
+        android:alpha="0.1"
+        android:id="@+id/seekBar"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/numPages"
+        android:thumb="@drawable/thumb_seekbar"
+        android:progressTint="@color/Blue"
+        android:progress="1"
+        />
+    <ImageView
+        android:id="@+id/prevChap"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/numPages"
+        app:tint="@color/Blue"
+        android:src="@drawable/back"/>
+    <ImageView
+        android:id="@+id/nextChap"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/numPages"
+        android:scaleX="-1"
+        android:scaleY="-1"
+        android:src="@drawable/back"
+        app:tint="@color/Blue"/>
+    <TextView
+        android:id="@+id/numPages"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/footer"
+        android:textSize="17sp"
+        android:textColor="@color/white"
+        android:fontFamily="@font/roboto_black"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/alphaControlContainer"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:background="@drawable/alpha_controll_container_bg"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:paddingTop="20dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/controlAlphaText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Definir a luminosidade de leitura"
+            android:textSize="17sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textColor="@color/white"/>
+        <SeekBar
+            android:id="@+id/alphaController"
+            android:layout_width="250dp"
+            android:layout_height="50dp"
+            app:layout_constraintTop_toBottomOf="@id/controlAlphaText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:min="10"
+            android:max="100"
+            android:progress="100"
+            android:thumb="@drawable/light_controll_desactive_disabled"
+
+
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/readConfigsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/alpha_controll_container_bg"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:paddingTop="20dp"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/configTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="17sp"
+            android:textColor="@color/white"
+            android:text="Definir orientação de leitura"
+            android:fontFamily="@font/roboto_black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+        <RadioGroup
+            android:id="@+id/radio"
+            app:layout_constraintTop_toBottomOf="@+id/configTitle"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            >
+            <RadioButton
+                android:id="@+id/leftToRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/da_esquerda_para_direita"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:fontFamily="@font/roboto_black" />
+            <RadioButton
+                android:id="@+id/rightToLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/da_direita_para_esquerda"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:fontFamily="@font/roboto_black"/>
+            <RadioButton
+                android:id="@+id/cascade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/em_cascata"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:fontFamily="@font/roboto_black"/>
+        </RadioGroup>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

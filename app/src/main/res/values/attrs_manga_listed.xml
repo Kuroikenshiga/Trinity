@@ -1,0 +1,7 @@
+<resources>
+    <declare-styleable name="MangaListed">
+        <attr name="mangaTitulo" format="string" />
+        <attr name="mangaDimension" format="dimension" />
+        <attr name="mangaDrawable" format="color|reference" />
+    </declare-styleable>
+</resources>
