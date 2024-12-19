@@ -56,13 +56,43 @@ public class LogoMangaStorageTemp {
             return "";
         }
     }
+
+    public String insertLogoManga(Bitmap logo, String idApiManga,String format){
+        File dir = new File(absolutePath);
+
+        idApiManga += "."+format;
+
+        if(!dir.exists() || logo == null)return "";
+
+        try{
+            File logoImage = new File(dir,idApiManga);
+            if(logoImage.exists()){
+                return logoImage.getAbsolutePath();
+            }
+            try(FileOutputStream outputStream = new FileOutputStream(logoImage)){
+                logo.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
+                outputStream.flush();
+            }catch (Exception ex){
+                ex.printStackTrace();
+                return "";
+            }
+            return logoImage.getAbsolutePath();
+        }catch (NullPointerException ex){
+            ex.printStackTrace();
+            return "";
+        }
+    }
+
     public String getLogoFromTempStorage(String idApiManga){
         idApiManga += ".jpeg";
         File dir = new File(absolutePath);
         if(!dir.exists())return "";
         try{
             File logo = new File(dir,idApiManga);
-            if(!logo.exists())return "";
+            if(!logo.exists()){
+                logo = new File(dir,idApiManga.split("[/]")[idApiManga.split("[/]").length-1]);
+                if(!logo.exists())return "";
+            };
             return logo.getAbsolutePath();
         }catch (NullPointerException ex){
             ex.printStackTrace();

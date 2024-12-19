@@ -49,6 +49,7 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.trinity.Interfeces.Extensions;
 import com.example.trinity.MainActivity;
 
 
@@ -59,6 +60,7 @@ import com.example.trinity.adapters.AdapterPages;
 import com.example.trinity.adapters.AdapterPagesCascade;
 import com.example.trinity.databinding.FragmentReaderMangaBinding;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.services.ClearPageCacheWork;
@@ -116,7 +118,7 @@ public class ReaderMangaFragment extends Fragment {
     private int currentDecoration;
     private int newDecoration;
     private View decoration;
-    private MangaDexExtension mangaDexExtension;
+    private Extensions mangaDexExtension;
     private GestureDetector gestureDetector;
     private ValueAnimator vm;
     private int chapterIndex;
@@ -317,7 +319,7 @@ public class ReaderMangaFragment extends Fragment {
             @Override
             public void handleMessage(Message msg) {
 
-                if (msg.what == 1) {
+                if (msg.what == Extensions.RESPONSE_ITEM) {
                     Glide.get(requireActivity()).clearMemory();
                     new Thread() {
                         @Override
@@ -438,7 +440,7 @@ public class ReaderMangaFragment extends Fragment {
                         }
                     });
 
-                } else if (msg.what == 2) {
+                } else if (msg.what == Extensions.RESPONSE_PAGE) {
                     vm.cancel();
 
                     binding.errorContainer.setVisibility(View.GONE);
@@ -451,7 +453,7 @@ public class ReaderMangaFragment extends Fragment {
                     adapterPages.notifyItemChanged(msg.getData().getInt("index"));
                     binding.seekBar.bringToFront();
 
-                } else if (msg.what == 3) {
+                } else if (msg.what == Extensions.RESPONSE_ERROR) {
                     binding.errorContainer.setVisibility(View.VISIBLE);
                 }
 
@@ -473,7 +475,7 @@ public class ReaderMangaFragment extends Fragment {
 
             }
         });
-        mangaDexExtension = new MangaDexExtension(mangaLanguage, imageQuality);
+        mangaDexExtension = mangaDataViewModel.getManga().getId().contains(MangakakalotExtension.MANGAKAKALOT)||mangaDataViewModel.getManga().getId().contains(MangakakalotExtension.CHAPMANGANATO)?new MangakakalotExtension(null):new MangaDexExtension(mangaLanguage, imageQuality);
         mangaDexExtension.setContext(getActivity());
         workThread = new Thread() {
             @Override
@@ -955,7 +957,10 @@ public class ReaderMangaFragment extends Fragment {
 
         ContentResolver contentResolver = getActivity().getContentResolver();
 
-        Uri uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, imageValue);
+        Uri uri = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, imageValue);
+        }
 
         if (uri == null) return;
 

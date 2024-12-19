@@ -57,6 +57,7 @@ public class MangaShowContentActivity extends AppCompatActivity {
     private NavHostFragment navHostFragment;
     public boolean fromMain;
     public static final int REQUEST_WRITE_EXTERNAL_STORAGE_CODE = 2;
+    private String extension;
     private boolean isDownloadButtonShow = false;
     @Override
 
@@ -65,7 +66,7 @@ public class MangaShowContentActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
 
         binding = ActivityMangaShowContentBinding.inflate(getLayoutInflater());
-
+        extension = getIntent().getStringExtra("Extension");
         setContentView(binding.getRoot());
         this.manga = getIntent().getParcelableExtra("Item");
 
@@ -85,5 +86,7 @@ public class MangaShowContentActivity extends AppCompatActivity {
     public void backToInfoManga(){
         navController.navigateUp();
     }
-
+    public String getExtension(){
+        return this.extension;
+    }
 }

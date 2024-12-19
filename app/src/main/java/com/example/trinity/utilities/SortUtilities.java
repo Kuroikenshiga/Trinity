@@ -7,6 +7,9 @@ import java.util.ArrayList;
 public abstract class SortUtilities {
 
     public static void dinamicSort(String classToUse, String method, ArrayList array,OrderEnum order) throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException {
+        if(array == null){
+            return;
+        }
         int orderChap = order == OrderEnum.DECRESCENTE?1:-1;
         Class<?> clazz = Class.forName(classToUse);
 

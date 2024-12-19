@@ -35,10 +35,12 @@ import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.services.UpdateWork;
 import com.example.trinity.services.broadcasts.ActionsPending;
+import com.example.trinity.services.broadcasts.CancelCurrentWorkReceiver;
 import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.ChapterUpdated;
 import com.example.trinity.valueObject.Manga;
 import com.example.trinity.viewModel.MangaDataViewModel;
+import com.example.trinity.viewModel.MangasFromDataBaseViewModel;
 import com.example.trinity.viewModel.UpdatesViewModel;
 
 import java.time.Instant;
@@ -82,6 +84,7 @@ public class UpdatesFragment extends Fragment {
     private SharedPreferences.Editor editor;
     private long lastUpadate;
     private boolean wasReloaded = false;
+
     public UpdatesFragment() {
         // Required empty public constructor
     }
@@ -122,14 +125,14 @@ public class UpdatesFragment extends Fragment {
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.checkPermission();
         sharedPreferences = getActivity().getSharedPreferences(ConfigClass.TAG_PREFERENCE, Context.MODE_PRIVATE);
-        String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY,"dataSaver");
+        String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY, "dataSaver");
         editor = sharedPreferences.edit();
-        this.lastUpadate = sharedPreferences.getLong(ConfigClass.ConfigUpdates.LAST_UPDATE,0);
+        this.lastUpadate = sharedPreferences.getLong(ConfigClass.ConfigUpdates.LAST_UPDATE, 0);
 
         mangaDataViewModel = new ViewModelProvider(getActivity()).get(MangaDataViewModel.class);
         binding = FragmentUpdatesBinding.inflate(inflater, container, false);
-        if(lastUpadate != 0){
-            binding.lastUpdate.setText("Última atualização feita "+this.returnLastUpdateTime(lastUpadate,Instant.now().getEpochSecond()));
+        if (lastUpadate != 0) {
+            binding.lastUpdate.setText("Última atualização feita " + this.returnLastUpdateTime(lastUpadate, Instant.now().getEpochSecond()));
 //            System.out.println(binding.lastUpdate.getText());
             binding.lastUpdate.setVisibility(View.VISIBLE);
         }
@@ -138,11 +141,10 @@ public class UpdatesFragment extends Fragment {
 //        mangaDexExtension = new MangaDexExtension(imageQuality);
         chapContainer = binding.updatesConteiner;
         this.updateds = updatesViewModel.getChapterUpdatedLiveData().getValue();
-        this.adapter = new AdapterUpdates(getActivity(), updateds,this);
+        this.adapter = new AdapterUpdates(getActivity(), updateds, this);
         adapter.setMangaDataViewModel(mangaDataViewModel);
         adapter.setFragment(this);
         this.chapContainer.setAdapter(adapter);
-
 
 
         this.updatesViewModel.getItem().observe(getViewLifecycleOwner(), new Observer<ChapterUpdated>() {
@@ -162,7 +164,7 @@ public class UpdatesFragment extends Fragment {
     }
 
     private void loadUpdates() {
-        if(updatesViewModel.getChapterUpdatedLiveData().getValue().isEmpty() || wasReloaded) {
+        if (updatesViewModel.getChapterUpdatedLiveData().getValue().isEmpty() || wasReloaded) {
             wasReloaded = false;
             if (!isUpdatingLibray) {
                 new Thread() {
@@ -171,7 +173,9 @@ public class UpdatesFragment extends Fragment {
                         model = Model.getInstance(myActivity);
 //                        System.out.println("Load chamado");
                         ArrayList<ChapterManga> chapterUpdatedArrayList = model.loadUpdates();
-                        ArrayList<Manga> mangas = model.selectAllMangas(true);
+                        if (getActivity() == null) return;
+                        MangasFromDataBaseViewModel mangasFromDataBaseViewModel = new ViewModelProvider(requireActivity()).get(MangasFromDataBaseViewModel.class);
+                        ArrayList<Manga> mangas = mangasFromDataBaseViewModel.getMangas().isEmpty() ? model.selectAllMangas(false) : mangasFromDataBaseViewModel.getMangas();
                         librarySize = mangas.size();
                         updatesViewModel.getChapterUpdatedLiveData().getValue().clear();
 
@@ -179,16 +183,15 @@ public class UpdatesFragment extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    adapter.notifyItemRangeRemoved(0,updatesViewModel.getChapterUpdatedLiveData().getValue().size());
+                                    adapter.notifyItemRangeRemoved(0, updatesViewModel.getChapterUpdatedLiveData().getValue().size());
                                 }
                             });
                         }
 
                         for (ChapterManga chapU : chapterUpdatedArrayList) {
                             for (Manga m : mangas) {
-                                if (m.isChapterAlredySaved(chapU.getId())) {
+                                if (m.uuid == chapU.mangaUUID) {
                                     ChapterUpdated capU = new ChapterUpdated(m, chapU);
-
                                     if (getActivity() != null) {
                                         getActivity().runOnUiThread(new Runnable() {
                                             @Override
@@ -211,29 +214,30 @@ public class UpdatesFragment extends Fragment {
         binding.swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+
                 lastUpadate = Instant.now().getEpochSecond();
-                editor.putLong(ConfigClass.ConfigUpdates.LAST_UPDATE,lastUpadate);
+                editor.putLong(ConfigClass.ConfigUpdates.LAST_UPDATE, lastUpadate);
                 editor.apply();
-                if(!isUpdatingLibray){
+                if (!isUpdatingLibray) {
 
                     isUpdatingLibray = true;
 
                     workRequest = new OneTimeWorkRequest.Builder(UpdateWork.class).addTag(ActionsPending.UPDATE_WORK_TAG).build();
 
-                    //workManager.enqueueUniqueWork(UpdateWork.WORK_NAME, ExistingWorkPolicy.KEEP,workRequest);
-                    workManager.enqueue(workRequest);
+                    workManager.enqueueUniqueWork(UpdateWork.WORK_NAME, ExistingWorkPolicy.KEEP, workRequest);
+//                    workManager.enqueue(workRequest);
                     workManager.getWorkInfoByIdLiveData(workRequest.getId()).observe(UpdatesFragment.this.getActivity(), new Observer<WorkInfo>() {
                         @Override
                         public void onChanged(WorkInfo workInfo) {
 
-                            if (workInfo.getState().isFinished()){
+                            if (workInfo.getState().isFinished()) {
                                 isUpdatingLibray = false;
                                 binding.swipe.setRefreshing(false);
                                 isUpdatingLibray = false;
                                 workManager.cancelAllWork();
                                 wasReloaded = true;
                                 loadUpdates();
-                                binding.lastUpdate.setText("Última atualização feita "+returnLastUpdateTime(lastUpadate,Instant.now().getEpochSecond()));
+                                binding.lastUpdate.setText("Última atualização feita " + returnLastUpdateTime(lastUpadate, Instant.now().getEpochSecond()));
 
                             }
 
@@ -243,64 +247,70 @@ public class UpdatesFragment extends Fragment {
             }
         });
     }
+
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
-            if(getActivity() instanceof MainActivity){
-                MainActivity mainActivity = (MainActivity) getActivity();
-                mainActivity.controllShowBottomNavigator(this);
-                mainActivity.isInFirstDestination = false;
-                mainActivity.isInReadFragment = false;
-            }
+        if (getActivity() instanceof MainActivity) {
+            MainActivity mainActivity = (MainActivity) getActivity();
+            mainActivity.controllShowBottomNavigator(this);
+            mainActivity.isInFirstDestination = false;
+            mainActivity.isInReadFragment = false;
+        }
     }
-    public void turnOffRefresh(){
+
+    public void turnOffRefresh() {
         binding.swipe.setRefreshing(false);
     }
-    public void navigateToRead(){
+
+    public void navigateToRead() {
         Navigation.findNavController(binding.getRoot()).navigate(R.id.action_updates_to_readerMangaFragment2);
     }
+
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
 
 //        System.out.println("Destroy");
 
 
     }
-    public String returnLastUpdateTime(long lastupdate,long currentUpdate){
+
+    public String returnLastUpdateTime(long lastupdate, long currentUpdate) {
         long time = currentUpdate - lastupdate;
 
         long year = time / 31556926;
-        time = year > 0?time % 31556926:time;
+        time = year > 0 ? time % 31556926 : time;
         long month = time / 2592000;
-        time = month > 0?time % 2592000:time;
-        long day = time/86000;
-        time = day > 0?time%86000:time;
+        time = month > 0 ? time % 2592000 : time;
+        long day = time / 86000;
+        time = day > 0 ? time % 86000 : time;
         long hour = time / 3600;
-        time  = hour > 0?time%hour:time;
-        long min = time/60;
-        time = min > 0?time%60:time;
+        time = hour > 0 ? time % hour : time;
+        long min = time / 60;
+        time = min > 0 ? time % 60 : time;
         long sec = time;
 
-        if(year > 0){
-            return "Há "+year+(year > 1?" anos atrás":" ano atrás");
+        if (year > 0) {
+            return "Há " + year + (year > 1 ? " anos atrás" : " ano atrás");
         }
-        if(month > 0){
-            return "Há "+month+(month > 1?" meses atrás":" mês atrás");
+        if (month > 0) {
+            return "Há " + month + (month > 1 ? " meses atrás" : " mês atrás");
         }
-        if(day > 0){
-            return "Há "+day+(day > 1?" dias atrás":" dia atrás");
+        if (day > 0) {
+            return "Há " + day + (day > 1 ? " dias atrás" : " dia atrás");
         }
-        if(hour > 0){
-            return "Há "+hour+(hour > 1?" horas atrás":" hora atrás");
+        if (hour > 0) {
+            return "Há " + hour + (hour > 1 ? " horas atrás" : " hora atrás");
         }
-        if(min > 0){
-            return "Há "+min+(min > 1?" minutos atrás":" minuto atrás");
+        if (min > 0) {
+            return "Há " + min + (min > 1 ? " minutos atrás" : " minuto atrás");
         }
-        return "Há "+sec+(sec > 1?" segundos atrás":" segundo atrás");
+        return "Há " + sec + (sec > 1 ? " segundos atrás" : " segundo atrás");
     }
+
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
         this.turnOffRefresh();
 //        System.out.println("Pausado");

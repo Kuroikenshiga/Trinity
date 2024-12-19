@@ -1,5 +1,6 @@
 package com.example.trinity.models;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.function.Predicate;
 
 public class Model extends SQLiteOpenHelper {
 
@@ -45,7 +47,8 @@ public class Model extends SQLiteOpenHelper {
     private SQLiteDatabase sqLiteDatabase;
     private static Model instance;
     private Context context;
-
+    private ArrayList<OnMangaRemovedListener> observers = new ArrayList<>();
+    private ArrayList<OnMangaAddedNotifier> notifiers = new ArrayList<>();
     private Model(@Nullable Context context) {
         super(context, dataBaseName, null, version);
         this.context = context;
@@ -367,7 +370,7 @@ public class Model extends SQLiteOpenHelper {
                 return mangaArrayList;
             }
 
-
+            int uuidIndex = row.getColumnIndex("id");
             while (row.moveToNext()) {
 
                 String id = row.getString(2);
@@ -383,6 +386,7 @@ public class Model extends SQLiteOpenHelper {
                 String language = row.getString(7);
                 Manga m = new Manga(id, title, null, this.selectAllAuthorByIdManga(row.getString(0)), desc, selectAllTagMangasByIdManga(row.getString(0)), language, cover, (loadChaptersToo ? selectAllChaptersByIdManga(row.getString(0)) : null));
                 m.isAdded = true;
+                m.uuid = row.getLong(uuidIndex);
                 m.setLastChapter(row.getDouble(indexLastChapter));
                 mangaArrayList.add(m);
 
@@ -445,18 +449,22 @@ public class Model extends SQLiteOpenHelper {
         ArrayList<ChapterManga> chapterMangaArrayList = new ArrayList<>();
 
         try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM chapters WHERE manga_id = ?", new String[]{id})) {
+            int mangaIdIndex = row.getColumnIndex("manga_id");
             while (row.moveToNext()) {
                 String idChap = row.getString(1);
                 String title = row.getString(2);
                 String scan = row.getString(3);
                 String RFC3339 = row.getString(4);
                 String chapter = row.getString(6);
+
                 boolean alredyRead = Boolean.parseBoolean(row.getString(7));
                 int currentPage = row.getInt(8);
 
                 int isDownloadedIndex = row.getColumnIndex("is_downloaded");
                 boolean isDownloded = Boolean.parseBoolean(row.getString(isDownloadedIndex));
-                chapterMangaArrayList.add(new ChapterManga(idChap, title, chapter, scan, RFC3339, alredyRead, currentPage, isDownloded));
+                ChapterManga chapterManga = new ChapterManga(idChap, title, chapter, scan, RFC3339, alredyRead, currentPage, isDownloded);
+                chapterManga.mangaUUID = Long.parseLong(row.getString(mangaIdIndex));
+                chapterMangaArrayList.add(chapterManga);
             }
         }
 
@@ -749,8 +757,8 @@ public class Model extends SQLiteOpenHelper {
 
             }
         }
-//        MainActivity mainActivity = (MainActivity) context;
-//        MainActivity mainActivity = (MainActivity)context;
+        MainActivity mainActivity = (MainActivity) context;
+
 //        if (libraryFragment != null) {
 //            mainActivity.runOnUiThread(new Runnable() {
 //                @Override
@@ -816,6 +824,11 @@ public class Model extends SQLiteOpenHelper {
             }
         }
         if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.setTransactionSuccessful();
+        ((Activity)context).runOnUiThread(()->{
+            for(OnMangaAddedNotifier notifier:notifiers){
+                notifier.someMangaAdded();
+            }
+        });
 
         return true;
     }
@@ -872,7 +885,11 @@ public class Model extends SQLiteOpenHelper {
 
             return false;
         }
-
+        ((Activity)context).runOnUiThread(()->{
+            for(OnMangaRemovedListener listener:observers){
+                listener.onMangaRemoved(manga.getLanguage(),manga.getId());
+            }
+        });
         return true;
     }
 
@@ -919,7 +936,7 @@ public class Model extends SQLiteOpenHelper {
         try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM updates " +
                 "INNER JOIN chapters ON updates.chapter = chapters.id ORDER BY STRFTIME('%s',date_RFC3339) DESC LIMIT 100", new String[]{})) {
 
-
+            int mangaUuidIndex = row.getColumnIndex("manga_id");
             while (row.moveToNext()) {
                 String idChap = row.getString(3);
                 String title = row.getString(4);
@@ -932,7 +949,7 @@ public class Model extends SQLiteOpenHelper {
                 int isDownloadedIndex = row.getColumnIndex("is_downloaded");
                 boolean isDownloded = Boolean.parseBoolean(row.getString(isDownloadedIndex));
                 ChapterManga c = new ChapterManga(idChap, title, chapter, scan, RFC3339, alredyRead, currentPage, isDownloded);
-
+                c.mangaUUID = row.getLong(mangaUuidIndex);
                 updateds.add(c);
             }
         }
@@ -1337,6 +1354,29 @@ public class Model extends SQLiteOpenHelper {
             }
         }
         return response;
+    }
+
+    public static interface OnMangaRemovedListener{
+        public static final int LIBRARY_OWNER = 0;
+        int getOwner();
+        void onMangaRemoved(String language,String idAPI);
+    }
+    public static interface OnMangaAddedNotifier{
+        public static final int LIBRARY_OWNER = 0;
+        int getOwner();
+        void someMangaAdded();
+    }
+    public void addNotifier(OnMangaAddedNotifier notifier){
+        if(notifiers.stream().anyMatch(notifier1 -> notifier1.getOwner() == OnMangaAddedNotifier.LIBRARY_OWNER))return;
+        this.notifiers.add(notifier);
+    }
+    public void addOnMangaRemovedListener(OnMangaRemovedListener listener){
+        if(observers.stream().anyMatch(observer -> observer.getOwner() == OnMangaRemovedListener.LIBRARY_OWNER))return;
+        this.observers.add(listener);
+    }
+    public int getObserversSize(){return this.observers.size();}
+    public void removeOnMangaRemovedListener(OnMangaRemovedListener listener){
+        this.observers.remove(listener);
     }
 
 //    public void removeLastChapter(){

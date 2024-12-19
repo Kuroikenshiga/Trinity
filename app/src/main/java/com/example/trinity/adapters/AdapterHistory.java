@@ -15,6 +15,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.trinity.Interfeces.Extensions;
 import com.example.trinity.MainActivity;
 import com.example.trinity.MangaShowContentActivity;
 import com.example.trinity.databinding.HistoryItemBinding;
@@ -47,24 +48,25 @@ public class AdapterHistory extends RecyclerView.Adapter<AdapterHistory.HistoryV
     public void onBindViewHolder(@NonNull HistoryViewHoler holder, int position) {
         if (fragment.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
             Glide.with(fragment)
-                    .load(storage.getLogoFromStorage(histories.get(position).getManga().getId()))
+                    .load(storage.getLogoFromStorage(histories.get(holder.getAdapterPosition()).getManga().getId()))
                     .override((int) context.getResources().getDisplayMetrics().density * 50, (int) context.getResources().getDisplayMetrics().density * 50)
                     .into(holder.binding.mangaImage);
 
-            holder.binding.mangaTitle.setText(histories.get(position).getManga().getTitulo());
-            holder.binding.lastAcess.setText(histories.get(position).returnLastTimeAccessed());
+            holder.binding.mangaTitle.setText(histories.get(holder.getAdapterPosition()).getManga().getTitulo());
+            holder.binding.lastAcess.setText(histories.get(holder.getAdapterPosition()).returnLastTimeAccessed());
             holder.binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(context, MangaShowContentActivity.class);
                     //Testa a versão do sistema operacional antes de serializar o objeto
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-                        intent.putExtra("Item", (Parcelable) histories.get(position).getManga());
+                        intent.putExtra("Item", (Parcelable) histories.get(holder.getAdapterPosition()).getManga());
                     }
                     else{
-                        intent.putExtra("Item", (Serializable) histories.get(position).getManga());
+                        intent.putExtra("Item", (Serializable) histories.get(holder.getAdapterPosition()).getManga());
                     }
-                    intent.putExtra("Language", histories.get(position).getManga().getLanguage());
+                    intent.putExtra("Language", histories.get(holder.getAdapterPosition()).getManga().getLanguage());
+                    intent.putExtra("Extension",histories.get(holder.getAdapterPosition()).getManga().getId().contains("manganato")||histories.get(holder.getAdapterPosition()).getManga().getId().contains("mangakakalot")? Extensions.MANGAKAKALOT:Extensions.MANGADEX);
                     intent.putExtra("FromMain", context instanceof MainActivity);
                     context.startActivity(intent);
                 }

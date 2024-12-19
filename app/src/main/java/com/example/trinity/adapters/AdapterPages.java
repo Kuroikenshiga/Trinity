@@ -43,6 +43,7 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
+import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
@@ -102,8 +103,10 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
-
-        if (position == this.resourcesImage.length - 1) {
+        
+        
+        
+        if (holder.getAdapterPosition() == this.resourcesImage.length - 1) {
 
             holder.binding.timeWaste.setText(timeWasteString);
             holder.binding.imgContainer.setVisibility(View.GONE);
@@ -131,7 +134,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
             });
             return;
         }
-        if (position == 0) {
+        if (holder.getAdapterPosition() == 0) {
 
 
             holder.binding.imgContainer.setVisibility(View.GONE);
@@ -186,9 +189,9 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
         holder.binding.nextChapterContainer.setVisibility(View.GONE);
         holder.binding.imgContainer.setVisibility(View.VISIBLE);
 
-        if (resourcesImage[position] != null) {
+        if (resourcesImage[holder.getAdapterPosition()] != null) {
 
-            holder.page = position;
+            holder.page = holder.getAdapterPosition();
 
             SubsamplingScaleImageView img = holder.binding.img;
 
@@ -212,28 +215,28 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
 
                 Glide.with(fragment.getActivity().getApplicationContext())
                         .asBitmap()
-                        .load(resourcesImage[position])
+                        .load(resourcesImage[holder.getAdapterPosition()])
                         .override(context.getResources().getDisplayMetrics().widthPixels, context.getResources().getDisplayMetrics().heightPixels)
                         .apply(RequestOptions.skipMemoryCacheOf(true))
                         .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .downsample(DownsampleStrategy.AT_LEAST)
                         .into(new CustomTarget<Bitmap>() {
                             @Override
                             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                 float zoomScale = 1f;
-                                System.out.println(resource.getWidth());
-                                System.out.println(resource.getHeight());
-                                if(resource.getWidth() < resource.getHeight() && resource.getHeight() > screenHeight && ((float) resource.getHeight() /resource.getWidth())>1.5f){
-
-                                    img.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            img.setScaleAndCenter(1,new PointF((float)screenWidth/2,0));
-                                        }
-                                    });
-                                    img.setDoubleTapZoomScale(2f);
-                                    img.setMinScale(1f);
-                                }
                                 img.setImage(ImageSource.bitmap(resource));
+//                                if(resource.getWidth() < resource.getHeight() && resource.getHeight() > screenHeight && ((float) resource.getHeight() /resource.getWidth())>1.5f){
+//
+////                                    img.post(new Runnable() {
+////                                        @Override
+////                                        public void run() {
+////                                            img.setScaleAndCenter(1,new PointF((float)screenWidth/2,0));
+////                                        }
+////                                    });
+//
+//                                }
+                                img.setDoubleTapZoomScale(2f);
+                                img.setMinScale(1f);
                             }
 
                             @Override
@@ -251,23 +254,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
         }
 
     }
-
-//        @Override
-//    public void onViewAttachedToWindow(@NonNull ImageViewHolder holder){
-//        super.onViewAttachedToWindow(holder);
-////        if(holder.page > 0 && holder.page < resourcesImage.length-1 && !holder.isAlredyInFullResolution){
-////
-////            String url = PageCacheManager.getInstance(context).getBitmapFromCache(Integer.toString(holder.page)+".jpeg");
-////            System.out.println(url);
-////            holder.binding.img.setImage(ImageSource.uri(url));
-////            resourcesImage[holder.page].recycle();
-////            resourcesImage[holder.page] = null;
-////            holder.isAlredyInFullResolution = true;
-////        }
-//            System.out.println(holder.binding.backGroundManga.getDrawable() == null);
-//        System.out.println(holder.page);
-//
-//    }
+    
     @Override
     public int getItemCount() {
         return this.resourcesImage.length;
@@ -285,12 +272,9 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
         public CustomTarget<Bitmap> bitmapCustomTarget;
         public float screenWidth,screenHeight;
         public ImageViewHolder(PageItemBinding binding) {
-
             super(binding.getRoot());
             this.binding = binding;
-
-
-
+            
         }
 
     }

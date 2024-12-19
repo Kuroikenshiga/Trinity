@@ -9,7 +9,9 @@ import java.util.ArrayList;
 
 public class MangasFromDataBaseViewModel extends ViewModel {
     private MutableLiveData<ArrayList<Manga>> mangaMutableLiveData = new MutableLiveData<>();
-
+    public MangasFromDataBaseViewModel(){
+        mangaMutableLiveData.setValue(new ArrayList<>());
+    }
     public void setMangas(ArrayList<Manga> dataSet){
         this.mangaMutableLiveData.setValue(dataSet);
     }

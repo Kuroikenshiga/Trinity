@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -91,7 +92,7 @@ public class MangaDexExtension implements Extensions {
         //System.out.println("Url = "+url);
         if (this.UpdateTotalItens > 0 && this.updateOffSet > this.UpdateTotalItens) {
             Message msg = Message.obtain();
-            msg.what = 2;
+            msg.what = Extensions.RESPONSE_FINAL;
             h.sendMessage(msg);
             return;
 
@@ -114,7 +115,7 @@ public class MangaDexExtension implements Extensions {
             ArrayList<Manga> mangaModels = this.responseToValueObject(resp.body().string());
             if (mangaModels.isEmpty()) {
                 Message msg = Message.obtain();
-                msg.what = 3;
+                msg.what = RESPONSE_ERROR;
                 h.sendMessage(msg);
             }
             this.updateOffSet += 15;
@@ -163,7 +164,7 @@ public class MangaDexExtension implements Extensions {
 //        System.out.println("Url = " + url);
         if (this.UpdateTotalItens > 0 && this.updateOffSet > this.UpdateTotalItens) {
             Message msg = Message.obtain();
-            msg.what = 2;
+            msg.what = RESPONSE_FINAL;
             h.sendMessage(msg);
             return;
 
@@ -199,6 +200,14 @@ public class MangaDexExtension implements Extensions {
 //        System.out.println(response);
         JsonArray data = json.getAsJsonObject().get("data").getAsJsonArray();
 //        System.out.println(json.getAsJsonObject().get("total").getAsString());
+        int total = json.getAsJsonObject().get("total").getAsInt();
+        if(total == 0){
+            if(context != null){
+                Toast.makeText(context,"Ocorreu um erro ao realizar a requisição", Toast.LENGTH_LONG).show();
+            }
+            return new ArrayList<>();
+        }
+
         ArrayList<Manga> mangaModels = new ArrayList<>();
         int position = 0;
         for (JsonElement jsonItem : data) {
@@ -313,7 +322,7 @@ public class MangaDexExtension implements Extensions {
                             Bundle bundle = new Bundle();
                             bundle.putParcelable("dados", item);
                             msg.setData(bundle);
-                            msg.what = 1;
+                            msg.what = RESPONSE_ITEM;
                             h.sendMessage(msg);
                         }
                     } catch (IOException ex) {
@@ -326,7 +335,7 @@ public class MangaDexExtension implements Extensions {
 
     }
 
-    public ArrayList<ChapterManga> viewChapters(String mangaId, Context context, Fragment fragment) {
+    public ArrayList<ChapterManga> viewChapters(String mangaId) {
         ArrayList<ChapterManga> chapterMangas = new ArrayList<>();
         int offSet = 0;
         int total = 0;
@@ -350,10 +359,17 @@ public class MangaDexExtension implements Extensions {
             try (Response response = http.newCall(req).execute();) {
 
                 Gson gson = new Gson();
-//                System.out.println(response.body().string());
+
                 String s = response.body().string();
                 JsonElement json = gson.fromJson(s, JsonElement.class);
                 total = json.getAsJsonObject().get("total").getAsInt();
+                if(total == 0){
+                    if(context != null){
+                        Toast.makeText(context,"Ocorreu um erro ao realizar a requisição", Toast.LENGTH_LONG).show();
+                    }
+                    return new ArrayList<>();
+                }
+
                 JsonArray data = json.getAsJsonObject().get("data").getAsJsonArray();
                 int pos = 0;
                 for (JsonElement chapter : data) {
@@ -404,16 +420,16 @@ public class MangaDexExtension implements Extensions {
 
 
         }
-        MangaShowContentActivity mangaShowContentActivity = (MangaShowContentActivity) context;
-        InfoMangaFragment infoMangaFragment = (InfoMangaFragment) fragment;
-        if (context != null && fragment != null) {
-            mangaShowContentActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-//                    infoMangaFragment.setDataSet(chapterMangas);infoMangaFragment.stopLoading();
-                }
-            });
-        }
+//        MangaShowContentActivity mangaShowContentActivity = (MangaShowContentActivity) context;
+//        InfoMangaFragment infoMangaFragment = (InfoMangaFragment) fragment;
+//        if (context != null && fragment != null) {
+//            mangaShowContentActivity.runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+////                    infoMangaFragment.setDataSet(chapterMangas);infoMangaFragment.stopLoading();
+//                }
+//            });
+//        }
         return chapterMangas;
     }
 
@@ -433,7 +449,13 @@ public class MangaDexExtension implements Extensions {
 
             Gson gson = new Gson();
             JsonElement json = gson.fromJson(response.body().string(), JsonElement.class);
-
+//            int total = json.getAsJsonObject().get("total").getAsInt();
+//            if(total == 0){
+//                if(context != null){
+//                    Toast.makeText(context,"Ocorreu um erro ao carregar as páginas do capítuo", Toast.LENGTH_LONG).show();
+//                }
+//                return;
+//            }
 
             JsonArray imgs;
             try {
@@ -444,7 +466,7 @@ public class MangaDexExtension implements Extensions {
             }
 
             Message msg = Message.obtain();
-            msg.what = 1;
+            msg.what = Extensions.RESPONSE_ITEM;
             Bundle bundle = new Bundle();
             bundle.putInt("numPages", imgs.size());
             msg.setData(bundle);
@@ -453,13 +475,13 @@ public class MangaDexExtension implements Extensions {
         } catch (IOException ex) {
             ex.printStackTrace();
             Message msg = Message.obtain();
-            msg.what = 3;
+            msg.what = Extensions.RESPONSE_ERROR;
             h.sendMessage(msg);
         }
 
     }
 
-    private void loadChapterPages(Handler h, JsonArray array, String hash, String urlBase) {
+    public void loadChapterPages(Handler h, JsonArray array, String hash, String urlBase) {
         int index = 1;
         for (JsonElement s : array) {
             URL urlImage = null;
@@ -499,7 +521,7 @@ public class MangaDexExtension implements Extensions {
                     }
 
                     Message msg = Message.obtain();
-                    msg.what = 2;
+                    msg.what = Extensions.RESPONSE_PAGE;
                     Bundle bundle = new Bundle();
                     bundle.putString("img", url);
                     bundle.putInt("index", index);
@@ -508,7 +530,7 @@ public class MangaDexExtension implements Extensions {
                 }
             } catch (ConnectException ex) {
                 Message msg = Message.obtain();
-                msg.what = 2;
+                msg.what = Extensions.RESPONSE_PAGE;
                 Bundle bundle = new Bundle();
                 Bitmap bit = BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.time_out);
                 bundle.putParcelable("img", bit);
@@ -552,6 +574,8 @@ public class MangaDexExtension implements Extensions {
             JsonElement json = gson.fromJson(response.body().string(), JsonElement.class);
 
             JsonArray imgs = json.getAsJsonObject().get("chapter").getAsJsonObject().get(imageQuality).getAsJsonArray();
+
+
             String[] imgsString = new String[imgs.size()];
             int index = 0;
             for (JsonElement element : imgs) {
@@ -566,7 +590,7 @@ public class MangaDexExtension implements Extensions {
         } catch (IOException ex) {
             ex.printStackTrace();
             Message msg = Message.obtain();
-            msg.what = 3;
+            msg.what = Extensions.RESPONSE_ERROR;
             return null;
         }
         return bundle;
@@ -624,7 +648,7 @@ public class MangaDexExtension implements Extensions {
             return;
         }
         Message msg = Message.obtain();
-        msg.what = 2;
+        msg.what = Extensions.RESPONSE_PAGE;
         Bundle bundle2 = new Bundle();
         bundle2.putParcelable("img", bitmap);
         bundle2.putInt("index", chapterPage + 1);

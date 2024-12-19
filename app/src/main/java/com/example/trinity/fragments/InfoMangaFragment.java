@@ -3,6 +3,8 @@ package com.example.trinity.fragments;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -34,16 +36,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.example.trinity.Interfeces.Extensions;
 import com.example.trinity.MangaShowContentActivity;
 import com.example.trinity.R;
 import com.example.trinity.adapters.AdapterChapters;
 import com.example.trinity.adapters.AdapterGenres;
 import com.example.trinity.databinding.FragmentInfoMangaBinding;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.services.DownloadChapterWork;
@@ -96,13 +102,13 @@ public class InfoMangaFragment extends Fragment {
     private ArrayList<ChapterManga> chapterMangasListed;
     private AdapterChapters chaptersAdapter;
     private Handler mainHandler;
-    private MangaDexExtension mangaDexExtension;
+    private Extensions mangaDexExtension;
     private MangaDataViewModel mangaDataViewModel;
     private View v;
     private List<ChapterManga>[] sublListsChapters;
     private int indexSubLists = 0;
     private boolean canLoadMoreContent = true;
-    private ArrayList<ChapterManga> allChapters;
+    private ArrayList<ChapterManga> allChapters = new ArrayList<>();
     private String lastChapter = "";
     private WorkManager workManager;
     private LogoMangaStorageTemp storageTemp;
@@ -150,9 +156,18 @@ public class InfoMangaFragment extends Fragment {
         String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY, "dataSaver");
         v = binding.getRoot();
 
-
         mangaDataViewModel = new ViewModelProvider(getActivity()).get(MangaDataViewModel.class);
         manga = mangaDataViewModel.getManga();
+
+        binding.title.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                ClipboardManager manager = (ClipboardManager) requireActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+                manager.setPrimaryClip(ClipData.newPlainText("Título do mangá", manga.getTitulo()));
+                Toast.makeText(requireContext(),"Título copiado para a área de transferência",Toast.LENGTH_LONG).show();
+                return true;
+            }
+        });
 
         isAdded = manga.isAdded;
         if(manga.isAdded){
@@ -230,13 +245,14 @@ public class InfoMangaFragment extends Fragment {
         Glide.with(requireActivity())
                 .asBitmap()
                 .load(manga.isAdded  ? storage.getLogoFromStorage(manga.getId()) : storageTemp.getLogoFromTempStorage(manga.getId()))
-                .override((int) (requireActivity().getResources().getDisplayMetrics().widthPixels), (int) (200 * requireActivity().getResources().getDisplayMetrics().density))
+                .override(binding.backGroundLogo.getMaxWidth(),binding.backGroundLogo.getHeight())
                 .into(new CustomTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         Drawable backDrawable = new BitmapDrawable(getResources(), resource);
                         backDrawable.setAlpha(120);
                         binding.backGroundLogo.setBackground(backDrawable);
+
                     }
 
                     @Override
@@ -245,6 +261,7 @@ public class InfoMangaFragment extends Fragment {
                     }
                 });
         binding.title.setText(manga.getTitulo());
+        binding.extension.setText(binding.extension.getText().toString()+(manga.getId().contains("manganato")||manga.getId().contains("mangakakalot")?"Mangakakalot":"MangaDex"));
         binding.descriptionText.setText(manga.getDescricao());
         binding.goBack.bringToFront();
         StringBuilder autores = new StringBuilder();
@@ -282,8 +299,34 @@ public class InfoMangaFragment extends Fragment {
         binding.chapterContainer.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
         binding.chapterContainer.setAdapter(chaptersAdapter);
         binding.chapterContainer.setHasFixedSize(true);
+        MangakakalotExtension.OnMangaLoaded onMangaLoaded = new MangakakalotExtension.OnMangaLoaded() {
+            @Override
+            public void onMangaLoaded(Manga manga) {
+                InfoMangaFragment.this.manga.setDescricao(manga.getDescricao());
+                InfoMangaFragment.this.manga.setAutor(manga.getAutor());
+                InfoMangaFragment.this.manga.setTags(manga.getTags());
+                InfoMangaFragment.this.manga.setLastChapter(manga.getLastChapter());
+                requireActivity().runOnUiThread(()->{
+                    binding.descriptionText.setText(manga.getDescricao());
+                    StringBuilder autores = new StringBuilder();
+                    for (int i = 0; i < (manga.getAutor() != null ? manga.getAutor().size() : 0); i++) {
+                        if (i != manga.getAutor().size() - 1) {
+                            autores.append(manga.getAutor().get(i)).append(", ");
+                        } else {
+                            autores.append(manga.getAutor().get(i));
+                        }
+                    }
+                    binding.author.setText(autores);
+                    AdapterGenres adapter = new AdapterGenres(getActivity(), manga.getTags());
+                    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), RecyclerView.HORIZONTAL, false);
+                    recyclerView.setLayoutManager(linearLayoutManager);
+                    recyclerView.setAdapter(adapter);
+                    recyclerView.setHasFixedSize(true);
 
-        mangaDexExtension = new MangaDexExtension(this.language, imageQuality);
+                });
+            }
+        };
+        mangaDexExtension = requireActivity() instanceof MangaShowContentActivity?(((MangaShowContentActivity)requireActivity()).getExtension().equals(Extensions.MANGADEX)?new MangaDexExtension(this.language, imageQuality):new MangakakalotExtension(onMangaLoaded)):new MangaDexExtension(this.language, imageQuality);
 
         favorite();
         loadChapters();
@@ -466,8 +509,10 @@ public class InfoMangaFragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                ChapterManga chapterManga = getChapterFromDataSet(allChapters, lastChapter);
+                                if(chapterManga == null)return;
                                 binding.resumeRead.setImageResource(R.drawable.resume_read_ative);
-                                binding.resumeState.setText("Cuntinuar leitura do capítulo " +getChapterFromDataSet(allChapters, lastChapter).getChapter());
+                                binding.resumeState.setText("Cuntinuar leitura do capítulo " +chapterManga.getChapter());
 
                             }
                         });
@@ -502,7 +547,7 @@ public class InfoMangaFragment extends Fragment {
                 new Thread() {
                     @Override
                     public void run() {
-                        ArrayList<ChapterManga> chapters = mangaDataViewModel.getManga().getChapters() != null&&!mangaDataViewModel.getManga().getChapters().isEmpty()?mangaDataViewModel.getManga().getChapters():(mangaDexExtension.viewChapters(manga.getId(), getActivity(), null));
+                        ArrayList<ChapterManga> chapters = mangaDataViewModel.getManga().getChapters() != null&&!mangaDataViewModel.getManga().getChapters().isEmpty()?mangaDataViewModel.getManga().getChapters():(mangaDexExtension.viewChapters(manga.getId()));
                         mangaDataViewModel.getManga().setChapters(chapters);
 
                         chapterMangasListed.clear();
@@ -518,6 +563,7 @@ public class InfoMangaFragment extends Fragment {
                             public void run() {
                                 if(!manga.isOngoing(chapters))binding.status.setText("Concluído");
                                 if (!loadSubLists(chapters)) {
+                                    if(chapters == null)return;
                                     chapterMangasListed.addAll(chapters);
                                     chaptersAdapter.notifyDataSetChanged();
                                     binding.numChapters.setText(chapters.size() + " Capítulos");
@@ -590,7 +636,8 @@ public class InfoMangaFragment extends Fragment {
         }
 
         private boolean loadSubLists (ArrayList < ChapterManga > array) {
-            int numOfSubLists = 0;
+        if(array == null)return false;
+        int numOfSubLists = 0;
             try {
                 SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", array, OrderEnum.DECRESCENTE);
             } catch (NoSuchMethodException e) {

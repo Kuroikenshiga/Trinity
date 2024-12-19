@@ -11,6 +11,7 @@ import android.os.Bundle;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.trinity.ExtensionShowContentActivity;
+import com.example.trinity.Interfeces.Extensions;
 import com.example.trinity.MainActivity;
 import com.example.trinity.R;
 import com.example.trinity.adapters.AdapterMangas;
@@ -55,7 +57,7 @@ public class ExtensionsShowFragment extends Fragment {
     private String mParam1;
     private String mParam2;
     private FragmentExtensionsShowBinding binding;
-    private boolean isSearchFildShow = false;
+    private boolean isSearchFieldShow = false;
     private Handler mainHandler;
     private ArrayList<Manga> mangasPtBr;
     private ArrayList<Manga> mangasEn;
@@ -65,6 +67,7 @@ public class ExtensionsShowFragment extends Fragment {
     private AdapterMangas adapterMangasEsLa;
     private MangaDexExtension mangaDexExtension;
     private boolean isSearching = false;
+
     public ExtensionsShowFragment() {
         // Required empty public constructor
     }
@@ -121,15 +124,15 @@ public class ExtensionsShowFragment extends Fragment {
         adapterMangasEsLa.setFromUpdates(true);
 
         binding.recyclerPtBr.setAdapter(adapterMangasPtBr);
-        binding.recyclerPtBr.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.HORIZONTAL,false));
+        binding.recyclerPtBr.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.HORIZONTAL, false));
         binding.recyclerPtBr.setHasFixedSize(false);
 
         binding.recyclerEn.setAdapter(adapterMangasEn);
-        binding.recyclerEn.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.HORIZONTAL,false));
+        binding.recyclerEn.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.HORIZONTAL, false));
         binding.recyclerEn.setHasFixedSize(false);
 
         binding.recyclerEsLa.setAdapter(adapterMangasEsLa);
-        binding.recyclerEsLa.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.HORIZONTAL,false));
+        binding.recyclerEsLa.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.HORIZONTAL, false));
         binding.recyclerEsLa.setHasFixedSize(false);
 
         binding.mangaDexClickablePtBr.setOnClickListener(new View.OnClickListener() {
@@ -140,10 +143,10 @@ public class ExtensionsShowFragment extends Fragment {
                 i.putExtra("Logo", R.drawable.mangadex_logo);
                 i.putExtra("Titulo", "MangaDex - pt-br");
                 i.putExtra("Language", languages[0]);
-                startActivity(i);
-                ///Toast.makeText(getActivity().getApplicationContext(), "MangaDex",Toast.LENGTH_LONG).show();
+                i.putExtra("Extension",Extensions.MANGADEX);
 
-                //nav.getNavController().navigate("ViewExtensionsContent");
+                startActivity(i);
+
 
             }
         });
@@ -156,10 +159,8 @@ public class ExtensionsShowFragment extends Fragment {
                 i.putExtra("Logo", R.drawable.mangadex_logo);
                 i.putExtra("Titulo", "MangaDex - Espanhol");
                 i.putExtra("Language", languages[2]);
+                i.putExtra("Extension",Extensions.MANGADEX);
                 startActivity(i);
-                ///Toast.makeText(getActivity().getApplicationContext(), "MangaDex",Toast.LENGTH_LONG).show();
-
-                //nav.getNavController().navigate("ViewExtensionsContent");
 
             }
         });
@@ -172,13 +173,28 @@ public class ExtensionsShowFragment extends Fragment {
                 i.putExtra("Logo", R.drawable.mangadex_logo);
                 i.putExtra("Titulo", "MangaDex - en");
                 i.putExtra("Language", languages[1]);
+                i.putExtra("Extension",Extensions.MANGADEX);
                 startActivity(i);
-                ///Toast.makeText(getActivity().getApplicationContext(), "MangaDex",Toast.LENGTH_LONG).show();
 
-                //nav.getNavController().navigate("ViewExtensionsContent");
 
             }
         });
+        binding.mangakakalotClickable.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getActivity(), ExtensionShowContentActivity.class);
+
+//
+                i.putExtra("Logo", R.drawable.mangakakalot);
+                i.putExtra("Titulo", "Mangakakalot - en");
+                i.putExtra("Language", languages[2]);
+                i.putExtra("Extension",Extensions.MANGAKAKALOT);
+                startActivity(i);
+
+
+            }
+        });
+
         mainHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
@@ -202,8 +218,8 @@ public class ExtensionsShowFragment extends Fragment {
                     adapterMangasEsLa.notifyItemInserted(mangasEsLa.size());
                     binding.esLa.setVisibility(View.VISIBLE);
                 }
-                if(msg.what == 3){
-                    Toast.makeText(getActivity(),"Nenhum resultado encontrado",Toast.LENGTH_LONG).show();
+                if (msg.what == 3) {
+                    Toast.makeText(getActivity(), "Nenhum resultado encontrado", Toast.LENGTH_LONG).show();
                     binding.progress.setVisibility(View.GONE);
                 }
             }
@@ -213,23 +229,23 @@ public class ExtensionsShowFragment extends Fragment {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (isSearchFildShow) {
-                    isSearchFildShow = false;
+                if (isSearchFieldShow) {
+                    isSearchFieldShow = false;
                     hideSearch();
                     binding.searchField.setText("");
                     int itemCount = 0;
 
                     itemCount = mangasPtBr.size();
                     mangasPtBr.clear();
-                    adapterMangasPtBr.notifyItemRangeRemoved(0,itemCount);
+                    adapterMangasPtBr.notifyItemRangeRemoved(0, itemCount);
 
                     itemCount = mangasEn.size();
                     mangasEn.clear();
-                    adapterMangasEn.notifyItemRangeRemoved(0,itemCount);
+                    adapterMangasEn.notifyItemRangeRemoved(0, itemCount);
 
                     itemCount = mangasEsLa.size();
                     mangasEsLa.clear();
-                    adapterMangasEsLa.notifyItemRangeRemoved(0,itemCount);
+                    adapterMangasEsLa.notifyItemRangeRemoved(0, itemCount);
 
                     binding.ptBr.setVisibility(View.GONE);
                     binding.en.setVisibility(View.GONE);
@@ -253,48 +269,61 @@ public class ExtensionsShowFragment extends Fragment {
         binding.searchIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!isSearchFildShow) {
-                    isSearchFildShow = true;
+                if (!isSearchFieldShow) {
+                    isSearchFieldShow = true;
                     showSearch();
                 }
+            }
+        });
+
+        binding.searchAction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                search();
+            }
+        });
+        binding.close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                binding.searchField.setText("");
             }
         });
         binding.searchField.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
 
-                if(keyCode == KeyEvent.KEYCODE_ENTER && !isSearching){
+                if (keyCode == KeyEvent.KEYCODE_ENTER && !isSearching) {
 
                     int itemCount = 0;
 
                     itemCount = mangasPtBr.size();
                     mangasPtBr.clear();
-                    adapterMangasPtBr.notifyItemRangeRemoved(0,itemCount);
+                    adapterMangasPtBr.notifyItemRangeRemoved(0, itemCount);
 
                     itemCount = mangasEn.size();
                     mangasEn.clear();
-                    adapterMangasEn.notifyItemRangeRemoved(0,itemCount);
+                    adapterMangasEn.notifyItemRangeRemoved(0, itemCount);
 
                     itemCount = mangasEsLa.size();
                     mangasEsLa.clear();
-                    adapterMangasEsLa.notifyItemRangeRemoved(0,itemCount);
+                    adapterMangasEsLa.notifyItemRangeRemoved(0, itemCount);
 
                     binding.ptBr.setVisibility(View.GONE);
                     binding.en.setVisibility(View.GONE);
                     binding.esLa.setVisibility(View.GONE);
 
                     String search = binding.searchField.getText().toString();
-                    if(search.isEmpty()){
+                    if (search.isEmpty()) {
                         return false;
                     }
                     binding.progress.setVisibility(View.VISIBLE);
                     isSearching = true;
-                    new Thread(){
+                    new Thread() {
                         @Override
-                        public void run(){
-                            for(String s:languages){
-                                mangaDexExtension = new MangaDexExtension(s,"");
-                                mangaDexExtension.search(search,mainHandler);
+                        public void run() {
+                            for (String s : languages) {
+                                mangaDexExtension = new MangaDexExtension(s, "");
+                                mangaDexExtension.search(search, mainHandler);
                             }
                             isSearching = false;
                         }
@@ -351,53 +380,52 @@ public class ExtensionsShowFragment extends Fragment {
         });
         animator.start();
     }
-    private void search(){
 
-        binding.search.setOnClickListener(new View.OnClickListener() {
+    private void search() {
+
+
+        String search = binding.searchField.getText().toString();
+        if (search.isEmpty()) {
+            return;
+        }
+        if (isSearching) {
+            return;
+        }
+        int itemCount = 0;
+
+        itemCount = mangasPtBr.size();
+        mangasPtBr.clear();
+        adapterMangasPtBr.notifyItemRangeRemoved(0, itemCount);
+
+        itemCount = mangasEn.size();
+        mangasEn.clear();
+        adapterMangasEn.notifyItemRangeRemoved(0, itemCount);
+
+        itemCount = mangasEsLa.size();
+        mangasEsLa.clear();
+        adapterMangasEsLa.notifyItemRangeRemoved(0, itemCount);
+
+        binding.ptBr.setVisibility(View.GONE);
+        binding.en.setVisibility(View.GONE);
+        binding.esLa.setVisibility(View.GONE);
+
+        binding.progress.setVisibility(View.VISIBLE);
+        isSearching = true;
+        new Thread() {
             @Override
-            public void onClick(View v) {
-                String search = binding.searchField.getText().toString();
-                if(search.isEmpty()){
-                    return;
+            public void run() {
+                for (String s : languages) {
+                    mangaDexExtension = new MangaDexExtension(s, "");
+                    mangaDexExtension.search(search, mainHandler);
                 }
-                if(isSearching){
-                    return;
-                }
-                int itemCount = 0;
-
-                itemCount = mangasPtBr.size();
-                mangasPtBr.clear();
-                adapterMangasPtBr.notifyItemRangeRemoved(0,itemCount);
-
-                itemCount = mangasEn.size();
-                mangasEn.clear();
-                adapterMangasEn.notifyItemRangeRemoved(0,itemCount);
-
-                itemCount = mangasEsLa.size();
-                mangasEsLa.clear();
-                adapterMangasEsLa.notifyItemRangeRemoved(0,itemCount);
-
-                binding.ptBr.setVisibility(View.GONE);
-                binding.en.setVisibility(View.GONE);
-                binding.esLa.setVisibility(View.GONE);
-
-                binding.progress.setVisibility(View.VISIBLE);
-                isSearching = true;
-                new Thread(){
-                    @Override
-                    public void run(){
-                        for(String s:languages){
-                            mangaDexExtension = new MangaDexExtension(s,"");
-                            mangaDexExtension.search(search,mainHandler);
-                        }
-                        isSearching = false;
-                    }
-                }.start();
+                isSearching = false;
             }
-        });
+        }.start();
+
     }
+
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
         binding.recyclerPtBr.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override

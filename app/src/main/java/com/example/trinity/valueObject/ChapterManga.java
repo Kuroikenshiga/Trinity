@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 
 public class ChapterManga implements Parcelable {
-
+    public long mangaUUID;
     private  String id;
     public String title;
     private String chapter;

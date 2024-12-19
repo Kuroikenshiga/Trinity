@@ -11,10 +11,12 @@ import androidx.annotation.NonNull;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class Manga implements Parcelable, Serializable {
 
     public String coverName;
+    public long uuid;
     private String id;
     private String titulo;
     private Bitmap image;
@@ -27,7 +29,8 @@ public class Manga implements Parcelable, Serializable {
     private int amountChaptersToRead;
     public boolean isAdded = false;
     private double lastChapter;
-
+    public static final double COMPLETED = -1;
+    public boolean isVisible = true;
     public Manga(String id, String titulo, Bitmap image, ArrayList<String> autor, String descricao, ArrayList<TagManga> tags) {
         this.id = id;
         this.titulo = titulo;
@@ -78,7 +81,9 @@ public class Manga implements Parcelable, Serializable {
 //    }
 
     public Manga() {
-
+        this.chapters = new ArrayList<>();
+        this.autores = new ArrayList<>();
+        this.tags = new ArrayList<>();
     }
 
 
@@ -246,11 +251,25 @@ public class Manga implements Parcelable, Serializable {
         return false;
     }
     public boolean isOngoing(ArrayList<ChapterManga> chapters){
+        if(chapters == null){
+            return true;
+        }
+        if(COMPLETED == lastChapter){
+            return false;
+        }
         for(ChapterManga c:chapters){
             if(Double.parseDouble(c.getChapter()) == this.lastChapter){
                 return false;
             }
         }
         return true;
+    }
+
+    public String getCoverName() {
+        return coverName;
+    }
+
+    public void setCoverName(String coverName) {
+        this.coverName = coverName;
     }
 }

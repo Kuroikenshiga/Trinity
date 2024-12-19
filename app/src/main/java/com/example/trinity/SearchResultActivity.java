@@ -12,6 +12,7 @@ import android.view.View;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -19,9 +20,11 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.trinity.Interfeces.Extensions;
 import com.example.trinity.adapters.AdapterMangas;
 import com.example.trinity.databinding.ActivitySearchResultBinding;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.valueObject.Manga;
 
@@ -33,7 +36,7 @@ public class SearchResultActivity extends AppCompatActivity {
     private String language;
     private ActivitySearchResultBinding binding;
     private boolean supressManyLoad = true;
-    private MangaDexExtension mangaDexExtension;
+    private Extensions mangaDexExtension;
     private boolean controllEnter = false;
 
     Thread workerThread;
@@ -50,7 +53,7 @@ public class SearchResultActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences(ConfigClass.TAG_PREFERENCE,MODE_PRIVATE);
         String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY,"dataSaver");
 
-        mangaDexExtension = new MangaDexExtension(language,imageQuality);
+        mangaDexExtension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX)?new MangaDexExtension(language,imageQuality):new MangakakalotExtension(null);
         final ArrayList<Manga>[] mangaListedModelsAll = new ArrayList[]{new ArrayList()};
         AdapterMangas adapter = new AdapterMangas(SearchResultActivity.this, mangaListedModelsAll[0],this.language);
         adapter.setShowLanguageIcon(true);
@@ -64,7 +67,7 @@ public class SearchResultActivity extends AppCompatActivity {
             public void handleMessage(@NonNull Message msg){
 //                System.out.println("Dados: "+msg.getData().get("dados"));
 
-                if(msg.what == 1){
+                if(msg.what == Extensions.RESPONSE_ITEM){
                     controllEnter = false;
                     mangaListedModelsAll[0].add(msg.getData().getParcelable("dados"));
                     adapter.notifyDataSetChanged();
@@ -79,15 +82,15 @@ public class SearchResultActivity extends AppCompatActivity {
 
                 }
 
-                else if(msg.what == 2){
+                else if(msg.what == Extensions.RESPONSE_FINAL){
                     binding.progressTop.setVisibility(View.GONE);
                     supressManyLoad = false;
 
                 }
-                else if(msg.what == 3){
+                else if(msg.what == Extensions.RESPONSE_EMPTY){
                     binding.resultContainer.setVisibility(View.GONE);
                     binding.ErrorOnResult.setVisibility(View.VISIBLE);
-                    binding.errorText.setText("Nenhum resultado encontrado para "+binding.searchField.getText().toString());
+                    binding.errorText.setText("Nenhum resultado encontrado para "+binding.searchField.getText().toString().toString());
                 }
 
             }
@@ -99,26 +102,26 @@ public class SearchResultActivity extends AppCompatActivity {
             }
         };
         workerThread.start();
-        binding.search.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(workerThread != null && workerThread.isAlive()){
-                    workerThread.interrupt();
-                }
-                mangaDexExtension = new MangaDexExtension(language,imageQuality);
-                mangaListedModelsAll[0].clear();
-                adapter.notifyDataSetChanged();
-                binding.progressTop.setVisibility(View.VISIBLE);
-                workerThread = new Thread(){
-                    @Override
-                    public void run(){
-                        mangaDexExtension.search(binding.searchField.getText().toString(),mainHandler);
-                    }
-                };
-                workerThread.start();
-                binding.progressTop.setVisibility(View.VISIBLE);
-            }
-        });
+//        binding.search.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(workerThread != null && workerThread.isAlive()){
+//                    workerThread.interrupt();
+//                }
+//                mangaDexExtension = new MangaDexExtension(language,imageQuality);
+//                mangaListedModelsAll[0].clear();
+//                adapter.notifyDataSetChanged();
+//                binding.progressTop.setVisibility(View.VISIBLE);
+//                workerThread = new Thread(){
+//                    @Override
+//                    public void run(){
+//                        mangaDexExtension.search(binding.searchField.getText().toString(),mainHandler);
+//                    }
+//                };
+//                workerThread.start();
+//                binding.progressTop.setVisibility(View.VISIBLE);
+//            }
+//        });
 
 
         binding.reciclerViewMangas.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -150,7 +153,26 @@ public class SearchResultActivity extends AppCompatActivity {
 //            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
 //            return insets;
 //        });
-
+        binding.searchAction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(workerThread != null && workerThread.isAlive()){
+                    workerThread.interrupt();
+                }
+                mangaDexExtension = new MangaDexExtension(language,imageQuality);
+                mangaListedModelsAll[0].clear();
+                adapter.notifyDataSetChanged();
+                binding.progressTop.setVisibility(View.VISIBLE);
+                workerThread = new Thread(){
+                    @Override
+                    public void run(){
+                        mangaDexExtension.search(binding.searchField.getText().toString(),mainHandler);
+                    }
+                };
+                workerThread.start();
+                binding.progressTop.setVisibility(View.VISIBLE);
+            }
+        });
         binding.searchField.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {

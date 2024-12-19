@@ -48,6 +48,7 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
         this.context = context;
         this.chapters = chapters;
         chapterToDownload = new ArrayList<>();
+        
     }
 
     @NonNull

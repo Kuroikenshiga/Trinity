@@ -24,8 +24,10 @@ import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.example.trinity.Interfeces.Extensions;
 import com.example.trinity.R;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.fragments.UpdatesFragment;
 import com.example.trinity.models.Model;
 
@@ -38,6 +40,7 @@ import com.example.trinity.valueObject.Manga;
 import com.example.trinity.viewModel.UpdatesViewModel;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class UpdateWork extends Worker {
     private Context context;
@@ -71,8 +74,10 @@ public class UpdateWork extends Worker {
 
         PendingIntent cancelPending = PendingIntent.getBroadcast(context,0,cancelUpdateIntent,PendingIntent.FLAG_IMMUTABLE);
 
-        ArrayList<Manga> mangas = model.selectAllMangas(true);
-        MangaDexExtension mangaDexExtension = new MangaDexExtension("",imageQuality);
+        ArrayList<Manga> mangas = model.selectAllMangas(false);
+
+
+
         NotificationCompat.Builder notification = new NotificationCompat.Builder(context, CHANNEL_NOTIFICATION_ID)
                 .setSmallIcon(R.drawable.app_icon)
                 .setContentTitle("Atualizando biblioteca ("+1+" de "+mangas.size()+")")
@@ -85,7 +90,6 @@ public class UpdateWork extends Worker {
         int progress = 0;
         for (Manga m : mangas) {
             isAlredyChecked = false;
-//            System.out.println(m.getTitulo());
             notification.setContentTitle("Atualizando biblioteca ("+(progress+1)+" de "+mangas.size()+")");
             notification.setContentText(m.getTitulo());
             this.notify(notification);
@@ -93,12 +97,14 @@ public class UpdateWork extends Worker {
             if(CancelCurrentWorkReceiver.isIsWorkUpdatesLibraryCanceled()){
                 break;
             }
+            Extensions mangaDexExtension = m.getId().contains("mangakakalot")||m.getId().contains("manganato")?new MangakakalotExtension(null):new MangaDexExtension("",imageQuality);
             mangaDexExtension.setLanguage(m.getLanguage());
-            ArrayList<ChapterManga> chaptersFromApi = mangaDexExtension.viewChapters(m.getId(), null, null);
+            ArrayList<ChapterManga> chaptersFromApi = mangaDexExtension.viewChapters(m.getId());
             double lastChapter = mangaDexExtension.getMangaStatus(m.getId());
             if(lastChapter != 0){
                 model.setLastChapterManga(m.getId(),m.getLanguage(),lastChapter);
             }
+            m.setChapters(model.getAllChapterByMangaID(m.getId(), m.getLanguage()));
             for (ChapterManga chapterManga : chaptersFromApi) {
                 if (!m.isChapterAlredySaved(chapterManga.getId())) {
                     ChapterUpdated chapterUpdated = new ChapterUpdated(m, chapterManga);
@@ -106,7 +112,7 @@ public class UpdateWork extends Worker {
                     this.haveNewChapters = true;
                 }
             }
-
+            m.getChapters().clear();
             progress++;
             notification.setProgress(mangas.size(), progress, false);
 

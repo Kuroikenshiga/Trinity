@@ -11,7 +11,7 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = 1
-        versionName = "2.2.6"
+        versionName = "2.2.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,6 +43,7 @@ android {
 dependencies {
 
     implementation(files("C:\\Users\\TeresaShySmile\\Downloads\\subsampling-scale-image-view-3.10.0.aar"))
+    implementation(files("C:/Users/TeresaShySmile/Downloads/jsoup-1.18.1.jar"))
     val work_version = "2.9.0"
     // (Java only)
     implementation("androidx.work:work-runtime:$work_version")

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
+import com.example.trinity.Interfeces.Extensions;
 import com.example.trinity.models.Model;
 
 import java.io.File;
@@ -86,7 +87,7 @@ public final class ChapterStorageManager {
         int numPages = model.getNumberPagesDownloaded(idChapterApi);
 
         Message msg1 = Message.obtain();
-        msg1.what = 1;
+        msg1.what = Extensions.RESPONSE_ITEM;
         Bundle bundle1 = new Bundle();
         bundle1.putInt("numPages",numPages);
         msg1.setData(bundle1);
@@ -108,7 +109,7 @@ public final class ChapterStorageManager {
 //                ex.printStackTrace();
 //            }
             Message msg = Message.obtain();
-            msg.what = 2;
+            msg.what = Extensions.RESPONSE_PAGE;
             Bundle bundle = new Bundle();
             bundle.putString("img",v.getAsString("path"));
             bundle.putInt("index",v.getAsInteger("page"));

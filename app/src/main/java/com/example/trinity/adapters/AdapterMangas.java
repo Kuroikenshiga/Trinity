@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.example.trinity.Interfeces.Extensions;
 import com.example.trinity.MainActivity;
 import com.example.trinity.MangaShowContentActivity;
 import com.example.trinity.R;
@@ -30,6 +31,7 @@ import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 import com.example.trinity.valueObject.Manga;
 
 import java.io.Serializable;
+import java.security.cert.Extension;
 import java.util.ArrayList;
 
 public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewHolder> {
@@ -43,6 +45,8 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
     private LogoMangaStorageTemp storageTemp;
     private boolean isFromUpdates = false;
     private Fragment fragment;
+
+
     public AdapterMangas(Context c, ArrayList<Manga> mangaModels) {
         this.c = c;
         this.mangaArrayList = mangaModels;
@@ -77,29 +81,29 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
 
     @Override
     public void onBindViewHolder(@NonNull MangaViewHolder holder, @SuppressLint("RecyclerView") int position) {
-//        System.out.println(mangaArrayList.get(position).isAdded);
+
         if (((AppCompatActivity) (c)).getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
             if (isHorizontalView) {
 
                 if(fragment == null){
                     Glide.with(c)
-                            .load(!isFromUpdates ? storage.getLogoFromStorage(mangaArrayList.get(position).getId()) : storageTemp.getLogoFromTempStorage(mangaArrayList.get(position).getId()))
+                            .load(!isFromUpdates ? storage.getLogoFromStorage(mangaArrayList.get(holder.getAdapterPosition()).getId()) : storageTemp.getLogoFromTempStorage(mangaArrayList.get(holder.getAdapterPosition()).getId()))
 //                    .override((int) c.getResources().getDisplayMetrics().density * 120, (int) c.getResources().getDisplayMetrics().density * 170)
                             .into(holder.horizontalViewBinding.mangaLogo);
                 }
                 else{
                     Glide.with(fragment)
-                            .load(!isFromUpdates ? storage.getLogoFromStorage(mangaArrayList.get(position).getId()) : storageTemp.getLogoFromTempStorage(mangaArrayList.get(position).getId()))
+                            .load(!isFromUpdates ? storage.getLogoFromStorage(mangaArrayList.get(holder.getAdapterPosition()).getId()) : storageTemp.getLogoFromTempStorage(mangaArrayList.get(holder.getAdapterPosition()).getId()))
 //                    .override((int) c.getResources().getDisplayMetrics().density * 120, (int) c.getResources().getDisplayMetrics().density * 170)
                             .into(holder.horizontalViewBinding.mangaLogo);
                 }
 
-                holder.horizontalViewBinding.title.setText(mangaArrayList.get(position).getTitulo());
+                holder.horizontalViewBinding.title.setText(mangaArrayList.get(holder.getAdapterPosition()).getTitulo());
                 holder.horizontalViewBinding.getRoot().setClickable(true);
                 if (this.showLanguageIcon) {
                     Glide.with(c)
 
-                            .load(mangaArrayList.get(position).getLanguage().equals("pt-br") ? R.drawable.brazil_flag : mangaArrayList.get(position).getLanguage().equals("en") ? R.drawable.usa_flag : R.drawable.spain_flag)
+                            .load(mangaArrayList.get(holder.getAdapterPosition()).getLanguage().equals("pt-br") ? R.drawable.brazil_flag : mangaArrayList.get(holder.getAdapterPosition()).getLanguage().equals("en") ? R.drawable.usa_flag : R.drawable.spain_flag)
                             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                             .centerInside()
                             .into(holder.horizontalViewBinding.languageIcon);
@@ -112,12 +116,13 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
                         Intent intent = new Intent(c, MangaShowContentActivity.class);
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            intent.putExtra("Item", (Parcelable) mangaArrayList.get(position));
+                            intent.putExtra("Item", (Parcelable) mangaArrayList.get(holder.getAdapterPosition()));
                         }
                         else{
-                            intent.putExtra("Item", (Serializable) mangaArrayList.get(position));
+                            intent.putExtra("Item", (Serializable) mangaArrayList.get(holder.getAdapterPosition()));
                         }
-                        intent.putExtra("Language", language == null ? mangaArrayList.get(position).getLanguage() : language);
+                        intent.putExtra("Extension",mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangakakalot")||mangaArrayList.get(holder.getAdapterPosition()).getId().contains("chapmanganato")? Extensions.MANGAKAKALOT:Extensions.MANGADEX);
+                        intent.putExtra("Language", language == null ? mangaArrayList.get(holder.getAdapterPosition()).getLanguage() : language);
                         intent.putExtra("FromMain", c instanceof MainActivity);
                         c.startActivity(intent);
                     }
@@ -127,30 +132,30 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
 
             if(this.fragment == null){
 //                System.out.println("Context");
-                Glide.with(c).load(!isFromUpdates ? storage.getLogoFromStorage(mangaArrayList.get(position).getId()) : storageTemp.getLogoFromTempStorage(mangaArrayList.get(position).getId()))
+                Glide.with(c).load(!isFromUpdates ? storage.getLogoFromStorage(mangaArrayList.get(holder.getAdapterPosition()).getId()) : storageTemp.getLogoFromTempStorage(mangaArrayList.get(holder.getAdapterPosition()).getId()))
 //                    .override((int) c.getResources().getDisplayMetrics().density * 120, (int) c.getResources().getDisplayMetrics().density * 170)
                         .into(holder.binding.mangaLogo);
             }else {
 //                System.out.println("Fragment");
-                Glide.with(this.fragment).load(!isFromUpdates ? storage.getLogoFromStorage(mangaArrayList.get(position).getId()) : storageTemp.getLogoFromTempStorage(mangaArrayList.get(position).getId()))
+                Glide.with(this.fragment).load(!isFromUpdates ? storage.getLogoFromStorage(mangaArrayList.get(holder.getAdapterPosition()).getId()) : storageTemp.getLogoFromTempStorage(mangaArrayList.get(holder.getAdapterPosition()).getId()))
 //                    .override((int) c.getResources().getDisplayMetrics().density * 120, (int) c.getResources().getDisplayMetrics().density * 170)
                         .into(holder.binding.mangaLogo);
             }
 
 
-            holder.binding.title.setText(mangaArrayList.get(position).getTitulo());
+            holder.binding.title.setText(mangaArrayList.get(holder.getAdapterPosition()).getTitulo());
             holder.binding.getRoot().setClickable(true);
             if (this.showLanguageIcon) {
                 if(fragment == null){
 //                    System.out.println("Context");
-                    Glide.with(c).load(mangaArrayList.get(position).getLanguage().equals("pt-br") ? R.drawable.brazil_flag : mangaArrayList.get(position).getLanguage().equals("en") ? R.drawable.usa_flag : R.drawable.spain_flag)
+                    Glide.with(c).load(mangaArrayList.get(holder.getAdapterPosition()).getLanguage().equals("pt-br") ? R.drawable.brazil_flag : mangaArrayList.get(holder.getAdapterPosition()).getLanguage().equals("en") ? R.drawable.usa_flag : R.drawable.spain_flag)
                             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                             .override((int) (30 * c.getResources().getDisplayMetrics().density), (int) (30 * c.getResources().getDisplayMetrics().density))
                             .into(holder.binding.languageIcon);
                 }
                 else{
 //                    System.out.println("Fragment");
-                    Glide.with(fragment).load(mangaArrayList.get(position).getLanguage().equals("pt-br") ? R.drawable.brazil_flag : mangaArrayList.get(position).getLanguage().equals("en") ? R.drawable.usa_flag : R.drawable.spain_flag)
+                    Glide.with(fragment).load(mangaArrayList.get(holder.getAdapterPosition()).getLanguage().equals("pt-br") ? R.drawable.brazil_flag : mangaArrayList.get(holder.getAdapterPosition()).getLanguage().equals("en") ? R.drawable.usa_flag : R.drawable.spain_flag)
                             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                             .override((int) (30 * c.getResources().getDisplayMetrics().density), (int) (30 * c.getResources().getDisplayMetrics().density))
                             .into(holder.binding.languageIcon);
@@ -162,12 +167,14 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
                 public void onClick(View v) {
 
                     Intent intent = new Intent(c, MangaShowContentActivity.class);
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        intent.putExtra("Item", (Parcelable) mangaArrayList.get(position));
+                        intent.putExtra("Item", (Parcelable) mangaArrayList.get(holder.getAdapterPosition()));
                     }else{
-                        intent.putExtra("Item", (Serializable) mangaArrayList.get(position));
+                        intent.putExtra("Item", (Serializable) mangaArrayList.get(holder.getAdapterPosition()));
                     }
-                    intent.putExtra("Language", language == null ? mangaArrayList.get(position).getLanguage() : language);
+                    intent.putExtra("Extension",mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangakakalot")||mangaArrayList.get(holder.getAdapterPosition()).getId().contains("chapmanganato")? Extensions.MANGAKAKALOT:Extensions.MANGADEX);
+                    intent.putExtra("Language", language == null ? mangaArrayList.get(holder.getAdapterPosition()).getLanguage() : language);
                     intent.putExtra("FromMain", c instanceof MainActivity);
                     c.startActivity(intent);
                 }
@@ -194,7 +201,10 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
             this.horizontalViewBinding = binding;
         }
     }
-
+    public void setDataSet(ArrayList<Manga> dataSet){
+        this.mangaArrayList = dataSet;
+        notifyDataSetChanged();
+    }
     public String getLanguage() {
         return language;
     }
@@ -233,4 +243,6 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
     public void setFragment(Fragment fragment) {
         this.fragment = fragment;
     }
+
+
 }

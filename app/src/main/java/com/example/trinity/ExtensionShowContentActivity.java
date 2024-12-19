@@ -20,6 +20,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,6 +36,7 @@ import com.example.trinity.adapters.AdapterMangas;
 
 import com.example.trinity.databinding.ActivityExtensionShowContentBinding;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.fragments.LibraryFragment;
 import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
@@ -59,11 +61,11 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
     private boolean supressManyLoad = true;
     private boolean controllClick = false;
     private Handler mainHandler;
-    private MangaDexExtension mangaDexExtension;
+    private Extensions mangaDexExtension;
     private ArrayList<Manga> mangaListed;
     private AdapterMangas adapter;
     private int controllLoad = 0;
-
+    private boolean alredyClicked = false;
     private boolean isAdvancedSearchShow = false;
     private boolean isAdvancedSearchSettingsChanged = false;
     private Thread workerThread;
@@ -193,15 +195,26 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
          adapter = new AdapterMangas(ExtensionShowContentActivity.this, mangaListed,this.language);
          adapter.setFromUpdates(true);
         startUphandler();
-        binding.search.setOnClickListener(new View.OnClickListener() {
+//        binding.search.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(ExtensionShowContentActivity.this,SearchResultActivity.class);
+//                intent.putExtra("language",language);
+//                intent.putExtra("SearchField",binding.searchField.getText().toString());
+//                ExtensionShowContentActivity.this.startActivity(intent);
+//            }
+//        });
+        binding.searchAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ExtensionShowContentActivity.this,SearchResultActivity.class);
                 intent.putExtra("language",language);
                 intent.putExtra("SearchField",binding.searchField.getText().toString());
+                intent.putExtra("Extension",mangaDexExtension instanceof MangaDexExtension?Extensions.MANGADEX:Extensions.MANGAKAKALOT);
                 ExtensionShowContentActivity.this.startActivity(intent);
             }
         });
+
         binding.showSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -213,7 +226,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new GridLayoutManager(ExtensionShowContentActivity.this, 3));
         recyclerView.setHasFixedSize(false);
 
-        mangaDexExtension = new MangaDexExtension(this.language,imageQuality);
+        mangaDexExtension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX)?new MangaDexExtension(this.language,imageQuality):new MangakakalotExtension(null);
 
        workerThread = new Thread(){
             public void run(){
@@ -251,6 +264,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
     public void onResume(){
         super.onResume();
         this.controllClick = false;
+        alredyClicked = false;
     }
     public void showSearch() {
 
@@ -302,21 +316,15 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
         binding.searchField.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if(keyCode == KeyEvent.KEYCODE_ENTER && !controllClick){
-                    controllClick = true;
-                    binding.search.performClick();
-                    if(workerThread != null && workerThread.isAlive()){
-                        workerThread.interrupt();
-                    }
-                    workerThread = new Thread(){
-                        public void run(){
-                            mangaDexExtension.updates(mainHandler);
-                        }
-                    };
-                    workerThread.start();
-                    return true;
+                if(!alredyClicked){
+                    alredyClicked = true;
+                    Intent intent = new Intent(ExtensionShowContentActivity.this,SearchResultActivity.class);
+                    intent.putExtra("language",language);
+                    intent.putExtra("SearchField",binding.searchField.getText().toString());
+                    intent.putExtra("Extension",mangaDexExtension instanceof MangaDexExtension?Extensions.MANGADEX:Extensions.MANGAKAKALOT);
+                    ExtensionShowContentActivity.this.startActivity(intent);
                 }
-                return false;
+                return true;
             }
         });
 
@@ -355,7 +363,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
             public void handleMessage(@NonNull Message msg){
                 //System.out.println("Dados: "+msg.getData().get("dados"));
 
-                if(msg.what == 1){
+                if(msg.what == Extensions.RESPONSE_ITEM){
                     isAdvancedSearchSettingsChanged = false;
                     binding.progressTop.setVisibility(View.GONE);
                     binding.progressBotton.setVisibility(View.GONE);
@@ -363,8 +371,6 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
 
                     adapter.notifyItemInserted(mangaListed.size()-1);
 
-//                    binding.progressTop.setVisibility(View.GONE);
-//                    binding.progressBotton.setVisibility(View.GONE);
                     controllLoad++;
                     if(controllLoad == 27){
                         supressManyLoad = false;
@@ -373,7 +379,13 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
 
                 }
 
-                else if(msg.what == 2){
+                else if(msg.what == Extensions.RESPONSE_FINAL){
+                    binding.progressTop.setVisibility(View.GONE);
+                    binding.progressBotton.setVisibility(View.GONE);
+                    supressManyLoad = false;
+                }
+
+                else if(msg.what == Extensions.RESPONSE_ERROR){
                     binding.progressTop.setVisibility(View.GONE);
                     binding.progressBotton.setVisibility(View.GONE);
                     supressManyLoad = false;
@@ -382,6 +394,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
             }
         };
     }
+
 
 }
 

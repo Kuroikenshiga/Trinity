@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -97,7 +98,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
 //        holder.position = position;
 
         if(position == 0){
-            ((StartReadViewHolder)(holder)).position = position;
+            ((StartReadViewHolder)(holder)).position = holder.getAdapterPosition();
             if (this.isFirstChapter) {
                 ((StartReadViewHolder)(holder)).binding.actionPrev.setVisibility(View.GONE);
 
@@ -142,7 +143,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
                 ((EndReadViewHolder)(holder)).binding.endLogo.setImageResource(R.drawable.end_chapters);
                 ((EndReadViewHolder)(holder)).binding.actionEnd.setVisibility(View.GONE);
                 ((EndReadViewHolder)(holder)).binding.lastChap.setVisibility(View.VISIBLE);
-                ((EndReadViewHolder)(holder)).position = position;
+                ((EndReadViewHolder)(holder)).position = holder.getAdapterPosition();
             }
             ((EndReadViewHolder)(holder)).binding.nextChapterContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -154,9 +155,9 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
             return;
         }
 
-        if(imagesResource[position] == null)return;
+        if(imagesResource[holder.getAdapterPosition()] == null)return;
 //        System.out.println(position);
-        ((ViewHolderItem)(holder)).position = position;
+        ((ViewHolderItem)(holder)).position = holder.getAdapterPosition();
         SubsamplingScaleImageView img = ((ViewHolderItem)(holder)).binding.img;
         img.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -166,28 +167,24 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
         });
         Glide.with(fragment.getActivity().getApplicationContext())
                 .asBitmap()
-                .load(imagesResource[position])
+                .load(imagesResource[holder.getAdapterPosition()])
                 .override((int)screenWidth, (int)screenHeight)
                 .apply(RequestOptions.skipMemoryCacheOf(true))
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .downsample(DownsampleStrategy.AT_LEAST)
                 .into(new CustomTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         float zoomScale = 1f;
-                        System.out.println(resource.getWidth());
-                        System.out.println(resource.getHeight());
-                        if(resource.getWidth() < resource.getHeight() && resource.getHeight() > screenHeight && ((float) resource.getHeight() /resource.getWidth())>1.5f){
-
-                            img.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    img.setScaleAndCenter(1,new PointF((float)screenWidth/2,0));
-                                }
-                            });
-                            img.setDoubleTapZoomScale(2f);
-                            img.setMinScale(1f);
-                        }
                         img.setImage(ImageSource.bitmap(resource));
+                        img.setDoubleTapZoomScale(2f);
+                        img.setMinScale(1f);
+//                        if(resource.getWidth() < resource.getHeight() && resource.getHeight() > screenHeight && ((float) resource.getHeight() /resource.getWidth())>1.5f){
+//
+////                            img.setScaleAndCenter(1,new PointF((float)screenWidth/2,0));
+//
+//                        }
+
                         ((ViewHolderItem)(holder)).binding.progressTop.setVisibility(View.GONE);
 //                        holder.binding.nextChapterContainer.setVisibility(View.GONE);
 //                        holder.binding.startRead.setVisibility(View.GONE);
