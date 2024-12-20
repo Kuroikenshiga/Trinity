@@ -210,12 +210,12 @@ public class InfoMangaFragment extends Fragment {
         if (manga.getChapters() != null && !manga.getChapters().isEmpty()) {
 
             this.stopLoading();
-            if (!loadSubLists(manga.getChapters())) {
-                chapterMangasListed.addAll(manga.getChapters());
-                allChapters = chapterMangasListed;
-            }
+//            if (!loadSubLists(manga.getChapters())) {
+//                chapterMangasListed.addAll(manga.getChapters());
+//                allChapters = chapterMangasListed;
+//            }
             allChapters = manga.getChapters();
-            manageSubLists();
+//            manageSubLists();
         }
 
         Glide.with(getActivity())
@@ -332,20 +332,20 @@ public class InfoMangaFragment extends Fragment {
         loadChapters();
         showMore();
 
-        binding.scrollParent.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(@NonNull NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+//        binding.scrollParent.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+//            @Override
+//            public void onScrollChange(@NonNull NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+//
+//                manageSubLists();
+//            }
+//        });
 
-                manageSubLists();
-            }
-        });
-
-        binding.chapterContainer.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                manageSubLists();
-            }
-        });
+//        binding.chapterContainer.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+//            @Override
+//            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+//                manageSubLists();
+//            }
+//        });
         binding.downloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -491,17 +491,29 @@ public class InfoMangaFragment extends Fragment {
                 @Override
                 public void run() {
                     model = Model.getInstance(getActivity());
-                    ArrayList<ChapterManga> chapters = model.getAllChapterByMangaID(manga.getId(), manga.getLanguage());
-                    mangaDataViewModel.getManga().setChapters(chapters);
+                    allChapters = model.getAllChapterByMangaID(manga.getId(), manga.getLanguage());
+                    try {
+                        SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
+                    } catch (NoSuchMethodException e) {
+                        throw new RuntimeException(e);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    } catch (InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                    mangaDataViewModel.getManga().setChapters(allChapters);
                     chapterMangasListed.clear();
                     indexSubLists = 0;
-                    allChapters = chapters;
+//                    allChapters = chapters;
                     lastChapter = model.getIdApiOfLastChapterRead(manga.getId(), manga.getLanguage());
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-
-                            if(manga.getLastChapter()!=0&&!manga.isOngoing(chapters))binding.status.setText("Concluído");
+                            chaptersAdapter = new AdapterChapters(requireActivity(),allChapters);
+                            binding.chapterContainer.setAdapter(chaptersAdapter);
+                            if(manga.getLastChapter()!=0&&!manga.isOngoing(allChapters))binding.status.setText("Concluído");
                         }
                     });
                     if (!lastChapter.isEmpty()) {
@@ -524,18 +536,14 @@ public class InfoMangaFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (!loadSubLists(chapters)) {
-                                chapterMangasListed.addAll(chapters);
-                                chaptersAdapter.notifyDataSetChanged();
-                                binding.numChapters.setText(chapters.size() + " Capítulos");
-                            }
+
                             binding.numChapters.setText(allChapters.size() + " Capítulos");
                             binding.progressChapter.setVisibility(View.GONE);
 
                             manageSubLists();
-                            mangaDataViewModel.getManga().setChapters(chapters);
-                        }
-                    });
+                            mangaDataViewModel.getManga().setChapters(allChapters);
+                       }
+                   });
                 }
             }.start();
             return;
@@ -547,13 +555,21 @@ public class InfoMangaFragment extends Fragment {
                 new Thread() {
                     @Override
                     public void run() {
-                        ArrayList<ChapterManga> chapters = mangaDataViewModel.getManga().getChapters() != null&&!mangaDataViewModel.getManga().getChapters().isEmpty()?mangaDataViewModel.getManga().getChapters():(mangaDexExtension.viewChapters(manga.getId()));
-                        mangaDataViewModel.getManga().setChapters(chapters);
-
+                        allChapters = mangaDataViewModel.getManga().getChapters() != null&&!mangaDataViewModel.getManga().getChapters().isEmpty()?mangaDataViewModel.getManga().getChapters():(mangaDexExtension.viewChapters(manga.getId()));
+                        mangaDataViewModel.getManga().setChapters(allChapters);
+                        try {
+                            SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
+                        } catch (NoSuchMethodException e) {
+                            throw new RuntimeException(e);
+                        } catch (ClassNotFoundException e) {
+                            throw new RuntimeException(e);
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        } catch (InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
                         chapterMangasListed.clear();
                         indexSubLists = 0;
-                        allChapters = chapters;
-
 
                         if (getActivity() == null) {
                             return;
@@ -561,18 +577,13 @@ public class InfoMangaFragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                if(!manga.isOngoing(chapters))binding.status.setText("Concluído");
-                                if (!loadSubLists(chapters)) {
-                                    if(chapters == null)return;
-                                    chapterMangasListed.addAll(chapters);
-                                    chaptersAdapter.notifyDataSetChanged();
-                                    binding.numChapters.setText(chapters.size() + " Capítulos");
-                                }
+                                if(!manga.isOngoing(allChapters))binding.status.setText("Concluído");
                                 binding.numChapters.setText(allChapters.size() + " Capítulos");
                                 binding.progressChapter.setVisibility(View.GONE);
+                                mangaDataViewModel.getManga().setChapters(allChapters);
+                                chaptersAdapter = new AdapterChapters(requireActivity(),allChapters);
+                                binding.chapterContainer.setAdapter(chaptersAdapter);
 
-                                manageSubLists();
-                                mangaDataViewModel.getManga().setChapters(chapters);
                             }
                         });
 
