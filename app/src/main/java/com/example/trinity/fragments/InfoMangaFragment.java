@@ -540,7 +540,7 @@ public class InfoMangaFragment extends Fragment {
                             binding.numChapters.setText(allChapters.size() + " Capítulos");
                             binding.progressChapter.setVisibility(View.GONE);
 
-                            manageSubLists();
+//                            manageSubLists();
                             mangaDataViewModel.getManga().setChapters(allChapters);
                        }
                    });
@@ -689,28 +689,28 @@ public class InfoMangaFragment extends Fragment {
             mangaDataViewModel = null;
 
         }
-        private void manageSubLists () {
-            if (sublListsChapters != null && indexSubLists < sublListsChapters.length) {
-                int currentSize = chapterMangasListed.size();
-//            System.out.println(chapterMangasListed.size());
-                chapterMangasListed.addAll(sublListsChapters[indexSubLists]);
-                chaptersAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-                    @Override
-                    public void onItemRangeInserted(int positionStart, int itemCount) {
-                        super.onItemRangeInserted(positionStart, itemCount);
-
-                    }
-                });
-//            System.out.println(currentSize);
-                if (currentSize != 0)
-                    chaptersAdapter.notifyItemRangeInserted(currentSize, sublListsChapters[indexSubLists].size());
-                else chaptersAdapter.notifyDataSetChanged();
-                //            chaptersAdapter.notifyItemRangeChanged(currentSize,sublListsChapters[indexSubLists].size());
-//                chaptersAdapter.notifyDataSetChanged();
-                indexSubLists++;
-
-            }
-        }
+//        private void manageSubLists () {
+//            if (sublListsChapters != null && indexSubLists < sublListsChapters.length) {
+//                int currentSize = chapterMangasListed.size();
+////            System.out.println(chapterMangasListed.size());
+//                chapterMangasListed.addAll(sublListsChapters[indexSubLists]);
+//                chaptersAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+//                    @Override
+//                    public void onItemRangeInserted(int positionStart, int itemCount) {
+//                        super.onItemRangeInserted(positionStart, itemCount);
+//
+//                    }
+//                });
+////            System.out.println(currentSize);
+//                if (currentSize != 0)
+//                    chaptersAdapter.notifyItemRangeInserted(currentSize, sublListsChapters[indexSubLists].size());
+//                else chaptersAdapter.notifyDataSetChanged();
+//                //            chaptersAdapter.notifyItemRangeChanged(currentSize,sublListsChapters[indexSubLists].size());
+////                chaptersAdapter.notifyDataSetChanged();
+//                indexSubLists++;
+//
+//            }
+//        }
 
         private ChapterManga getChapterFromDataSet (ArrayList < ChapterManga > data, String
         idChapter){
