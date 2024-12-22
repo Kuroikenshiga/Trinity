@@ -1,5 +1,6 @@
 package com.example.trinity.extensions;
 
+import static java.util.Calendar.HOUR_OF_DAY;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
 
@@ -34,6 +35,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -312,7 +315,7 @@ public class MangakakalotExtension implements Extensions {
             String title = item.getElementsByTag("a").attr("title");
             double chapter = Double.parseDouble(item.getElementsByTag("a").attr("href").split("chapter-")[1]);
 //            String data = item.getElementsByTag("span").last().attr("data-fn-time");
-            String RFC3339 = simpleDateFormat.format(dateFormaterChapmanganato(item.getElementsByTag("span").last().attr("title")).getTime());
+            String RFC3339 = simpleDateFormat.format(dateFormaterChapmanganato(item.getElementsByTag("span").last().attr("data-fn-time")).getTime());
             chapterMangas.add(new ChapterManga(id, title, String.valueOf(chapter), "", RFC3339, false));
         }
         return chapterMangas;
@@ -326,12 +329,15 @@ public class MangakakalotExtension implements Extensions {
         Elements divsChap = div.getElementsByTag("div");
         ArrayList<ChapterManga> chapterMangas = new ArrayList<>();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
         for (Element item : divsChap) {
             String id = item.getElementsByTag("span").first().getElementsByTag("a").first().attr("href").split("//")[1];
             String title = item.getElementsByTag("span").first().getElementsByTag("a").first().attr("title");
 
             double chapter = Double.parseDouble(item.getElementsByTag("a").attr("href").split("chapter_")[1]);
-            String RFC3339 = simpleDateFormat.format(dateFormaterMangakakalot(item.getElementsByTag("span").last().text()).getTime());
+//            String RFC3339 = simpleDateFormat.format(dateFormaterMangakakalot(item.getElementsByTag("span").last().text()).getTime());
+//            System.out.println(dateFormaterMangakakalot(item.getElementsByTag("span").last().text()).getTime());
+            String RFC3339 = dateTimeFormatter.format(dateFormaterMangakakalot(item.getElementsByTag("span").last().attr("title")).getTime().toInstant().atZone(ZoneId.systemDefault()));
             chapterMangas.add(new ChapterManga(id, title, String.valueOf(chapter), "", RFC3339, false));
         }
         return chapterMangas;
@@ -518,33 +524,34 @@ public class MangakakalotExtension implements Extensions {
     }
 
     private static Calendar dateFormaterChapmanganato(String s) {
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTime(new Date(Instant.ofEpochMilli(Long.parseLong(s)).toEpochMilli()));
-//        return calendar;
         Calendar calendar = Calendar.getInstance();
-        String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-        String[] words = s.split(",");
-        int index = 0;
-        for (String string : words) {
-            if (index == 0) {
-                String m = string.split(" ")[0];
-                for (int i = 0; i < months.length; i++) {
-                    if (m.equals(months[i])) {
-                        calendar.set(MONTH, i);
-                        break;
-                    }
-                }
-                calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(string.split(" ")[1]));
-            } else {
-                String x = string.split(" ")[0];
-                calendar.set(YEAR, Integer.parseInt(string.split(" ")[0]));
-                calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(string.split(" ")[1].split(":")[0]));
-                calendar.set(Calendar.MINUTE, Integer.parseInt(string.split(" ")[1].split(":")[1]));
-            }
-            index++;
-        }
-//        System.out.println(calendar.get(Calendar.DAY_OF_MONTH)+"/"+calendar.get(MONTH)+"/"+calendar.get(YEAR));
+        calendar.setTime(Date.from(Instant.ofEpochSecond(Long.parseLong(s))));
+        calendar.add(HOUR_OF_DAY,-10);
         return calendar;
+//        Calendar calendar = Calendar.getInstance();
+//        String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+//        String[] words = s.split(",");
+//        int index = 0;
+//        for (String string : words) {
+//            if (index == 0) {
+//                String m = string.split(" ")[0];
+//                for (int i = 0; i < months.length; i++) {
+//                    if (m.equals(months[i])) {
+//                        calendar.set(MONTH, i);
+//                        break;
+//                    }
+//                }
+//                calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(string.split(" ")[1]));
+//            } else {
+//                String x = string.split(" ")[0];
+//                calendar.set(YEAR, Integer.parseInt(string.split(" ")[0]));
+//                calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(string.split(" ")[1].split(":")[0]));
+//                calendar.set(Calendar.MINUTE, Integer.parseInt(string.split(" ")[1].split(":")[1]));
+//            }
+//            index++;
+//        }
+//        System.out.println(calendar.get(Calendar.DAY_OF_MONTH)+"/"+calendar.get(MONTH)+"/"+calendar.get(YEAR));
+//        return calendar;
     }
 
     private static Calendar dateFormaterMangakakalot(String s) {
@@ -552,7 +559,7 @@ public class MangakakalotExtension implements Extensions {
 
         if (s.contains("day") || s.contains("hour") || s.contains("minute") || s.contains("second")) {
             String[] time = s.split(" ");
-            calendar.add((s.contains("day") ? Calendar.DAY_OF_MONTH : s.contains("hour") ? Calendar.HOUR_OF_DAY : s.contains("minute") ? Calendar.MINUTE : Calendar.SECOND), Integer.parseInt("5") * -1);
+            calendar.add((s.contains("day") ? Calendar.DAY_OF_MONTH : s.contains("hour") ? Calendar.HOUR_OF_DAY : s.contains("minute") ? Calendar.MINUTE : Calendar.SECOND), Integer.parseInt(time[0]) * -1);
 
             return calendar;
         }

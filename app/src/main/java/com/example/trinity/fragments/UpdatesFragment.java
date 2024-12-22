@@ -230,6 +230,8 @@ public class UpdatesFragment extends Fragment {
                         @Override
                         public void onChanged(WorkInfo workInfo) {
 
+                            if(workInfo == null)return;
+
                             if (workInfo.getState().isFinished()) {
                                 isUpdatingLibray = false;
                                 binding.swipe.setRefreshing(false);

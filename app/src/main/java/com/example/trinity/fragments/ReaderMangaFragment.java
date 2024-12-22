@@ -44,6 +44,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -100,17 +101,10 @@ public class ReaderMangaFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private FragmentReaderMangaBinding binding;
     private AdapterPages adapterPages;
     private String[] imageURI;
-    private ImageBundle[] imageBundles;
-    private boolean isPaginable = true;
     private boolean isShowedTopAndBotton = false;
     private Handler mainHandler;
     private Thread workThread;
@@ -125,6 +119,8 @@ public class ReaderMangaFragment extends Fragment {
     private String idChap;
     private ArrayList<ChapterManga> chapters;
     private boolean radioButtomChangeFromUser = true;
+
+    private boolean loadingFragmentContent = true;
 
     private boolean isLoadingNewChapter = false;
     private SharedPreferences preferences;
@@ -143,6 +139,11 @@ public class ReaderMangaFragment extends Fragment {
     private WindowInsetsControllerCompat windowInsetsControllerCompat;
     private boolean isMangaAdded;
     private UpdatesViewModel updatesViewModel;
+    private ValueAnimator animatorLeft;
+    private LinearLayout.LayoutParams layoutParamsLeft;
+    private LinearLayout.LayoutParams layoutParamsRight;
+    private ValueAnimator animatorRight;
+
     public ReaderMangaFragment() {
         // Required empty public constructor
     }
@@ -159,8 +160,7 @@ public class ReaderMangaFragment extends Fragment {
     public static ReaderMangaFragment newInstance(String param1, String param2) {
         ReaderMangaFragment fragment = new ReaderMangaFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -169,8 +169,7 @@ public class ReaderMangaFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+
         }
         TransitionInflater inflater = TransitionInflater.from(getActivity());
         setExitTransition(inflater.inflateTransition(R.transition.fragment_transition));
@@ -196,7 +195,7 @@ public class ReaderMangaFragment extends Fragment {
         }
 
 
-        if(this.getActivity() instanceof MainActivity){
+        if (this.getActivity() instanceof MainActivity) {
             this.updatesViewModel = new ViewModelProvider(requireActivity()).get(UpdatesViewModel.class);
         }
 
@@ -252,7 +251,7 @@ public class ReaderMangaFragment extends Fragment {
         binding.getRoot().bringChildToFront(binding.footer);
 
         idChap = mangaDataViewModel.getIdChap();
-
+        String mangaName = mangaDataViewModel.getManga().getTitulo();
         chapters = mangaDataViewModel.getManga().getChapters();
 
         try {
@@ -320,6 +319,7 @@ public class ReaderMangaFragment extends Fragment {
             public void handleMessage(Message msg) {
 
                 if (msg.what == Extensions.RESPONSE_ITEM) {
+
                     Glide.get(requireActivity()).clearMemory();
                     new Thread() {
                         @Override
@@ -442,7 +442,13 @@ public class ReaderMangaFragment extends Fragment {
 
                 } else if (msg.what == Extensions.RESPONSE_PAGE) {
                     vm.cancel();
-
+                    binding.animationContainer.setVisibility(View.GONE);
+                    if (animatorLeft != null) {
+                        if (animatorLeft.isRunning()) animatorLeft.cancel();
+                    }
+                    if (animatorRight != null) {
+                        if (animatorRight.isRunning()) animatorRight.cancel();
+                    }
                     binding.errorContainer.setVisibility(View.GONE);
                     String bit = msg.getData().getString("img");
 
@@ -475,7 +481,7 @@ public class ReaderMangaFragment extends Fragment {
 
             }
         });
-        mangaDexExtension = mangaDataViewModel.getManga().getId().contains(MangakakalotExtension.MANGAKAKALOT)||mangaDataViewModel.getManga().getId().contains(MangakakalotExtension.CHAPMANGANATO)?new MangakakalotExtension(null):new MangaDexExtension(mangaLanguage, imageQuality);
+        mangaDexExtension = mangaDataViewModel.getManga().getId().contains(MangakakalotExtension.MANGAKAKALOT) || mangaDataViewModel.getManga().getId().contains(MangakakalotExtension.CHAPMANGANATO) ? new MangakakalotExtension(null) : new MangaDexExtension(mangaLanguage, imageQuality);
         mangaDexExtension.setContext(getActivity());
         workThread = new Thread() {
             @Override
@@ -564,13 +570,19 @@ public class ReaderMangaFragment extends Fragment {
                 Glide.get(appContext).clearDiskCache();
             }
         }.start();
+        if (animatorLeft != null) {
+            if (animatorLeft.isRunning()) animatorLeft.cancel();
+        }
+        if (animatorRight != null) {
+            if (animatorRight.isRunning()) animatorRight.cancel();
+        }
 
         super.onDestroy();
 
         if (workThread != null && workThread.isAlive()) {
             workThread.interrupt();
         }
-        mangaDataViewModel.setIdChap("");
+//        mangaDataViewModel.setIdChap("");
         mangaDataViewModel = null;
 
 
@@ -691,8 +703,14 @@ public class ReaderMangaFragment extends Fragment {
     public void nextChapter() {
         preferencesEditor.putInt(ConfigClass.ConfigReader.ALPHA_CONFIG, binding.alphaController.getProgress());
         preferencesEditor.apply();
-        if (!isLoadingNewChapter && chapterIndex < chapters.size()) {
 
+        if (!isLoadingNewChapter && chapterIndex < chapters.size()) {
+            if (mangaDataViewModel != null && mangaDataViewModel.getManga() != null && mangaDataViewModel.getManga().getChapters() != null) {
+                if (!mangaDataViewModel.getManga().getChapters().isEmpty()) {
+                    mangaDataViewModel.getManga().getChapters().get(chapterIndex).setAlredyRead(true);
+                }
+            }
+            newChapterAnimationStartUp();
             new Thread() {
                 @Override
                 public void run() {
@@ -700,9 +718,9 @@ public class ReaderMangaFragment extends Fragment {
                     model.chapterRead(chapters.get(chapterIndex));
                     model.setLastChapterRead(chapters.get(chapterIndex).getId(), mangaId, mangaLanguage);
 
-                    if(updatesViewModel != null){
-                        for(ChapterUpdated updated: Objects.requireNonNull(updatesViewModel.getChapterUpdatedLiveData().getValue())){
-                            if(updated != null && updated.getChapterManga().getId().equals(chapters.get(chapterIndex).getId())){
+                    if (updatesViewModel != null) {
+                        for (ChapterUpdated updated : Objects.requireNonNull(updatesViewModel.getChapterUpdatedLiveData().getValue())) {
+                            if (updated != null && updated.getChapterManga().getId().equals(chapters.get(chapterIndex).getId())) {
                                 updated.getChapterManga().setAlredyRead(true);
                             }
                         }
@@ -734,7 +752,12 @@ public class ReaderMangaFragment extends Fragment {
         preferencesEditor.putInt(ConfigClass.ConfigReader.ALPHA_CONFIG, binding.alphaController.getProgress());
         preferencesEditor.apply();
         if (!isLoadingNewChapter && this.chapterIndex > 0) {
-
+            if (mangaDataViewModel != null && mangaDataViewModel.getManga() != null && mangaDataViewModel.getManga().getChapters() != null) {
+                if (!mangaDataViewModel.getManga().getChapters().isEmpty()) {
+                    mangaDataViewModel.getManga().getChapters().get(chapterIndex).setAlredyRead(true);
+                }
+            }
+            newChapterAnimationStartUp();
             new Thread() {
                 @Override
                 public void run() {
@@ -989,5 +1012,45 @@ public class ReaderMangaFragment extends Fragment {
         isDownloading = false;
     }
 
+    private void newChapterAnimationStartUp() {
+//        if(!isLoadingNewChapter)return;
+        layoutParamsLeft = (LinearLayout.LayoutParams) binding.left.getLayoutParams();
+        layoutParamsRight = (LinearLayout.LayoutParams) binding.right.getLayoutParams();
 
+        binding.animationContainer.setVisibility(View.VISIBLE);
+
+        animatorLeft = ValueAnimator.ofInt(30, 10);
+        animatorRight = ValueAnimator.ofInt(10, 30);
+        animatorLeft.setRepeatCount(ValueAnimator.INFINITE);
+        animatorRight.setRepeatCount(ValueAnimator.INFINITE);
+        animatorLeft.setRepeatMode(ValueAnimator.REVERSE);
+        animatorRight.setRepeatMode(ValueAnimator.REVERSE);
+        animatorLeft.setDuration(300);
+        animatorRight.setDuration(300);
+
+        animatorLeft.addUpdateListener(animation -> {
+            layoutParamsLeft.width = (int) animation.getAnimatedValue() * (int) requireActivity().getResources().getDisplayMetrics().density;
+            layoutParamsLeft.height = (int) animation.getAnimatedValue() * (int) requireActivity().getResources().getDisplayMetrics().density;
+            binding.left.setLayoutParams(layoutParamsLeft);
+        });
+
+        animatorRight.addUpdateListener(animation -> {
+            layoutParamsRight.width = (int) animation.getAnimatedValue() * (int) requireActivity().getResources().getDisplayMetrics().density;
+            layoutParamsRight.height = (int) animation.getAnimatedValue() * (int) requireActivity().getResources().getDisplayMetrics().density;
+            binding.right.setLayoutParams(layoutParamsRight);
+        });
+
+        animatorLeft.start();
+        animatorRight.start();
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(loadingFragmentContent){
+            newChapterAnimationStartUp();
+            loadingFragmentContent = false;
+        }
+    }
 }

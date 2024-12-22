@@ -109,8 +109,10 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
                     }
                 }.start();
                 if (mangaDataViewModel != null) {
-                    mangaDataViewModel.setIdChap(chapters.get(position).getId());
+                    mangaDataViewModel.setIdChap(chapters.get(holder.getAdapterPosition()).getId());
+                    mangaDataViewModel.getManga().getChapters().get(holder.getAdapterPosition()).setAlredyRead(true);
                 }
+
                 InfoMangaFragment f = (InfoMangaFragment) fragment;
                 Bundle bundle = new Bundle();
                 bundle.putInt("currentPage", chapters.get(position).getCurrentPage());
