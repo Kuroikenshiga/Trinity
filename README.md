@@ -1,4 +1,8 @@
-# Trinity 
+<p align="center">
+  <img src="./project images/logo.webp" width="300">
+</p>
+
+### <p style="text-align:center;">⚡De um amigo para amigos⚡</p>
 
 
 ## 📝Sobre o projeto
