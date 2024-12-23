@@ -12,9 +12,9 @@ Trinity é uma solução pessoal projetada para a leitura de mangás, manhuas e 
 ## 🗒️Pré-requisitos para execução do projeto
 
 ## Todos
-### Versão mínima do sdk necessário para compilação: 28
-
-## 📲Exemplo de configuração para computadores AMD sem placa de vídeo 
+### | Versão mínima do sdk necessário para compilação: 28
+___
+## |📲Exemplo de configuração de um AVD para computadores AMD sem placa de vídeo 
 
 ### avd.ini.displayname: Pixel 5 API 33
 ### avd.ini.encoding: UTF-8
