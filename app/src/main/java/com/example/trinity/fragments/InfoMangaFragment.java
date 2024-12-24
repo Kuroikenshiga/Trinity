@@ -114,6 +114,8 @@ public class InfoMangaFragment extends Fragment {
     private LogoMangaStorageTemp storageTemp;
     private LogoMangaStorage storage;
 
+    private boolean canScroll = false;
+
     public InfoMangaFragment() {
         // Required empty public constructor
     }
@@ -296,9 +298,29 @@ public class InfoMangaFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
 
 
-        binding.chapterContainer.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
+//        binding.chapterContainer.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
         binding.chapterContainer.setAdapter(chaptersAdapter);
-        binding.chapterContainer.setHasFixedSize(true);
+        binding.chapterContainer.setLayoutManager(new LinearLayoutManager(requireActivity()) {
+            @Override
+            public boolean canScrollVertically() {
+                return canScroll;
+            }
+        });
+
+        binding.scrollParent.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+//                System.out.println(String.format("Quantidade scrollada: %d\nQuantidade total: %d",v.getScrollY(),binding.containerInfo.getHeight()));
+                if(v.getScrollY() > binding.containerInfo.getHeight()){
+                    canScroll = true;
+                    return;
+                }
+                canScroll = false;
+            }
+        });
+        binding.chapterContainer.setHasFixedSize(false);
+        binding.chapterContainer.setNestedScrollingEnabled(true);
+
         MangakakalotExtension.OnMangaLoaded onMangaLoaded = new MangakakalotExtension.OnMangaLoaded() {
             @Override
             public void onMangaLoaded(Manga manga) {

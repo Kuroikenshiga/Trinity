@@ -44,11 +44,19 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
     private Fragment fragment;
     private boolean isLongPressed = false;
     private ArrayList<ChapterManga> chapterToDownload;
+
+    private int limiter;
+    //Altere o valor dessa constante, caso queira aumentar a quantidade de itens que podem ser inseridos em cada novo "load" de dados
+    private static final int LIMITE_PER_LOAD = 100;
+    //Altere o valor dessa constante, caso queira aumentar a quantidade mínima de itens a cada "load"
+    private static final int MIN_ITENS_PER_LOAD = 50;
+
     public AdapterChapters(Context context, @NonNull ArrayList<ChapterManga> chapters) {
         this.context = context;
         this.chapters = chapters;
         chapterToDownload = new ArrayList<>();
-        
+        limiter = chapters.size() < LIMITE_PER_LOAD?0:chapters.size()/LIMITE_PER_LOAD*LIMITE_PER_LOAD;
+        limiter -= chapters.size() - limiter < MIN_ITENS_PER_LOAD && limiter > MIN_ITENS_PER_LOAD?MIN_ITENS_PER_LOAD:0;
     }
 
     @NonNull
@@ -59,7 +67,7 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void onBindViewHolder(@NonNull ChapterViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ChapterViewHolder holder, @SuppressLint("RecyclerView") int position) {
         Calendar mangaDate = Calendar.getInstance();
         Instant instant = Instant.parse(this.chapters.get(position).getDateRFC3339());
         Date dateDate = new Date(instant.toEpochMilli());
@@ -165,7 +173,12 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
 //        });
 
     }
+    @Override
+    public void onViewAttachedToWindow(@NonNull ChapterViewHolder holder) {
+        super.onViewRecycled(holder);
+        System.out.println(holder.getAdapterPosition());
 
+    }
     @Override
     public int getItemCount() {
         return this.chapters.size();
@@ -249,6 +262,21 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
         isLongPressed = false;
     }
 
+    private void onReachEndDataSet(){
+        if(limiter == 0)return;
+        int itensInserted = 0;
+        if(limiter >= LIMITE_PER_LOAD){
+            itensInserted = LIMITE_PER_LOAD;
+            limiter -= LIMITE_PER_LOAD;
+        }
+        else{
+            itensInserted = limiter;
+            limiter = 0;
+        }
+
+        this.notifyItemRangeInserted(chapters.size()-limiter-itensInserted,itensInserted);
+    }
+
     private void removeChapterFromDownload(String idChapterApi){
         this.chapterToDownload.removeIf(ch -> ch.getId().equals(idChapterApi));
         if(this.chapterToDownload.isEmpty()){
@@ -263,4 +291,5 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
     public ArrayList<ChapterManga> getDataSet(){
         return this.chapters;
     }
+
 }
