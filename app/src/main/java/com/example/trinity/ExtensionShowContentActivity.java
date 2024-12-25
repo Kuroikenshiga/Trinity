@@ -4,6 +4,7 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -22,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.OneTimeWorkRequest;
@@ -46,6 +48,7 @@ import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.Manga;
 import com.example.trinity.valueObject.TagManga;
+import com.example.trinity.viewModel.MangasFromDataBaseViewModel;
 
 
 import java.util.ArrayList;
@@ -62,18 +65,20 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
     private boolean controllClick = false;
     private Handler mainHandler;
     private Extensions mangaDexExtension;
-    private ArrayList<Manga> mangaListed;
+//    private ArrayList<Manga> mangaListed;
     private AdapterMangas adapter;
     private int controllLoad = 0;
     private boolean alredyClicked = false;
     private boolean isAdvancedSearchShow = false;
     private boolean isAdvancedSearchSettingsChanged = false;
     private Thread workerThread;
+    private MangasFromDataBaseViewModel mangasFromDataBaseViewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         binding = ActivityExtensionShowContentBinding.inflate(getLayoutInflater());
+        mangasFromDataBaseViewModel = new ViewModelProvider(this).get(MangasFromDataBaseViewModel.class);
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -82,8 +87,6 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                     return;
                 }
                 ExtensionShowContentActivity.this.finish();
-
-
             }
         };
 
@@ -160,8 +163,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                             ExtensionShowContentActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    int itemCount = mangaListed.size();
-                                    mangaListed.clear();
+                                    mangasFromDataBaseViewModel.getMangas().clear();
                                     adapter.notifyDataSetChanged();
                                     binding.progressTop.setVisibility(View.VISIBLE);
                                 }
@@ -191,8 +193,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
             }
         });
 
-        mangaListed = new ArrayList<>();
-         adapter = new AdapterMangas(ExtensionShowContentActivity.this, mangaListed,this.language);
+         adapter = new AdapterMangas(ExtensionShowContentActivity.this, mangasFromDataBaseViewModel.getMangas(),this.language);
          adapter.setFromUpdates(true);
         startUphandler();
 //        binding.search.setOnClickListener(new View.OnClickListener() {
@@ -367,9 +368,9 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                     isAdvancedSearchSettingsChanged = false;
                     binding.progressTop.setVisibility(View.GONE);
                     binding.progressBotton.setVisibility(View.GONE);
-                    mangaListed.add(msg.getData().getParcelable("dados"));
+                    mangasFromDataBaseViewModel.getMangas().add(msg.getData().getParcelable("dados"));
 
-                    adapter.notifyItemInserted(mangaListed.size()-1);
+                    adapter.notifyItemInserted(mangasFromDataBaseViewModel.getMangas().size()-1);
 
                     controllLoad++;
                     if(controllLoad == 27){
@@ -395,6 +396,10 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
         };
     }
 
+    @Override
+    public void onConfigurationChanged (Configuration configuration){
+        super.onConfigurationChanged(configuration);
 
+    }
 }
 
