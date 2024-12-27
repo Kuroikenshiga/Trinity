@@ -3,6 +3,7 @@ package com.example.trinity.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,7 +85,9 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                 ((UpdatesViewHolder)holder).binding.chapDate.setText("Há " + chapterUpdateds.get(position).getChapterManga().returnTimeReleased());
 
-                ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(this.chapterUpdateds.get(position).getChapterManga().isAlredyRead() ? context.getColor(R.color.Blue) : context.getColor(R.color.white));
+                TypedValue typedValue = new TypedValue();
+                context.getTheme().resolveAttribute(this.chapterUpdateds.get(position).getChapterManga().isAlredyRead()?com.google.android.material.R.attr.colorPrimary:com.google.android.material.R.attr.colorTertiary,typedValue,true);
+                ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(typedValue.data);
                 ((UpdatesViewHolder)holder).binding.getRoot().setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

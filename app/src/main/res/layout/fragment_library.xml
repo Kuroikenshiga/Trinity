@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/purple"
-    android:backgroundTint="@color/BackGroundScreen"
+    android:background="?attr/colorSurface"
+    android:backgroundTint="?attr/colorSurface"
     tools:context=".fragments.LibraryFragment">
 
     <LinearLayout
@@ -30,7 +30,7 @@
                 android:layout_marginStart="5dp"
                 android:fontFamily="@font/roboto_black"
                 android:text="Biblioteca"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:textSize="17sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -59,7 +59,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/search_field_shape"
-                android:backgroundTint="@color/background_search"
+
                 >
                 <LinearLayout
                     android:layout_width="370dp"
@@ -80,7 +80,7 @@
                         android:fontFamily="@font/open_sans"
                         android:inputType="text"
                         android:padding="10dp"
-                        android:textColor="@color/white"
+                        android:textColor="?attr/colorTertiary"
 
                         />
                     <ImageView

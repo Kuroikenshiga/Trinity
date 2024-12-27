@@ -14,7 +14,7 @@
             android:layout_height="match_parent"
             android:text="Teste"
             android:textSize="12sp"
-            android:textColor="@color/Blue"
+            android:textColor="?attr/colorPrimary"
             android:fontFamily="@font/open_sans"
             android:textAlignment="center"
             android:padding="3dp"

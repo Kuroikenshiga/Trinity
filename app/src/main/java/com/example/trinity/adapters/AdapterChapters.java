@@ -6,11 +6,14 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+
+
 
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
@@ -20,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.example.trinity.R;
+
 import com.example.trinity.databinding.ChapterItemLayoutBinding;
 import com.example.trinity.fragments.InfoMangaFragment;
 import com.example.trinity.models.Model;
@@ -77,8 +81,23 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
 
         holder.binding.chapDate.setText(chapters.get(position).returnTimeReleased() +" - "+ this.chapters.get(position).getScan());
         holder.binding.downloaded.setVisibility(chapters.get(position).isDownloaded()?View.VISIBLE:View.GONE);
-        holder.binding.chapNumber.setTextColor(this.chapters.get(position).isAlredyRead() ? context.getColor(R.color.Blue) : context.getColor(R.color.white));
-        holder.binding.chapter.setBackground(chapters.get(position).isSelected?ResourcesCompat.getDrawable(context.getResources(),R.color.FullBlack,context.getTheme()):ResourcesCompat.getDrawable(context.getResources(),R.color.BackGroundScreen,context.getTheme()));
+
+        TypedValue typedValuePrimary = new TypedValue();
+
+
+        context.getTheme().resolveAttribute(this.chapters.get(position).isAlredyRead() ?androidx.appcompat.R.attr.colorPrimary:com.google.android.material.R.attr.colorTertiary,typedValuePrimary,true);
+//        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorTertiary,typedValueSecondary,true);
+
+        holder.binding.chapNumber.setTextColor(typedValuePrimary.data);
+
+        TypedValue typedValuePrimaryBc = new TypedValue();
+
+
+        context.getTheme().resolveAttribute(chapters.get(position).isSelected?com.google.android.material.R.attr.colorSecondary:com.google.android.material.R.attr.colorSurface,typedValuePrimaryBc,true);
+//        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurface,typedValueSecondaryBc,true);
+//        holder.binding.chapter.setBackground(chapters.get(position).isSelected?ResourcesCompat.getDrawable(context.getResources(),R.color.FullBlack,context.getTheme()):ResourcesCompat.getDrawable(context.getResources(),R.color.BackGroundScreen,context.getTheme()));
+        holder.binding.chapter.setBackgroundColor(typedValuePrimaryBc.data);
+        boolean value = chapters.get(position).isSelected;
         if (chapters.get(position).getCurrentPage() > 0) {
             holder.binding.currentPage.setText(String.format("Última página: %d", (chapters.get(position).getCurrentPage() + 1)));
         }
@@ -89,21 +108,20 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
             public boolean onSingleTapConfirmed(MotionEvent e){
 
                 if(isLongPressed){
-
-                    Drawable drawable;
+                    TypedValue typedValue = new TypedValue();
                     if(!chapters.get(position).isSelected){
-                        drawable =  ResourcesCompat.getDrawable(context.getResources(),R.color.FullBlack,context.getTheme());
+                        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSecondary,typedValue,false);
                         chapters.get(position).isSelected = true;
                         chapterToDownload.add(chapters.get(position));
-//                        System.out.println(chapterToDownload.size());
+//
                     }
                     else{
-                        drawable = ResourcesCompat.getDrawable(context.getResources(),R.color.BackGroundScreen,context.getTheme());
+                        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurface,typedValue,false);
                         chapters.get(position).isSelected = false;
                         removeChapterFromDownload(chapters.get(position).getId());
-//                        System.out.println(chapterToDownload.size());
+//
                     }
-                    holder.binding.chapter.setBackground(drawable);
+                    holder.binding.chapter.setBackgroundColor(typedValue.data);
                     return true;
                 }
 
@@ -135,8 +153,11 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
                 holder.isSelected = true;
                 InfoMangaFragment f = (InfoMangaFragment) fragment;
                 f.controlDownloadButtonVisibility(true);
-                Drawable drawable = ResourcesCompat.getDrawable(context.getResources(),R.color.FullBlack,context.getTheme());
-                holder.binding.chapter.setBackground(drawable);
+//                Drawable drawable = ResourcesCompat.getDrawable(context.getResources(),R.color.FullBlack,context.getTheme());
+                TypedValue typedValue = new TypedValue();
+                context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSecondary,typedValue,false);
+                holder.binding.chapter.setBackgroundColor(typedValue.data);
+//                holder.binding.chapter.post(()->{holder.binding.getRoot().setBackground(drawable);});
                 chapterToDownload.add(chapters.get(position));
             }
 

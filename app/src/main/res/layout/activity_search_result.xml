@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".SearchResultActivity"
-    android:background="@color/BackGroundScreen"
+    android:background="?attr/colorSurface"
     android:fitsSystemWindows="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -33,7 +33,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/imgError"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:textSize="15sp"
             android:text="Resultado não encontrado para"/>
 
@@ -66,13 +66,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/search_field_shape"
-                        android:backgroundTint="@color/gray_600"
+
                         >
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="@drawable/search_field_shape"
-                            android:backgroundTint="@color/background_search"
+
                             >
                             <LinearLayout
                                 android:layout_width="370dp"
@@ -93,7 +93,7 @@
                                     android:fontFamily="@font/open_sans"
                                     android:inputType="text"
                                     android:padding="10dp"
-                                    android:textColor="@color/white"
+                                    android:textColor="?attr/colorTertiary"
 
                                     />
                                 <ImageView
@@ -119,7 +119,7 @@
                 android:indeterminate="true"
 
                 android:indeterminateTintMode="src_atop"
-                android:indeterminateTint="@color/Blue"
+                android:indeterminateTint="?attr/colorPrimary"
                 android:layout_marginTop="10dp"
                 />
             <LinearLayout
@@ -142,7 +142,7 @@
                 android:layout_height="wrap_content"
                 android:indeterminate="true"
                 android:indeterminateTintMode="src_atop"
-                android:indeterminateTint="@color/Blue"
+                android:indeterminateTint="?attr/colorPrimary"
                 android:layout_marginTop="10dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

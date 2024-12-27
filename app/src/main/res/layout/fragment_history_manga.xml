@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragments.HistoryMangaFragment"
-    android:background="@color/BackGroundScreen">
+    android:background="?attr/colorSurface">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -21,7 +21,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:text="Histórico de mangás acessados"
             android:textSize="17sp"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:fontFamily="@font/roboto_black"
             android:layout_marginStart="5dp"
             />

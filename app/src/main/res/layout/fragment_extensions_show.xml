@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/FullBlack"
-    android:backgroundTint="@color/BackGroundScreen"
+    android:background="?attr/colorSurface"
+    android:backgroundTint="?attr/colorSurface"
     tools:context=".fragments.ExtensionsShowFragment">
     <ScrollView
         android:layout_width="match_parent"
@@ -37,7 +37,7 @@
                     android:layout_marginStart="5dp"
                     android:fontFamily="@font/roboto_black"
                     android:text="Extensões"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/colorTertiary"
                     android:textSize="17sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -68,13 +68,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/search_field_shape"
-                    android:backgroundTint="@color/gray_600"
+
                     >
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/search_field_shape"
-                        android:backgroundTint="@color/background_search"
+
                         >
                         <LinearLayout
                             android:layout_width="370dp"
@@ -94,7 +94,7 @@
                                 android:fontFamily="@font/open_sans"
                                 android:inputType="text"
                                 android:padding="10dp"
-                                android:textColor="@color/white"
+                                android:textColor="?attr/colorTertiary"
 
                                 />
                             <ImageView
@@ -136,7 +136,7 @@
                 android:layout_marginStart="5dp"
                 android:fontFamily="@font/open_sans"
                 android:text="MangaDex - Português Brasileiro"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:textSize="15sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/img1"
@@ -179,7 +179,7 @@
                 android:layout_marginStart="5dp"
                 android:fontFamily="@font/open_sans"
                 android:text="MangaDex - Inglês"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:textSize="15sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/img2"
@@ -219,7 +219,7 @@
                 android:layout_marginStart="5dp"
                 android:fontFamily="@font/open_sans"
                 android:text="MangaDex - Espanhol"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:textSize="15sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/img3"
@@ -259,7 +259,7 @@
                 android:layout_marginStart="5dp"
                 android:fontFamily="@font/open_sans"
                 android:text="Mangakakalot - Inglês"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:textSize="15sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/img4"
@@ -289,7 +289,7 @@
                 android:layout_height="wrap_content"
                 android:text="Português"
                 android:textSize="15sp"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:fontFamily="@font/roboto_black"
                 android:layout_marginStart="10dp"
                 />
@@ -314,7 +314,7 @@
                 android:layout_height="wrap_content"
                 android:text="Inglês"
                 android:textSize="15sp"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:fontFamily="@font/roboto_black"
                 android:layout_marginStart="10dp"
                 />
@@ -338,7 +338,7 @@
                 android:layout_height="wrap_content"
                 android:text="Espanhol"
                 android:textSize="15sp"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:fontFamily="@font/roboto_black"
                 android:layout_marginStart="10dp"
                 />
@@ -354,7 +354,7 @@
         android:id="@+id/progress"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:indeterminateTint="@color/Blue"
+        android:indeterminateTint="?attr/colorPrimary"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

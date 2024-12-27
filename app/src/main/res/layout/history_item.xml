@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="70dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/BackGroundScreen">
+    android:background="?attr/colorSurface">
 
     <ImageView
         android:id="@+id/mangaImage"
@@ -18,7 +18,7 @@
         android:id="@+id/mangaTitle"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorTertiary"
         android:text="Nome do mangá"
         android:textSize="14sp"
         android:fontFamily="@font/open_sans"
@@ -31,7 +31,7 @@
         android:id="@+id/lastAcess"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorTertiary"
         android:fontFamily="@font/open_sans"
         android:textSize="12sp"
         android:text="Tempo"

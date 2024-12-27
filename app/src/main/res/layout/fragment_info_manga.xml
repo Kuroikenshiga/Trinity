@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MangaShowContentActivity"
-    android:background="@color/BackGroundScreen"
+    android:background="?attr/colorSurface"
     android:fitsSystemWindows="true"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
@@ -42,7 +42,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="35dp"
                         android:alpha="0.3"
-                        android:background="@color/black"
+                        android:background="?attr/colorSecondary"
                         android:orientation="horizontal"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
@@ -63,7 +63,7 @@
                         app:layout_constraintBottom_toBottomOf="@id/backGroundLogo"
                         android:layout_width="100dp"
                         android:layout_height="140dp"
-                        android:background="@color/white"
+                        android:background="?attr/colorTertiary"
                         android:layout_margin="10dp"
                         android:scaleType="fitXY"
                         />
@@ -78,7 +78,7 @@
                         android:layout_margin="10dp"
                         android:textSize="17sp"
                         android:lineBreakStyle="normal"
-                        android:textColor="@color/white"
+                        android:textColor="?attr/colorTertiary"
                         android:text="Tokidoki Bosotto Roshia-go de Dereru Tonari no Alya-san"
                         android:ellipsize="end"
                         android:maxLines="6"
@@ -94,7 +94,7 @@
                         android:id="@+id/author"
                         app:layout_constraintTop_toBottomOf="@id/title"
                         android:text="Boichi Boichi Boichi Boichi Boichi Boichi"
-                        android:textColor="@color/white"
+                        android:textColor="?attr/colorTertiary"
                         android:layout_marginEnd="5dp"
                         />
                     <TextView
@@ -105,7 +105,7 @@
                         android:id="@+id/status"
                         app:layout_constraintTop_toBottomOf="@id/author"
                         android:text="Em andamento"
-                        android:textColor="@color/white"
+                        android:textColor="?attr/colorTertiary"
                         android:layout_marginEnd="5dp"/>
                     <TextView
                         android:layout_width="220dp"
@@ -115,7 +115,7 @@
                         android:id="@+id/extension"
                         app:layout_constraintTop_toBottomOf="@id/status"
                         android:text="Acompanhando no "
-                        android:textColor="@color/white"
+                        android:textColor="?attr/colorTertiary"
                         android:layout_marginEnd="5dp"/>
                     <ImageView
                         android:id="@+id/mangaLanguageFlag"
@@ -141,7 +141,7 @@
                         android:maxLines="4"
                         android:padding="5dp"
                         android:text="After his traumatic years in junior high school, the ultra-introvert Shizuki Keisuke decides to turn his life around, and gives himself a complete make-over for his high school His new high school life seems promising, as no one is aware of his hidden past...except for one person: Kusunoki Shizuka, who also changed herself in pursuit of a more successful high school life! As their fates intertwine, will Keisuke ultimately be able live a peaceful life in high school...?!"
-                        android:textColor="@color/white"
+                        android:textColor="?attr/colorTertiary"
                         android:textSize="14sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -165,14 +165,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
                     app:layout_constraintTop_toBottomOf="@+id/description"
-                    android:background="@color/Blue"/>
+                    android:background="?attr/colorPrimary"/>
                 <androidx.cardview.widget.CardView
                     android:id="@+id/showMore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@id/hr"
-                    android:background="@color/Blue"
-                    android:backgroundTint="@color/Blue"
+                    android:background="?attr/colorPrimary"
+                    android:backgroundTint="?attr/colorPrimary"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:cardCornerRadius="5dp"
@@ -184,7 +184,7 @@
                         android:layout_height="wrap_content"
                         android:text="↓↓ Mostrar mais ↓↓"
                         android:textSize="14sp"
-                        android:textColor="@color/white"
+                        android:textColor="?attr/colorTertiary"
                         android:fontFamily="sans-serif-condensed"
 
 
@@ -219,7 +219,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="30dp"
                                 android:src="@drawable/adicionar_na_biblioteca"
-
+                                app:tint="?attr/colorPrimary"
 
                                 />
 
@@ -231,7 +231,7 @@
                                 android:fontFamily="sans-serif-condensed"
                                 android:text="Acompanhar obra"
                                 android:textAlignment="center"
-                                android:textColor="@color/white" />
+                                android:textColor="?attr/colorTertiary" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -245,7 +245,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="30dp"
                                 android:src="@drawable/resume_read"
-
+                                app:tint="?attr/colorPrimary"
                                 />
 
                             <TextView
@@ -256,7 +256,7 @@
                                 android:fontFamily="sans-serif-condensed"
                                 android:text="Iniciar leitura"
                                 android:textAlignment="center"
-                                android:textColor="@color/white" />
+                                android:textColor="?attr/colorTertiary" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -276,7 +276,7 @@
                         app:layout_constraintTop_toTopOf="parent"
 
                         android:textSize="15sp"
-                        android:textColor="@color/white"
+                        android:textColor="?attr/colorTertiary"
                         android:layout_margin="5dp"
                         android:fontFamily="@font/noto_sans"
                         android:textStyle="bold"
@@ -314,7 +314,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:indeterminate="true"
                 android:indeterminateTintMode="src_atop"
-                android:indeterminateTint="@color/Blue"
+                android:indeterminateTint="?attr/colorPrimary"
                 android:layout_marginTop="10dp"
                 />
 
