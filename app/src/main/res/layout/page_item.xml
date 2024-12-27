@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/BackGroundScreen">
+    android:background="?attr/colorSurface">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/imgContainer"
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:indeterminate="true"
-            android:indeterminateTint="@color/Blue"
+            android:indeterminateTint="?attr/colorPrimary"
             android:indeterminateTintMode="src_atop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_black"
             android:text="@string/fim_do_cap"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:textSize="19sp"
             app:layout_constraintBottom_toTopOf="@id/actionEnd"
             app:layout_constraintEnd_toEndOf="parent"
@@ -86,7 +86,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_black"
             android:text="Tempo gasto: "
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:textSize="17sp"
             app:layout_constraintBottom_toTopOf="@id/actionEnd"
             app:layout_constraintEnd_toEndOf="parent"
@@ -102,7 +102,7 @@
             android:fontFamily="@font/roboto_black"
             android:padding="10dp"
             android:text="@string/ir_para_o_pr_ximo_cap"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -115,7 +115,7 @@
             android:layout_marginBottom="50dp"
             android:fontFamily="@font/roboto_black"
             android:text="Não há mais capítulos desta obra "
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:textSize="17sp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -159,7 +159,7 @@
             android:fontFamily="@font/roboto_black"
             android:padding="10dp"
             android:text="@string/cap_anterior"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />

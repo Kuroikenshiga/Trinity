@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.SettingsFragment"
-    android:background="@color/BackGroundScreen">
+    android:background="?attr/colorSurface">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -20,7 +20,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:text="Configurações"
             android:textSize="17sp"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:fontFamily="@font/roboto_black"
             android:layout_marginStart="5dp"
             />
@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorTertiary"
         android:text="Leitor"
         android:fontFamily="@font/roboto_black"
         app:layout_constraintTop_toBottomOf="@id/headerSettings"
@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:text="Orientação de leitura"
                 app:layout_constraintStart_toEndOf="@id/image1"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_marginStart="5dp"/>
@@ -90,7 +90,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/da_esquerda_para_direita"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:textSize="15sp"
                 android:fontFamily="@font/roboto_black" />
             <RadioButton
@@ -98,7 +98,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/da_direita_para_esquerda"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:textSize="15sp"
                 android:fontFamily="@font/roboto_black"/>
             <RadioButton
@@ -106,7 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/em_cascata"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:textSize="15sp"
                 android:fontFamily="@font/roboto_black"/>
         </RadioGroup>
@@ -116,7 +116,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorTertiary"
         android:text="Conteúdo"
         android:fontFamily="@font/roboto_black"
         app:layout_constraintTop_toBottomOf="@id/container1"
@@ -147,13 +147,13 @@
 <!--                app:layout_constraintStart_toStartOf="parent"-->
 <!--                app:layout_constraintBottom_toBottomOf="parent"-->
 <!--                android:src="@drawable/image_quality"-->
-<!--                app:tint="@color/Blue"/>-->
+<!--                app:tint="?attr/colorPrimary"/>-->
 <!--            <TextView-->
 <!--                android:layout_width="wrap_content"-->
 <!--                android:layout_height="wrap_content"-->
 <!--                android:text="Definir qualidade das páginas"-->
 <!--                app:layout_constraintStart_toEndOf="@id/image3"-->
-<!--                android:textColor="@color/white"-->
+<!--                android:textColor="?attr/colorTertiary"-->
 <!--                app:layout_constraintTop_toTopOf="parent"-->
 <!--                app:layout_constraintBottom_toBottomOf="parent"-->
 <!--                android:layout_marginStart="5dp"/>-->
@@ -177,7 +177,7 @@
 <!--                android:layout_width="wrap_content"-->
 <!--                android:layout_height="wrap_content"-->
 <!--                android:text="Alta"-->
-<!--                android:textColor="@color/white"-->
+<!--                android:textColor="?attr/colorTertiary"-->
 <!--                android:textSize="15sp"-->
 <!--                android:fontFamily="@font/roboto_black" />-->
 <!--            <RadioButton-->
@@ -185,7 +185,7 @@
 <!--                android:layout_width="wrap_content"-->
 <!--                android:layout_height="wrap_content"-->
 <!--                android:text="Baixa"-->
-<!--                android:textColor="@color/white"-->
+<!--                android:textColor="?attr/colorTertiary"-->
 <!--                android:textSize="15sp"-->
 <!--                android:fontFamily="@font/roboto_black"/>-->
 <!--        </RadioGroup>-->
@@ -201,7 +201,7 @@
             android:text="Sempre usar modo cascata em manhwas"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:fontFamily="@font/roboto_black"
             android:layout_marginStart="5dp"
             android:gravity="center_vertical"/>
@@ -212,7 +212,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorTertiary"
         android:text="Download de capítulos"
         android:fontFamily="@font/roboto_black"
         app:layout_constraintTop_toBottomOf="@id/container3"
@@ -237,13 +237,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:src="@drawable/delete"
-            app:tint="@color/Blue"/>
+            app:tint="?attr/colorPrimary"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Excluir todos os capítulos baixados"
             app:layout_constraintStart_toEndOf="@id/image2"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginStart="5dp"/>
@@ -265,7 +265,7 @@
             android:layout_height="wrap_content"
             android:textSize="15sp"
             android:text="Tem certeza que quer apagar todos os capítulos salvos?"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -280,7 +280,7 @@
             app:layout_constraintTop_toBottomOf="@id/textConfirm"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:layout_marginTop="10dp"
             android:backgroundTint="@color/FullRed"
             />
@@ -292,11 +292,11 @@
             android:textSize="12sp"
             app:layout_constraintTop_toBottomOf="@id/textConfirm"
             android:background="@drawable/download_icon_shape"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:layout_marginTop="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:backgroundTint="@color/Blue"
+            android:backgroundTint="?attr/colorPrimary"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

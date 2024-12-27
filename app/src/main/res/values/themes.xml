@@ -1,13 +1,35 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.Trinity" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.Trinity" parent="Theme.Material3.Dark">
         <!-- Customize your light theme here. -->
 <!--         <item name="colorPrimary">#000000</item>-->
 <!--        <item name="statusBarBackground">#FF000000</item>-->
 
     </style>
     
-    <style name="Theme.Trinity" parent="Base.Theme.Trinity">
+    <style name="Theme.Trinity" parent="Theme.Material3.Dark.NoActionBar">
         <item name="android:windowBackground">@color/FullBlack</item>
+        <item name="colorPrimary">@color/Blue</item>
+        <item name="colorSecondary">@color/FullBlack</item>
+        <item name="colorTertiary">@color/white</item>
+        <item name="colorSurface">@color/BackGroundScreen</item>
     </style>
+
+    <style name="Theme.Retro" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:windowBackground">#FFF</item>
+        <item name="colorPrimary">#20C997 </item>
+        <item name="colorSecondary">#FFF</item>
+        <item name="colorTertiary">@color/FullBlack</item>
+        <item name="colorSurface">#6C757D</item>
+    </style>
+
+    <style name="Theme.Vista" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:windowBackground">#7A6174</item>
+        <item name="colorPrimary">#6369D1 </item>
+        <item name="colorSecondary">#7A6174</item>
+        <item name="colorTertiary">@color/FullBlack</item>
+        <item name="colorSurface">#D8D2E1</item>
+    </style>
+
+
 </resources>

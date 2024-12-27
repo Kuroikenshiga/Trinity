@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="170dp"
     android:layout_marginTop="10dp"
-
     xmlns:app="http://schemas.android.com/apk/res-auto"
 
     >
@@ -12,8 +11,7 @@
         android:layout_width="120dp"
         android:layout_height="match_parent"
         app:cardCornerRadius="10dp"
-        android:background="@color/gray_600"
-        android:backgroundTint="@color/gray_600"
+        android:backgroundTint="?attr/colorSurface"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         >
@@ -36,11 +34,11 @@
             android:text="Tensai Majo no Maryoku Kare"
             android:fontFamily="@font/roboto_black"
             android:textSize="15sp"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:maxLines="2"
             android:ellipsize="end"
             android:maxHeight="40dp"
-            android:background="@color/FullBlack"
+            android:background="?attr/colorSecondary"
             />
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/languageIcon"

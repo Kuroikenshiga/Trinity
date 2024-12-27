@@ -42,7 +42,7 @@
             android:fontFamily="@font/roboto_black"
             android:padding="10dp"
             android:text="@string/cap_anterior"
-            android:textColor="@color/white" />
+            android:textColor="?attr/colorTertiary" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

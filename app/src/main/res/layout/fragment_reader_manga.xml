@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MangaShowContentActivity"
-    android:background="@color/BackGroundScreen"
+    android:background="?attr/colorSurface"
 
     >
 
@@ -50,7 +50,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:textSize="20sp"
             android:text="Erro na conexão"
             android:fontFamily="@font/roboto_black"
@@ -81,7 +81,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:src="@drawable/back"
             android:tintMode="src_in"
-            app:tint="@color/white"
+            app:tint="?attr/colorTertiary"
             />
 
         <TextView
@@ -95,7 +95,7 @@
             android:fontFamily="@font/noto_sans"
             android:textSize="15sp"
             android:text="Ch. 89"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:ellipsize="end"
             android:maxLines="2"
             />
@@ -124,6 +124,7 @@
             android:layout_width="40dp"
             android:layout_height="30dp"
             android:src="@drawable/brilho"
+            app:tint="?attr/colorPrimary"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -135,6 +136,7 @@
             android:layout_height="30dp"
             android:src="@drawable/configuracoes"
             app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -144,7 +146,7 @@
             android:layout_width="40dp"
             android:layout_height="30dp"
             android:src="@drawable/save_page"
-            app:tint="@color/Blue"
+            app:tint="?attr/colorPrimary"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -162,7 +164,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/numPages"
         android:thumb="@drawable/thumb_seekbar"
-        android:progressTint="@color/Blue"
+        android:progressTint="?attr/colorPrimary"
         android:progress="1"
         />
     <ImageView
@@ -171,7 +173,7 @@
         android:layout_height="30dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/numPages"
-        app:tint="@color/Blue"
+        app:tint="?attr/colorPrimary"
         android:src="@drawable/back"/>
     <ImageView
         android:id="@+id/nextChap"
@@ -182,7 +184,7 @@
         android:scaleX="-1"
         android:scaleY="-1"
         android:src="@drawable/back"
-        app:tint="@color/Blue"/>
+        app:tint="?attr/colorPrimary"/>
     <TextView
         android:id="@+id/numPages"
         android:layout_width="wrap_content"
@@ -191,7 +193,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/footer"
         android:textSize="17sp"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorTertiary"
         android:fontFamily="@font/roboto_black"/>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/alphaControlContainer"
@@ -212,7 +214,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:textColor="@color/white"/>
+            android:textColor="?attr/colorTertiary"/>
         <SeekBar
             android:id="@+id/alphaController"
             android:layout_width="250dp"
@@ -245,7 +247,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="17sp"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorTertiary"
             android:text="Definir orientação de leitura"
             android:fontFamily="@font/roboto_black"
             app:layout_constraintStart_toStartOf="parent"
@@ -264,7 +266,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/da_esquerda_para_direita"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:textSize="15sp"
                 android:fontFamily="@font/roboto_black" />
             <RadioButton
@@ -272,7 +274,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/da_direita_para_esquerda"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:textSize="15sp"
                 android:fontFamily="@font/roboto_black"/>
             <RadioButton
@@ -280,7 +282,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/em_cascata"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorTertiary"
                 android:textSize="15sp"
                 android:fontFamily="@font/roboto_black"/>
         </RadioGroup>
@@ -302,7 +304,7 @@
         <View
             android:id="@+id/left"
             android:layout_width="30dp"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="?attr/colorTertiary"
             android:layout_height="30dp"
             android:background="@drawable/animation_shape_dual"
 
@@ -310,7 +312,7 @@
         <View
             android:id="@+id/right"
             android:layout_width="10dp"
-            android:backgroundTint="@color/Blue"
+            android:backgroundTint="?attr/colorPrimary"
             android:layout_height="10dp"
             android:background="@drawable/animation_shape_dual"
             android:layout_marginStart="10dp"
