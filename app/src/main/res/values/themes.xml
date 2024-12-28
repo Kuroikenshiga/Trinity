@@ -1,13 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.Trinity" parent="Theme.Material3.Dark">
-        <!-- Customize your light theme here. -->
-<!--         <item name="colorPrimary">#000000</item>-->
-<!--        <item name="statusBarBackground">#FF000000</item>-->
+<!--    <style name="Base.Theme.Trinity" parent="Theme.Material3.Dark">-->
+<!--        &lt;!&ndash; Customize your light theme here. &ndash;&gt;-->
+<!--&lt;!&ndash;         <item name="colorPrimary">#000000</item>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item name="statusBarBackground">#FF000000</item>&ndash;&gt;-->
 
-    </style>
+<!--    </style>-->
     
-    <style name="Theme.Trinity" parent="Theme.Material3.Dark.NoActionBar">
+    <style name="Theme.Default" parent="Theme.Material3.Dark.NoActionBar">
         <item name="android:windowBackground">@color/FullBlack</item>
         <item name="colorPrimary">@color/Blue</item>
         <item name="colorSecondary">@color/FullBlack</item>
@@ -15,7 +15,7 @@
         <item name="colorSurface">@color/BackGroundScreen</item>
     </style>
 
-    <style name="Theme.Retro" parent="Theme.Material3.Light.NoActionBar">
+    <style name="Theme.ModernElegance" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:windowBackground">#FFF</item>
         <item name="colorPrimary">#20C997 </item>
         <item name="colorSecondary">#FFF</item>
@@ -23,7 +23,7 @@
         <item name="colorSurface">#6C757D</item>
     </style>
 
-    <style name="Theme.Vista" parent="Theme.Material3.Light.NoActionBar">
+    <style name="Theme.VioletIris" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:windowBackground">#7A6174</item>
         <item name="colorPrimary">#6369D1 </item>
         <item name="colorSecondary">#7A6174</item>
@@ -31,5 +31,12 @@
         <item name="colorSurface">#D8D2E1</item>
     </style>
 
+    <style name="Theme.EmeraldHaven" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowBackground">@color/FullBlack</item>
+        <item name="colorPrimary">#6bff57</item>
+        <item name="colorSecondary">@color/FullBlack</item>
+        <item name="colorTertiary">@color/white</item>
+        <item name="colorSurface">#254e1f</item>
+    </style>
 
 </resources>

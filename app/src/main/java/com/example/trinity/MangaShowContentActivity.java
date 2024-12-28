@@ -37,6 +37,7 @@ import com.example.trinity.databinding.ActivityMangaShowContentBinding;
 
 import com.example.trinity.fragments.ReaderMangaFragment;
 import com.example.trinity.models.Model;
+import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.extensions.MangaDexExtension;
 import com.example.trinity.valueObject.Manga;
@@ -64,6 +65,8 @@ public class MangaShowContentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
+        ConfigClass.ConfigTheme.setTheme(this);
 
         binding = ActivityMangaShowContentBinding.inflate(getLayoutInflater());
         extension = getIntent().getStringExtra("Extension");

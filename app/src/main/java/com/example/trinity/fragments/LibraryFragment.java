@@ -175,7 +175,7 @@ public class LibraryFragment extends Fragment {
                 new Thread(()->{
                     if(isSearching)return;
                     isSearching = true;
-                    model.loadSearch(binding.searchField.getText().toString(), LibraryFragment.this);
+//                    model.loadSearch(binding.searchField.getText().toString(), LibraryFragment.this);
                     isSearching = false;
                 }).start();
             }
@@ -187,7 +187,7 @@ public class LibraryFragment extends Fragment {
                 new Thread(()->{
                     if(isSearching)return;
                     isSearching = true;
-                    model.loadSearch(binding.searchField.getText().toString(), LibraryFragment.this);
+//                    model.loadSearch(binding.searchField.getText().toString(), LibraryFragment.this);
                     isSearching = false;
                 }).start();
             }
@@ -363,7 +363,6 @@ public class LibraryFragment extends Fragment {
 
             dataSet = model.selectAllMangas(false);
             requireActivity().runOnUiThread(()->{
-
                 mangasFromDataBaseViewModel.setMangas(dataSet);
                 adapter.setDataSet(mangasFromDataBaseViewModel.getMangas());
                 recyclerView.setAdapter(adapter);

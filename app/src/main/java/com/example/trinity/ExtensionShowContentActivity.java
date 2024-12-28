@@ -76,6 +76,9 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ConfigClass.ConfigTheme.setTheme(this);
+
         EdgeToEdge.enable(this);
         binding = ActivityExtensionShowContentBinding.inflate(getLayoutInflater());
         mangasFromDataBaseViewModel = new ViewModelProvider(this).get(MangasFromDataBaseViewModel.class);

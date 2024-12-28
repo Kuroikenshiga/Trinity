@@ -17,4 +17,25 @@
     <color name="background_search">#1F2326</color>
 
 
+    <color name="colorPrimaryT1">@color/Blue</color>
+    <color name="colorSecondaryT1">@color/FullBlack</color>
+    <color name="colorTertiaryT1">@color/white</color>
+    <color name="colorSurfaceT1">@color/BackGroundScreen</color>
+
+    
+    <color name="colorPrimaryT2">#20C997 </color>
+    <color name="colorSecondaryT2">#FFF</color>
+    <color name="colorTertiaryT2">@color/FullBlack</color>
+    <color name="colorSurfaceT2">#6C757D</color>
+
+    <color name="colorPrimaryT3">#6369D1 </color>
+    <color name="colorSecondaryT3">#7A6174</color>
+    <color name="colorTertiaryT3">@color/FullBlack</color>
+    <color name="colorSurfaceT3">#D8D2E1</color>
+
+    <color name="colorPrimaryT4">#6bff57</color>
+    <color name="colorSecondaryT4">@color/FullBlack</color>
+    <color name="colorTertiaryT4">@color/white</color>
+    <color name="colorSurfaceT4">#254e1f</color>
+
 </resources>

@@ -3,6 +3,10 @@ package com.example.trinity.preferecesConfig;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.trinity.R;
+
 public final class ConfigClass {
     /*
     * Atenção!! essa classe é voltada apenas para indexação de chaves de configurações utilizadas no sharePreferences,
@@ -58,5 +62,35 @@ public final class ConfigClass {
     public static final class ConfigLogoMigration{
         private ConfigLogoMigration(){}
         public final static String ALREDY_MIGRATED = "AlredyMigrated";
+    }
+    public static final class ConfigTheme{
+        private ConfigTheme(){}
+        public final static String THEME = "theme";
+
+        //Key values for themes
+        public final static String THEME_DEFAULT = "default";
+        public final static String THEME_MODERN_ELEGANCE = "modernElegance";
+        public final static String THEME_VIOLET_IRIS = "violetIris";
+        public final static String THEME_EMERALD_HAVEN = "emeraldHaven";
+
+        public static void setTheme(AppCompatActivity activity){
+            SharedPreferences preferences = activity.getSharedPreferences(TAG_PREFERENCE,Context.MODE_PRIVATE);
+            String theme = preferences.getString(ConfigTheme.THEME,THEME_DEFAULT);
+            System.out.println(theme);
+            switch (theme){
+                case THEME_MODERN_ELEGANCE:
+                    activity.setTheme(R.style.Theme_ModernElegance);
+                    break;
+                case THEME_VIOLET_IRIS:
+                    activity.setTheme(R.style.Theme_VioletIris);
+                    break;
+                case THEME_EMERALD_HAVEN:
+                    activity.setTheme(R.style.Theme_EmeraldHaven);
+                    break;
+                default:
+                    activity.setTheme(R.style.Theme_Default);
+                    break;
+            }
+        }
     }
 }

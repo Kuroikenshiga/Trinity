@@ -4,6 +4,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
@@ -39,6 +41,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.transition.TransitionInflater;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -60,6 +63,8 @@ import com.example.trinity.adapters.AdapterPages;
 
 import com.example.trinity.adapters.AdapterPagesCascade;
 import com.example.trinity.databinding.FragmentReaderMangaBinding;
+import com.example.trinity.databinding.ReaderAlphaDialogLayoutBinding;
+import com.example.trinity.databinding.ReaderConfigDialogLoyoutBinding;
 import com.example.trinity.extensions.MangaDexExtension;
 import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.models.Model;
@@ -144,6 +149,12 @@ public class ReaderMangaFragment extends Fragment {
     private LinearLayout.LayoutParams layoutParamsRight;
     private ValueAnimator animatorRight;
 
+    private AlertDialog.Builder configDialog;
+    private ReaderConfigDialogLoyoutBinding configDialogLoyoutBinding;
+
+    private AlertDialog.Builder alphaDialog;
+    private ReaderAlphaDialogLayoutBinding alphaDialogLayoutBinding;
+
     public ReaderMangaFragment() {
         // Required empty public constructor
     }
@@ -178,6 +189,7 @@ public class ReaderMangaFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentReaderMangaBinding.inflate(inflater, container, false);
+
         storageManager = new ChapterStorageManager(this.getContext());
 //        windowInsetsCompat = WindowCompat.getInsetsController(getActivity().getWindow(), getActivity().getWindow().getDecorView());
 //        windowInsetsCompat.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
@@ -207,17 +219,21 @@ public class ReaderMangaFragment extends Fragment {
         String imageQuality = preferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY, "dataSaver");
 
         this.alpha = preferences.getInt(ConfigClass.ConfigReader.ALPHA_CONFIG, 100);
-        this.binding.alphaController.setProgress(this.alpha);
+//        this.binding.alphaController.setProgress(this.alpha);
 
 
         this.readDirection = preferences.getInt(ConfigClass.ConfigReader.READ_DIRECTION, 1);
 
-        if (this.readDirection == 1) {
-            binding.leftToRight.setChecked(true);
-        } else if (this.readDirection == 2) {
-            binding.rightToLeft.setChecked(true);
+        if (readDirection == 1) {
+            binding.cascadeRead.setVisibility(View.GONE);
+            binding.pageContainer.setVisibility(View.VISIBLE);
+            binding.pageContainer.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+        } else if (readDirection == 2) {
+            binding.cascadeRead.setVisibility(View.GONE);
+            binding.pageContainer.setVisibility(View.VISIBLE);
+            binding.pageContainer.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         } else {
-            binding.cascade.setChecked(true);
+//            configDialogLoyoutBinding.cascade.setChecked(true);
             binding.cascadeRead.setVisibility(View.VISIBLE);
             binding.pageContainer.setVisibility(View.GONE);
         }
@@ -225,8 +241,17 @@ public class ReaderMangaFragment extends Fragment {
         binding.alpha.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                binding.alphaControlContainer.setVisibility(View.VISIBLE);
-                binding.readConfigsContainer.setVisibility(View.GONE);
+                alphaDialog = new AlertDialog.Builder(requireContext(),R.style.RoundAlertDialog);
+                alphaDialogLayoutBinding = ReaderAlphaDialogLayoutBinding.inflate(LayoutInflater.from(requireContext()));
+                alphaDialogLayoutBinding.alphaController.setProgress(alpha);
+                alphaControllerSetup();
+                alphaDialog.setView(alphaDialogLayoutBinding.getRoot());
+                alphaDialog.setTitle("Configurar a luminosidade da leitura");
+
+                AlertDialog alertDialog = alphaDialog.create();
+                Objects.requireNonNull(alertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.dialog_shape);
+                alertDialog.show();
+
             }
         });
         binding.alpha.bringToFront();
@@ -499,7 +524,7 @@ public class ReaderMangaFragment extends Fragment {
 
         tryReload();
         configShowUp();
-        startUpRadioGroup();
+
         startUpPageButtons();
         downloadStartUp();
 
@@ -527,9 +552,32 @@ public class ReaderMangaFragment extends Fragment {
         binding.settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                binding.readConfigsContainer.setVisibility(View.VISIBLE);
-                binding.readConfigsContainer.bringToFront();
-                binding.alphaControlContainer.setVisibility(View.GONE);
+//                binding.readConfigsContainer.setVisibility(View.VISIBLE);
+//                binding.readConfigsContainer.bringToFront();
+//                binding.alphaControlContainer.setVisibility(View.GONE);
+                configDialogLoyoutBinding = ReaderConfigDialogLoyoutBinding.inflate(LayoutInflater.from(requireContext()));
+                if (readDirection == 1) {
+                    configDialogLoyoutBinding.leftToRight.setChecked(true);
+                } else if (readDirection == 2) {
+                    configDialogLoyoutBinding.rightToLeft.setChecked(true);
+                } else {
+                    configDialogLoyoutBinding.cascade.setChecked(true);
+                    binding.cascadeRead.setVisibility(View.VISIBLE);
+                    binding.pageContainer.setVisibility(View.GONE);
+                }
+                startUpRadioGroup();
+//                if(configDialog == null){
+                    configDialog = new AlertDialog.Builder(requireActivity(),R.style.RoundAlertDialog);
+//                    configDialogLoyoutBinding.leftToRight.setChecked(true);
+                    configDialog.setView(configDialogLoyoutBinding.getRoot());
+
+                    configDialog.setTitle("Definir a horientação de leitura");
+
+
+//                }
+                AlertDialog alertDialog = configDialog.create();
+                Objects.requireNonNull(alertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.dialog_shape);
+                alertDialog.show();
             }
         });
     }
@@ -553,8 +601,8 @@ public class ReaderMangaFragment extends Fragment {
             }
         });
 
-        this.alphaControllerSetup();
-        this.binding.readConfigsContainer.bringToFront();
+//        this.alphaControllerSetup();
+//        this.binding.readConfigsContainer.bringToFront();
     }
 
 
@@ -600,8 +648,8 @@ public class ReaderMangaFragment extends Fragment {
         }
 
 
-        binding.alphaControlContainer.setVisibility(View.GONE);
-        binding.readConfigsContainer.setVisibility(View.GONE);
+//        binding.alphaControlContainer.setVisibility(View.GONE);
+//        binding.readConfigsContainer.setVisibility(View.GONE);
         ValueAnimator animatorShow = ValueAnimator.ofInt(-50, 0);
         animatorShow.setRepeatCount(0);
         animatorShow.setDuration(300);
@@ -701,7 +749,7 @@ public class ReaderMangaFragment extends Fragment {
     }
 
     public void nextChapter() {
-        preferencesEditor.putInt(ConfigClass.ConfigReader.ALPHA_CONFIG, binding.alphaController.getProgress());
+        preferencesEditor.putInt(ConfigClass.ConfigReader.ALPHA_CONFIG, alpha);
         preferencesEditor.apply();
 
         if (!isLoadingNewChapter && chapterIndex < chapters.size()) {
@@ -749,7 +797,7 @@ public class ReaderMangaFragment extends Fragment {
     }
 
     public void previousChapter() {
-        preferencesEditor.putInt(ConfigClass.ConfigReader.ALPHA_CONFIG, binding.alphaController.getProgress());
+        preferencesEditor.putInt(ConfigClass.ConfigReader.ALPHA_CONFIG, alpha);
         preferencesEditor.apply();
         if (!isLoadingNewChapter && this.chapterIndex > 0) {
             if (mangaDataViewModel != null && mangaDataViewModel.getManga() != null && mangaDataViewModel.getManga().getChapters() != null) {
@@ -788,7 +836,7 @@ public class ReaderMangaFragment extends Fragment {
     }
 
     private void alphaControllerSetup() {
-        binding.alphaController.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        alphaDialogLayoutBinding.alphaController.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 adapterPages.setAlpha(progress);
@@ -796,29 +844,40 @@ public class ReaderMangaFragment extends Fragment {
                 binding.pageContainer.setAlpha((float) progress / 100);
                 alpha = progress;
 
-                seekBar.setThumb(getActivity().getDrawable(R.drawable.light_controll_active));
+//                seekBar.setThumb(getActivity().getDrawable(R.drawable.light_controll_active));
+
 //                adapterPages.notifyDataSetChanged();
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                seekBar.setThumb(getActivity().getDrawable(R.drawable.light_controll_active));
+                Drawable drawable = AppCompatResources.getDrawable(requireContext(),R.drawable.light_controll_active);
+                TypedValue typedValue = new TypedValue();
+                requireActivity().getTheme().resolveAttribute(com.google.android.material.R.attr.colorTertiary, typedValue, true);
+                assert drawable != null;
+                drawable.setTint(typedValue.data);
+                seekBar.setThumb(drawable);
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                seekBar.setThumb(getActivity().getDrawable(R.drawable.light_controll_desactive_disabled));
+                Drawable drawable = AppCompatResources.getDrawable(requireContext(),R.drawable.light_controll_active);
+                TypedValue typedValue = new TypedValue();
+                requireActivity().getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
+                assert drawable != null;
+                drawable.setTint(typedValue.data);
+                seekBar.setThumb(drawable);
             }
         });
-        binding.alphaControlContainer.bringToFront();
+
     }
 
     private void startUpRadioGroup() {
 
-        binding.radio.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        configDialogLoyoutBinding.radio.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (binding.leftToRight.isChecked()) {
+                if (configDialogLoyoutBinding.leftToRight.isChecked()) {
                     binding.pageContainer.setVisibility(View.VISIBLE);
                     binding.cascadeRead.setVisibility(View.GONE);
                     binding.pageContainer.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
@@ -830,7 +889,7 @@ public class ReaderMangaFragment extends Fragment {
 //                    radioButtomChangeFromUser = true;
                     return;
                 }
-                if (binding.cascade.isChecked()) {
+                if (configDialogLoyoutBinding.cascade.isChecked()) {
                     binding.pageContainer.setVisibility(View.GONE);
                     binding.cascadeRead.setVisibility(View.VISIBLE);
 //                    if(radioButtomChangeFromUser){
@@ -889,7 +948,7 @@ public class ReaderMangaFragment extends Fragment {
             @Override
             public void run() {
                 model = Model.getInstance(getActivity());
-                model.setChapterLastPage(chapters.get(chapterIndex).getId(), binding.cascade.isChecked() ? binding.seekBar.getProgress() : binding.pageContainer.getCurrentItem());
+                model.setChapterLastPage(chapters.get(chapterIndex).getId(),binding.pageContainer.getCurrentItem());
             }
         }.start();
 

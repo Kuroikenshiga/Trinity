@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:fontFamily="@font/open_sans"
+        android:text="Escolha o tema"
+        android:textColor="?attr/colorTertiary"
+        android:textSize="18sp"
+        />
+    <androidx.viewpager2.widget.ViewPager2
+        android:layout_marginTop="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/selectTheme"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="30dp">
+
+        <Button
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancelar"
+            android:backgroundTint="?attr/colorSecondary"
+            android:textColor="?attr/colorTertiary"
+            android:id="@+id/cancel"/>
+        <Button
+            android:layout_marginStart="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aplicar tema"
+            android:backgroundTint="?attr/colorPrimary"
+            android:textColor="?attr/colorTertiary"
+            android:id="@+id/confirm"/>
+    </LinearLayout>
+
+</LinearLayout>
