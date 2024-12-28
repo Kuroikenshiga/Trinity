@@ -3,14 +3,19 @@ package com.example.trinity.fragments;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.animation.ValueAnimator;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 import android.transition.TransitionInflater;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,11 +25,17 @@ import android.widget.Toast;
 
 import com.example.trinity.MainActivity;
 import com.example.trinity.R;
+import com.example.trinity.adapters.AdapterThemes;
 import com.example.trinity.databinding.FragmentSettingsBinding;
+import com.example.trinity.databinding.SelectThemeDialogLayoutBinding;
+import com.example.trinity.dialogs.ThemeChangeDialogFragment;
 import com.example.trinity.extensions.MangaDexExtension;
 import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.storageAcess.ChapterStorageManager;
+
+import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -147,6 +158,10 @@ public class SettingsFragment extends Fragment {
 
         });
 
+        binding.changeTheme.setOnClickListener((view)->{
+            ThemeChangeDialogFragment dialogFragment = new ThemeChangeDialogFragment();
+            dialogFragment.show(getParentFragmentManager(),"ThemeChangeDialogFragment");
+        });
 //        binding.imageQuality.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {

@@ -1,8 +1,8 @@
 <resources>
 
-    <style name="Normal" parent="">
-        <item name="android:background">@color/black</item>
-
+    <style name="RoundAlertDialog" parent="ThemeOverlay.AppCompat.Dialog">
+<!--        <item name="android:background">@color/FullRed</item>-->
+        <item name="android:background">@drawable/dialog_shape</item>
 
     </style>
 </resources>

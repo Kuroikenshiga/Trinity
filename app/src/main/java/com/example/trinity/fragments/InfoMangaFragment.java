@@ -15,6 +15,7 @@ import android.os.Bundle;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
@@ -31,6 +32,7 @@ import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import android.os.Handler;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -173,7 +175,12 @@ public class InfoMangaFragment extends Fragment {
 
         isAdded = manga.isAdded;
         if (manga.isAdded) {
-            binding.readState.setImageResource(R.drawable.adicionado_a_biblioteca);
+//            binding.readState.setImageResource(R.drawable.adicionado_a_biblioteca);
+            TypedValue typedValue = new TypedValue();
+
+            requireContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
+
+            binding.readState.getDrawable().setTint(typedValue.data);
             binding.inLibraryText.setText("Acompanhando obra");
 
         }
@@ -443,7 +450,10 @@ public class InfoMangaFragment extends Fragment {
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            binding.readState.setImageResource(R.drawable.adicionado_a_biblioteca);
+//                                            binding.readState.setImageResource(R.drawable.adicionado_a_biblioteca);
+                                            TypedValue typedValue = new TypedValue();
+                                            requireContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
+                                            binding.readState.getDrawable().setTint(typedValue.data);
                                             binding.inLibraryText.setText("Acompanhando obra");
                                         }
                                     });
@@ -458,7 +468,12 @@ public class InfoMangaFragment extends Fragment {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        binding.readState.setImageResource(R.drawable.adicionar_na_biblioteca);
+//                                        binding.readState.setImageResource(R.drawable.adicionar_na_biblioteca);
+                                        TypedValue typedValue = new TypedValue();
+
+                                        requireContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorTertiary, typedValue, true);
+
+                                        binding.readState.getDrawable().setTint(typedValue.data);
                                         binding.inLibraryText.setText("Acompanhar obra");
                                         isAdded = false;
                                     }
@@ -825,7 +840,13 @@ public class InfoMangaFragment extends Fragment {
     public void setAdded(boolean added) {
         isAdded = added;
         if (added) {
-            binding.readState.setImageResource(R.drawable.adicionado_a_biblioteca);
+
+//            binding.readState.setImageResource(R.drawable.adicionado_a_biblioteca);
+            TypedValue typedValue = new TypedValue();
+
+            requireContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
+
+            binding.readState.getDrawable().setTint(typedValue.data);
             binding.inLibraryText.setText("Acompanhando obra");
         }
 

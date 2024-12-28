@@ -219,7 +219,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="30dp"
                                 android:src="@drawable/adicionar_na_biblioteca"
-                                app:tint="?attr/colorPrimary"
+                                app:tint="?attr/colorTertiary"
 
                                 />
 
@@ -245,7 +245,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="30dp"
                                 android:src="@drawable/resume_read"
-                                app:tint="?attr/colorPrimary"
+                                app:tint="?attr/colorTertiary"
                                 />
 
                             <TextView
