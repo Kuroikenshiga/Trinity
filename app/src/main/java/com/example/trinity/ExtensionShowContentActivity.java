@@ -103,7 +103,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                 ArrayList<TagManga> tags = model.selectAllTags();
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 TypedValue typedValue = new TypedValue();
-                getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary,typedValue,false);
+                getTheme().resolveAttribute(com.google.android.material.R.attr.colorTertiary,typedValue,true);
                 for(TagManga t:tags){
                     CheckBox checkBox = getCheckBox(t, lp, typedValue);
                     ExtensionShowContentActivity.this.runOnUiThread(new Runnable() {
