@@ -125,7 +125,7 @@ public class UpdatesFragment extends Fragment {
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.checkPermission();
         sharedPreferences = getActivity().getSharedPreferences(ConfigClass.TAG_PREFERENCE, Context.MODE_PRIVATE);
-        String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY, "dataSaver");
+
         editor = sharedPreferences.edit();
         this.lastUpadate = sharedPreferences.getLong(ConfigClass.ConfigUpdates.LAST_UPDATE, 0);
 
@@ -133,7 +133,6 @@ public class UpdatesFragment extends Fragment {
         binding = FragmentUpdatesBinding.inflate(inflater, container, false);
         if (lastUpadate != 0) {
             binding.lastUpdate.setText("Última atualização feita " + this.returnLastUpdateTime(lastUpadate, Instant.now().getEpochSecond()));
-//            System.out.println(binding.lastUpdate.getText());
             binding.lastUpdate.setVisibility(View.VISIBLE);
         }
         workManager = WorkManager.getInstance(getActivity());
@@ -253,6 +252,10 @@ public class UpdatesFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (lastUpadate != 0) {
+            binding.lastUpdate.setText("Última atualização feita " + this.returnLastUpdateTime(lastUpadate, Instant.now().getEpochSecond()));
+            binding.lastUpdate.setVisibility(View.VISIBLE);
+        }
         if (getActivity() instanceof MainActivity) {
             MainActivity mainActivity = (MainActivity) getActivity();
             mainActivity.controllShowBottomNavigator(this);
