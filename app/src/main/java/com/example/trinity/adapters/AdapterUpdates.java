@@ -115,7 +115,9 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                     mangaShowContentActivity.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(context.getColor(R.color.Blue));
+                                            TypedValue value = new TypedValue();
+                                            context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary,value,false);
+                                            ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(value.data);
                                         }
                                     });
                                 }

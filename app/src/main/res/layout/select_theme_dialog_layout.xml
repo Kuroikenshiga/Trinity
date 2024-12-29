@@ -21,6 +21,26 @@
         android:layout_height="wrap_content"
         android:id="@+id/selectTheme"/>
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:id="@+id/animation"
+        android:src="@drawable/pan_tool_alt_24dp_e8eaed_fill0_wght400_grad0_opsz24__1_"
+        android:tint="?attr/colorPrimary"
+        android:rotation="-35"
+        android:layout_marginTop="20dp"
+        />
+    <TextView
+        android:id="@+id/animationLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:fontFamily="@font/open_sans"
+        android:text="Deslize para ver outras opções de temas"
+        android:textColor="?attr/colorTertiary"
+        android:textSize="15sp"
+        android:layout_marginTop="20dp"
+        />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -44,5 +64,7 @@
             android:textColor="?attr/colorTertiary"
             android:id="@+id/confirm"/>
     </LinearLayout>
+
+
 
 </LinearLayout>

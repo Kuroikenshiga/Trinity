@@ -1,5 +1,6 @@
 package com.example.trinity.dialogs;
 
+import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -14,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.DialogFragment;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.trinity.R;
 import com.example.trinity.adapters.AdapterChapters;
@@ -26,13 +28,44 @@ import java.util.Objects;
 
 public class ThemeChangeDialogFragment extends DialogFragment {
 
-    SelectThemeDialogLayoutBinding binding;
-
+    private SelectThemeDialogLayoutBinding binding;
+    private ValueAnimator animator;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-//        return super.onCreateView(inflater, container, savedInstanceState);
         binding = SelectThemeDialogLayoutBinding.inflate(inflater,container,false);
+        startUpDialogFragment();
+        animationStartUp();
+        binding.selectTheme.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if(position != 0 && animator != null && animator.isRunning()){
+                    animator.cancel();
+                    binding.animation.setVisibility(View.INVISIBLE);
+                    binding.animationLabel.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+        return binding.getRoot();
+    }
+
+    private void animationStartUp(){
+        animator = ValueAnimator.ofInt(-35,35);
+        animator.setDuration(500);
+        animator.setRepeatMode(ValueAnimator.REVERSE);
+        animator.setRepeatCount(ValueAnimator.INFINITE);
+
+        animator.addUpdateListener((animation -> {
+            binding.animation.setRotation((int)animation.getAnimatedValue());
+        }));
+
+        animator.start();
+    }
+
+    private void startUpDialogFragment(){
+
         ArrayList<ContentValues> values = new ArrayList<>();
 
         ContentValues contentValues = new ContentValues();
@@ -70,39 +103,27 @@ public class ThemeChangeDialogFragment extends DialogFragment {
 
         binding.confirm.setOnClickListener((v)->{
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext(),R.style.RoundAlertDialog);
-            builder.setTitle("Atenção");
-            builder.setMessage("Para realizar a alteração do tema o aplicativo terá que ser reiniciado. Deseja continuar?");
-            builder.setPositiveButton("Sim",(dialog,which)->{
-                switch (binding.selectTheme.getCurrentItem()){
-                    case 0:
-                        editor.putString(ConfigClass.ConfigTheme.THEME,ConfigClass.ConfigTheme.THEME_DEFAULT);
-                        break;
-                    case 1:
-                        editor.putString(ConfigClass.ConfigTheme.THEME,ConfigClass.ConfigTheme.THEME_MODERN_ELEGANCE);
-                        break;
-                    case 2:
-                        editor.putString(ConfigClass.ConfigTheme.THEME,ConfigClass.ConfigTheme.THEME_VIOLET_IRIS);
-                        break;
-                    default:
-                        editor.putString(ConfigClass.ConfigTheme.THEME,ConfigClass.ConfigTheme.THEME_EMERALD_HAVEN);
-                        break;
-                }
-                editor.apply();
-                requireActivity().recreate();
-            });
-            builder.setNegativeButton("Não",(dialog,which)->{
-                dialog.dismiss();
-            });
-            builder.show();
+            switch (binding.selectTheme.getCurrentItem()){
+                case 0:
+                    editor.putString(ConfigClass.ConfigTheme.THEME,ConfigClass.ConfigTheme.THEME_DEFAULT);
+                    break;
+                case 1:
+                    editor.putString(ConfigClass.ConfigTheme.THEME,ConfigClass.ConfigTheme.THEME_MODERN_ELEGANCE);
+                    break;
+                case 2:
+                    editor.putString(ConfigClass.ConfigTheme.THEME,ConfigClass.ConfigTheme.THEME_VIOLET_IRIS);
+                    break;
+                default:
+                    editor.putString(ConfigClass.ConfigTheme.THEME,ConfigClass.ConfigTheme.THEME_EMERALD_HAVEN);
+                    break;
+            }
+            editor.apply();
+            requireActivity().recreate();
         });
         binding.cancel.setOnClickListener((v)->{
             dismiss();
         });
-
-        return binding.getRoot();
     }
-
     @Override
     public void onStart() {
         super.onStart();

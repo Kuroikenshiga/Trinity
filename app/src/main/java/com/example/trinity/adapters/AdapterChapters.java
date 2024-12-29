@@ -124,11 +124,13 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
                     holder.binding.chapter.setBackgroundColor(typedValue.data);
                     return true;
                 }
-
+                TypedValue typedValueText = new TypedValue();
+                context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary,typedValueText,false);
+                holder.binding.chapNumber.setTextColor(typedValueText.data);
                 new Thread() {
                     @Override
                     public void run() {
-                        holder.binding.chapNumber.setTextColor(context.getColor(R.color.Blue));
+
                         Model model = Model.getInstance(context);
                         model.chapterRead(chapters.get(position));
 
