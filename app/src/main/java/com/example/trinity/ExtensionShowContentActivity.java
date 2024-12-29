@@ -102,19 +102,10 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                 Model model = Model.getInstance(ExtensionShowContentActivity.this);
                 ArrayList<TagManga> tags = model.selectAllTags();
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                TypedValue typedValue = new TypedValue();
+                getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary,typedValue,false);
                 for(TagManga t:tags){
-                    CheckBox checkBox = new CheckBox(ExtensionShowContentActivity.this);
-                    checkBox.setLayoutParams(lp);
-                    checkBox.setText(t.getNome());
-                    checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP,15);
-                    checkBox.setTextColor(getColor(R.color.white));
-                    checkBox.setTag(t.getId());
-                    checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            isAdvancedSearchSettingsChanged = true;
-                        }
-                    });
+                    CheckBox checkBox = getCheckBox(t, lp, typedValue);
                     ExtensionShowContentActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -122,6 +113,22 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                         }
                     });
                 }
+            }
+
+            private @NonNull CheckBox getCheckBox(TagManga t, LinearLayout.LayoutParams lp, TypedValue typedValue) {
+                CheckBox checkBox = new CheckBox(ExtensionShowContentActivity.this);
+                checkBox.setLayoutParams(lp);
+                checkBox.setText(t.getNome());
+                checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP,15);
+                checkBox.setTextColor(typedValue.data);
+                checkBox.setTag(t.getId());
+                checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        isAdvancedSearchSettingsChanged = true;
+                    }
+                });
+                return checkBox;
             }
         }.start();
         binding.showAdvancedSearch.setOnClickListener(new View.OnClickListener() {
