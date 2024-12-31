@@ -23,4 +23,6 @@ public class MangaDataViewModel extends ViewModel {
     public String getIdChap(){
         return this.idChap.getValue();
     }
+
+
 }

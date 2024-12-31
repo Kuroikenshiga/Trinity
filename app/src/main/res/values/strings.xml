@@ -11,5 +11,7 @@
     <string name="da_direita_para_esquerda">Da direita para esquerda</string>
     <string name="em_cascata">Webtoon</string>
     <string name="da_esquerda_para_direita">Da esquerda para direita</string>
+    <string name="hist_rico">Histórico</string>
+    <string name="configura_es">Configurações</string>
 
 </resources>
