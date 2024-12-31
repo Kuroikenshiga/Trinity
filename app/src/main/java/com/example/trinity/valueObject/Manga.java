@@ -92,7 +92,7 @@ public class Manga implements Parcelable, Serializable {
             coverName = in.readString();
             id = in.readString();
             titulo = in.readString();
-            image = in.readParcelable(Bitmap.class.getClassLoader());
+//            image = in.readParcelable(Bitmap.class.getClassLoader());
             language = in.readString();
             autores = in.createStringArrayList();
             descricao = in.readString();
@@ -101,6 +101,7 @@ public class Manga implements Parcelable, Serializable {
             idOfLastChapterOpen = in.readString();
             isAdded = in.readBoolean();
             lastChapter = in.readDouble();
+            uuid = in.readLong();
         }
     }
 
@@ -203,7 +204,7 @@ public class Manga implements Parcelable, Serializable {
             dest.writeString(coverName);
             dest.writeString(id);
             dest.writeString(titulo);
-            dest.writeParcelable(image, flags);
+//            dest.writeParcelable(image, flags);
             dest.writeString(language);
             dest.writeStringList(autores);
             dest.writeString(descricao);
@@ -212,6 +213,7 @@ public class Manga implements Parcelable, Serializable {
             dest.writeString(idOfLastChapterOpen);
             dest.writeBoolean(isAdded);
             dest.writeDouble(lastChapter);
+            dest.writeLong(uuid);
         }
     }
 

@@ -4,7 +4,7 @@
     <item android:title="@string/biblioteca"
         android:id="@+id/library"
         android:icon="@drawable/book_open"
-        
+
         />
 
     <item android:title="@string/updates"
@@ -17,11 +17,11 @@
         android:id="@+id/extensions"
         android:icon="@drawable/cloud"/>
 
-    <item android:title="Histórico"
+    <item android:title="@string/hist_rico"
         android:id="@+id/historyManga"
         android:icon="@drawable/history"/>
 
-    <item android:title="Configurações"
+    <item android:title="@string/configura_es"
         android:id="@+id/settings"
         android:icon="@drawable/configuracoes"/>
 </menu>

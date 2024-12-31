@@ -48,10 +48,12 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import androidx.navigation.Navigation;
+import androidx.viewpager2.widget.ViewPager2;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
+import com.example.trinity.adapters.AdapterNavigation;
 import com.example.trinity.databinding.ActivityMainBinding;
 import com.example.trinity.extensions.MangaDexExtension;
 import com.example.trinity.fragments.LibraryFragment;
@@ -88,25 +90,27 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private NotificationCompat.Builder notification;
-
-
+    private ValueAnimator animatorHide;
+    private ValueAnimator animatorShow;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         ConfigClass.ConfigTheme.setTheme(this);
 
 
-        sharedPreferences = getSharedPreferences(ConfigClass.TAG_PREFERENCE,MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(ConfigClass.TAG_PREFERENCE, MODE_PRIVATE);
         editor = sharedPreferences.edit();
-        if(!sharedPreferences.getBoolean(ConfigClass.ConfigContent.ALREDY_LOADED_TAGS,false)){
-            new Thread(){
+        if (!sharedPreferences.getBoolean(ConfigClass.ConfigContent.ALREDY_LOADED_TAGS, false)) {
+            new Thread() {
                 @Override
-                public void run(){
+                public void run() {
 
-                    MangaDexExtension mangaDexExtension = new MangaDexExtension("","");
+                    MangaDexExtension mangaDexExtension = new MangaDexExtension("", "");
                     ArrayList<TagManga> tags = mangaDexExtension.getTags();
                     model.saveTag(tags);
 //                    System.out.println("Fazendo requisição das tags");
@@ -114,10 +118,10 @@ public class MainActivity extends AppCompatActivity {
             }.start();
         }
 
-         mangasFromDataBaseViewModel = new ViewModelProvider(this).get(MangasFromDataBaseViewModel.class);
-        new Thread(){
+        mangasFromDataBaseViewModel = new ViewModelProvider(this).get(MangasFromDataBaseViewModel.class);
+        new Thread() {
             @Override
-            public void run(){
+            public void run() {
                 model = Model.getInstance(MainActivity.this);
                 LogoMangaStorage storage = new LogoMangaStorage(MainActivity.this);
                 storage.createIfNotExistsFolderForLogos();
@@ -125,10 +129,10 @@ public class MainActivity extends AppCompatActivity {
                 LogoMangaStorageTemp storageTemp = new LogoMangaStorageTemp(MainActivity.this);
                 storageTemp.createIfNotExistsFolderTempForLogos();
 
-                boolean migrated = sharedPreferences.getBoolean(ConfigClass.ConfigLogoMigration.ALREDY_MIGRATED,false);
+                boolean migrated = sharedPreferences.getBoolean(ConfigClass.ConfigLogoMigration.ALREDY_MIGRATED, false);
 //                model.removeImagesFromDataBase();
                 //Retirar a migração após a atualização
-                if(!migrated){
+                if (!migrated) {
                     System.out.println("Entrou");
                     model.doUpdateLogos();
                 }
@@ -148,71 +152,78 @@ public class MainActivity extends AppCompatActivity {
             }
         }.start();
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+
+//        binding.menuNavi.post(()->{
+//            animatorHide = ValueAnimator.ofInt(0,binding.menuNavi.getMeasuredHeight()*-1);
+//            animatorHide.setDuration(500);
+//
+//            animatorShow = ValueAnimator.ofInt(binding.menuNavi.getMeasuredHeight()*-1,0);
+//            animatorShow.setDuration(500);
+//        });
+
         MangaDataViewModel mangaDataViewModel = new ViewModelProvider(this).get(MangaDataViewModel.class);
         initNavigation();
         this.checkFolders();
 
     }
+
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
 
     }
+
     private void initNavigation() {
 
-        navHost = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.hostFragmentMain);
+//        navHost = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.hostFragmentMain);
+//
+//        assert navHost != null;
+//        navController = navHost.getNavController();
+//
+//        NavigationUI.setupWithNavController(binding.menuNavi, navController);
+        this.binding.hostFragmentMain.setAdapter(new AdapterNavigation(this));
 
-        assert navHost != null;
-        navController = navHost.getNavController();
-
-        NavigationUI.setupWithNavController(binding.menuNavi, navController);
-
-    }
-
-    public void hiddenBottomNavigator() {
-
-
-        ValueAnimator anim = ValueAnimator.ofInt(0, binding.menuNaviContainer.getHeight());
-        anim.setDuration(500);
-        anim.setRepeatCount(0);
-
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        this.binding.menuNavi.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
-            public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-                ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                lp.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
-                lp.bottomMargin = (int) animation.getAnimatedValue() * -1;
-                binding.menuNaviContainer.setLayoutParams(lp);
-
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+//                System.out.println(item.get);
+                if (item.getItemId() == R.id.library) {
+                    binding.hostFragmentMain.setCurrentItem(0);
+                } else if (item.getItemId() == R.id.updates) {
+                    binding.hostFragmentMain.setCurrentItem(1);
+                } else if (item.getItemId() == R.id.extensions) {
+                    binding.hostFragmentMain.setCurrentItem(2);
+                } else if (item.getItemId() == R.id.historyManga) {
+                    binding.hostFragmentMain.setCurrentItem(3);
+                } else if (item.getItemId() == R.id.settings) {
+                    binding.hostFragmentMain.setCurrentItem(4);
+                }
+                return true;
             }
         });
-        anim.start();
-
-
-    }
-
-    public void showBottomNavigator() {
-
-        isBottomShowed = true;
-        ValueAnimator anim = ValueAnimator.ofInt(binding.menuNaviContainer.getHeight(), 0);
-        anim.setDuration(500);
-        anim.setRepeatCount(0);
-
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        binding.hostFragmentMain.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-                ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                lp.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
-                lp.bottomMargin = (int) animation.getAnimatedValue() * -1;
-                binding.menuNaviContainer.setLayoutParams(lp);
-
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                switch (position) {
+                    case 0:
+                        binding.menuNavi.setSelectedItemId(R.id.library);
+                        break;
+                    case 1:
+                        binding.menuNavi.setSelectedItemId(R.id.updates);
+                        break;
+                    case 2:
+                        binding.menuNavi.setSelectedItemId(R.id.extensions);
+                        break;
+                    case 3:
+                        binding.menuNavi.setSelectedItemId(R.id.historyManga);
+                        break;
+                    default:
+                        binding.menuNavi.setSelectedItemId(R.id.settings);
+                        break;
+                }
             }
         });
-        anim.start();
-
-
     }
 
     public void controllShowBottomNavigator(Fragment fragment) {
@@ -233,7 +244,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     public void checkPermission() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -250,17 +260,19 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-    public void backToUpdates(){
+
+    public void backToUpdates() {
         navController.navigateUp();
     }
-    public void checkFolders(){
-        new Thread(){
+
+    public void checkFolders() {
+        new Thread() {
             @Override
-            public void run(){
+            public void run() {
                 ChapterStorageManager chapterStorageManager = new ChapterStorageManager(MainActivity.this);
                 chapterStorageManager.createIfNotExistsFolderForChapters();
 
-                PageCacheManager pageCacheManager =  PageCacheManager.getInstance(MainActivity.this);
+                PageCacheManager pageCacheManager = PageCacheManager.getInstance(MainActivity.this);
                 pageCacheManager.createIfNotExistCacheChapterFolder();
 
             }
@@ -271,5 +283,32 @@ public class MainActivity extends AppCompatActivity {
         workManager.beginWith(workRequest1).then(workRequest2).enqueue();
     }
 
+    public void hideBottomNavigation(){
+        if(!isBottomShowed || animatorShow.isRunning() || animatorHide.isRunning()){
+            return;
+        }
+        isBottomShowed = false;
+
+        animatorHide.addUpdateListener((animation)->{
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) binding.menuNavi.getLayoutParams();
+            layoutParams.setMargins(0,0,0,(int) animation.getAnimatedValue());
+            binding.menuNavi.setLayoutParams(layoutParams);
+        });
+
+        animatorHide.start();
+    }
+    public void showBottomNavigation(){
+        if(isBottomShowed || animatorHide.isRunning() || animatorHide.isRunning()){
+            return;
+        }
+        isBottomShowed = true;
+
+        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) binding.menuNavi.getLayoutParams();
+        animatorHide.addUpdateListener((animation)->{
+            layoutParams.setMargins(0,0,0,(int) animation.getAnimatedValue());
+            binding.menuNavi.setLayoutParams(layoutParams);
+        });
+        animatorHide.start();
+    }
 
 }

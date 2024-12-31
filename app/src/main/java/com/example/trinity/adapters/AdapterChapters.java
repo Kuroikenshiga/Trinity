@@ -199,7 +199,7 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
     @Override
     public void onViewAttachedToWindow(@NonNull ChapterViewHolder holder) {
         super.onViewRecycled(holder);
-        System.out.println(holder.getAdapterPosition());
+
 
     }
     @Override

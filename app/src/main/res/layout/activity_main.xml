@@ -11,22 +11,32 @@
     android:background="?attr/colorSurface"
     >
 
-    <androidx.fragment.app.FragmentContainerView
+<!--    <androidx.fragment.app.FragmentContainerView-->
+<!--        android:id="@+id/hostFragmentMain"-->
+<!--        android:name="androidx.navigation.fragment.NavHostFragment"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:background="?attr/colorSurface"-->
+<!--        android:visibility="visible"-->
+<!--        app:defaultNavHost="true"-->
+<!--        app:layout_constraintBottom_toTopOf="@id/menuNaviContainer"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:navGraph="@navigation/main_navigation_botton"-->
+
+<!--        />-->
+    <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/hostFragmentMain"
-        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="?attr/colorSurface"
         android:visibility="visible"
-        app:defaultNavHost="true"
         app:layout_constraintBottom_toTopOf="@id/menuNaviContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navGraph="@navigation/main_navigation_botton"
-
         />
-
 
     <LinearLayout
         android:id="@+id/menuNaviContainer"

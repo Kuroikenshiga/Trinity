@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/show_manga_data_navigation"
     app:startDestination="@id/infoMangaFragment2">
     <fragment
@@ -10,9 +11,21 @@
         <action
             android:id="@+id/action_infoMangaFragment2_to_readerMangaFragment"
             app:destination="@id/readerMangaFragment" />
+        <action
+            android:id="@+id/action_infoMangaFragment2_to_loadingFragment"
+            app:destination="@id/loadingFragment" />
     </fragment>
     <fragment
         android:id="@+id/readerMangaFragment"
         android:name="com.example.trinity.fragments.ReaderMangaFragment"
         android:label="ReaderMangaFragment" />
+    <fragment
+        android:id="@+id/loadingFragment"
+        android:name="com.example.trinity.fragments.transitionFragments.LoadingChaptersToReadFragment"
+        android:label="fragment_loading"
+        tools:layout="@layout/fragment_loading" >
+        <action
+            android:id="@+id/action_loadingFragment_to_readerMangaFragment"
+            app:destination="@id/readerMangaFragment" />
+    </fragment>
 </navigation>

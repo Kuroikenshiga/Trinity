@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -158,6 +159,21 @@ public class UpdatesFragment extends Fragment {
         this.chapContainer.setLayoutManager(new LinearLayoutManager(myActivity));
         loadUpdates();
         realodUpdates();
+
+//        binding.updatesConteiner.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+//                super.onScrolled(recyclerView, dx, dy);
+//                System.out.println(dy);
+//                if (dy > 0) {
+//                    ((MainActivity) requireActivity()).hideBottomNavigation();
+//                }
+//                if (dy < 0) {
+//                    ((MainActivity)requireActivity()).showBottomNavigation();
+//                }
+//            }
+//
+//        });
 
         return binding.getRoot();
     }
