@@ -4,24 +4,31 @@
     <item android:title="@string/biblioteca"
         android:id="@+id/library"
         android:icon="@drawable/book_open"
-
+        android:iconTint="?attr/primaryColor"
         />
 
     <item android:title="@string/updates"
         android:id="@+id/updates"
         android:icon="@drawable/refresh_ccw"
-
+        android:iconTint="?attr/primaryColor"
         />
 
     <item android:title="@string/extensoes"
         android:id="@+id/extensions"
-        android:icon="@drawable/cloud"/>
+        android:icon="@drawable/cloud"
+        android:iconTint="?attr/primaryColor"
+        />
 
     <item android:title="@string/hist_rico"
         android:id="@+id/historyManga"
-        android:icon="@drawable/history"/>
+        android:icon="@drawable/history"
+        android:iconTint="?attr/primaryColor"
+        />
 
     <item android:title="@string/configura_es"
         android:id="@+id/settings"
-        android:icon="@drawable/configuracoes"/>
+        android:icon="@drawable/configuracoes"
+        android:iconTint="?attr/primaryColor"
+
+        />
 </menu>

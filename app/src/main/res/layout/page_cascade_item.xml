@@ -20,13 +20,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/img"/>
-            <ProgressBar
+            <com.example.trinity.custom_components.LoadingView
                 android:layout_gravity="center"
                 android:id="@+id/progressTop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:indeterminate="true"
                 android:indeterminateTint="?attr/colorPrimary"
                 android:indeterminateTintMode="src_atop"
                 app:layout_constraintTop_toTopOf="parent" />

@@ -2,6 +2,7 @@ package com.example.trinity.fragments;
 
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,6 +41,7 @@ public class HistoryMangaFragment extends Fragment {
     private Model model;
     private ArrayList<History> histories;
     private AdapterHistory adapterHistory;
+    private Thread workerThread;
     public HistoryMangaFragment() {
         // Required empty public constructor
     }
@@ -78,23 +80,25 @@ public class HistoryMangaFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         this.binding = FragmentHistoryMangaBinding.inflate(inflater,container,false);
         View v = binding.getRoot();
-        new Thread(){
+       this.workerThread = new Thread(()->{
+           model = Model.getInstance(getActivity());
+           histories = model.selectAllHistory();
+           getActivity().runOnUiThread(new Runnable() {
+               @Override
+               public void run() {
+                   adapterHistory = new AdapterHistory(getActivity(),histories,HistoryMangaFragment.this);
+                   binding.reciclerViewHistory.setAdapter(adapterHistory);
+                   binding.reciclerViewHistory.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL,false));
+               }
+           });
+       });
+        workerThread.start();
+        requireActivity().getOnBackPressedDispatcher().addCallback(requireActivity(), new OnBackPressedCallback(true) {
             @Override
-            public void run(){
-                model = Model.getInstance(getActivity());
-                histories = model.selectAllHistory();
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapterHistory = new AdapterHistory(getActivity(),histories,HistoryMangaFragment.this);
-                        binding.reciclerViewHistory.setAdapter(adapterHistory);
-                        binding.reciclerViewHistory.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL,false));
-                    }
-                });
+            public void handleOnBackPressed() {
+                ((MainActivity)requireActivity()).navigateToLibrary();
             }
-        }.start();
-
-
+        });
         return v;
     }
     @Override
@@ -105,6 +109,21 @@ public class HistoryMangaFragment extends Fragment {
             mainActivity.controllShowBottomNavigator(this);
             mainActivity.isInFirstDestination = false;
             mainActivity.isInReadFragment = false;
+        }
+        if(!workerThread.isAlive()) {
+            this.workerThread = new Thread(() -> {
+                model = Model.getInstance(getActivity());
+                histories = model.selectAllHistory();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapterHistory = new AdapterHistory(getActivity(), histories, HistoryMangaFragment.this);
+                        binding.reciclerViewHistory.setAdapter(adapterHistory);
+                        binding.reciclerViewHistory.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
+                    }
+                });
+            });
+            this.workerThread.start();
         }
     }
     @Override
