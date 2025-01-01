@@ -33,12 +33,11 @@
 
 
 
-        <ProgressBar
+        <com.example.trinity.custom_components.LoadingView
             android:id="@+id/progressTop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:indeterminate="true"
             android:indeterminateTint="?attr/colorPrimary"
             android:indeterminateTintMode="src_atop"
             app:layout_constraintBottom_toBottomOf="parent"

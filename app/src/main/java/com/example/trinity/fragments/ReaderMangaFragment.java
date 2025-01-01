@@ -359,7 +359,7 @@ public class ReaderMangaFragment extends Fragment {
                     isLoadingNewChapter = false;
                     Instant now = Instant.now();
                     initialTime = now.getEpochSecond();
-                    controllShowBottomTopBar();
+//                    controllShowBottomTopBar();
                     int numPages = msg.getData().getInt("numPages");
 
                     imageURI = new String[numPages + 2];
@@ -962,18 +962,6 @@ public class ReaderMangaFragment extends Fragment {
 
         binding.cascadeRead.scrollToPosition(2);
 
-    }
-
-    private void goToNextPage() {
-        if (binding.pageContainer.getCurrentItem() < imageURI.length - 1) {
-            binding.pageContainer.setCurrentItem(binding.pageContainer.getCurrentItem() + 1, true);
-        }
-    }
-
-    private void goToPreviousPage() {
-        if (binding.pageContainer.getCurrentItem() > 0) {
-            binding.pageContainer.setCurrentItem(binding.pageContainer.getCurrentItem() - 1, true);
-        }
     }
 
     private void startUpPageButtons() {

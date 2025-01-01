@@ -682,7 +682,7 @@ public class Model extends SQLiteOpenHelper {
         * */
 
         try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT*FROM mangas " +
-                "INNER JOIN reading_historic on manga_id = mangas.id ORDER BY last_acessed DESC", new String[]{})) {
+                "INNER JOIN reading_historic on manga_id = mangas.id ORDER BY last_acessed DESC LIMIT 30", new String[]{})) {
             while (row.moveToNext()) {
                 int coverNameColumn = row.getColumnIndex("cover_name");
                 int id_mangaColumn = row.getColumnIndex("id_manga");

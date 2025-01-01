@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -30,6 +31,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -102,7 +104,12 @@ public class MainActivity extends AppCompatActivity {
 
         ConfigClass.ConfigTheme.setTheme(this);
 
-
+//        binding.menuNavi.setBackgroundColor(getColor(R.color.FullRed));
+        TypedValue typedValue = new TypedValue();
+        getTheme().resolveAttribute(com.google.android.material.R.attr.colorSecondary,typedValue,false);
+        binding.menuNavi.setBackgroundColor(typedValue.data);
+        binding.menuNavi.setItemIconTintList(ResourcesCompat.getColorStateList(getResources(),R.color.item_bottom_navigation_color,getTheme()));
+        binding.menuNavi.setItemTextColor(ResourcesCompat.getColorStateList(getResources(),R.color.item_bottom_navigation_color,getTheme()));
         sharedPreferences = getSharedPreferences(ConfigClass.TAG_PREFERENCE, MODE_PRIVATE);
         editor = sharedPreferences.edit();
         if (!sharedPreferences.getBoolean(ConfigClass.ConfigContent.ALREDY_LOADED_TAGS, false)) {
@@ -239,8 +246,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateToLibrary() {
-        navController.popBackStack(R.id.library, false);
-        navController.navigate(R.id.library);
+//        navController.popBackStack(R.id.library, false);
+//        navController.navigate(R.id.library);
+        binding.hostFragmentMain.setCurrentItem(0);
     }
 
 

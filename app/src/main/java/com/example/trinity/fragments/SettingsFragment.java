@@ -9,6 +9,7 @@ import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.DialogFragment;
@@ -162,36 +163,13 @@ public class SettingsFragment extends Fragment {
             ThemeChangeDialogFragment dialogFragment = new ThemeChangeDialogFragment();
             dialogFragment.show(getParentFragmentManager(),"ThemeChangeDialogFragment");
         });
-//        binding.imageQuality.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                ValueAnimator animator = !isShworeadImageQuality?ValueAnimator.ofInt(40,130):ValueAnimator.ofInt(130,40);
-//                animator.setDuration(300);
-//
-//                ValueAnimator rotateAnimator = !isShworeadImageQuality?ValueAnimator.ofFloat(0f,180f):ValueAnimator.ofFloat(180f,0f);
-//                rotateAnimator.setDuration(300);
-//
-//                animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//                    @Override
-//                    public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-//                        ViewGroup.LayoutParams lp = (ConstraintLayout.LayoutParams) binding.container3.getLayoutParams();
-//                        lp.height = (int)((int)animation.getAnimatedValue()*getActivity().getResources().getDisplayMetrics().density);
-//                        binding.container3.setLayoutParams(lp);
-//                    }
-//                });
-//
-//                rotateAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//                    @Override
-//                    public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-//                        binding.drop2.setRotation((float) animation.getAnimatedValue());
-//                    }
-//                });
-//
-//                animator.start();
-//                rotateAnimator.start();
-//                isShworeadImageQuality = !isShworeadImageQuality;
-//            }
-//        });
+
+        requireActivity().getOnBackPressedDispatcher().addCallback(requireActivity(), new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                ((MainActivity)requireActivity()).navigateToLibrary();
+            }
+        });
 
         binding.deleteChapters.setOnClickListener(new View.OnClickListener() {
             @Override
