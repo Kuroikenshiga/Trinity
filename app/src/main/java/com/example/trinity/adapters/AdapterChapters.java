@@ -171,30 +171,6 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
                 return gestureDetector.onTouchEvent(event);
             }
         });
-//        holder.binding.getRoot().setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                new Thread() {
-//                    @Override
-//                    public void run() {
-//                        holder.binding.chapNumber.setTextColor(context.getColor(R.color.Blue));
-//                        Model model = new Model(context);
-//                        model.chapterRead(chapters.get(position));
-//
-//                    }
-//                }.start();
-//                if (mangaDataViewModel != null) {
-//                    mangaDataViewModel.setIdChap(chapters.get(position).getId());
-//                }
-//                InfoMangaFragment f = (InfoMangaFragment) fragment;
-//                Bundle bundle = new Bundle();
-//                bundle.putInt("currentPage", chapters.get(position).getCurrentPage());
-//                f.navigateToRead(bundle);
-//
-//
-//            }
-//        });
-
     }
     @Override
     public void onViewAttachedToWindow(@NonNull ChapterViewHolder holder) {

@@ -93,7 +93,13 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 TypedValue typedValue = new TypedValue();
                 context.getTheme().resolveAttribute(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().isAlredyRead()?com.google.android.material.R.attr.colorPrimary:com.google.android.material.R.attr.colorTertiary,typedValue,true);
                 ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(typedValue.data);
-                ((UpdatesViewHolder)holder).binding.getRoot().setOnClickListener(new View.OnClickListener() {
+                ((UpdatesViewHolder)holder).binding.mangaCover.setOnClickListener((v)->{
+                    Intent intent = new Intent(context, MangaShowContentActivity.class);
+                    intent.putExtra("Item",(Parcelable)chapterUpdateds.get(holder.getAdapterPosition()).getManga());
+                    intent.putExtra("Extension",chapterUpdateds.get(holder.getAdapterPosition()).getManga().getId().contains("kakalot")||chapterUpdateds.get(holder.getAdapterPosition()).getManga().getId().contains("manganato")?Extensions.MANGAKAKALOT:Extensions.MANGADEX);
+                    context.startActivity(intent);
+                });
+                ((UpdatesViewHolder)holder).binding.chapterTitle.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Model model = Model.getInstance(context);
@@ -106,11 +112,7 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                                     @Override
                                     public void run() {
-//                                        chapterUpdateds.get(holder.getAdapterPosition()).getManga().setChapters(allChapterByMangaID);
-//                                        mangaDataViewModel.setManga(chapterUpdateds.get(holder.getAdapterPosition()).getManga());
-//                                        mangaDataViewModel.setIdChap(chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getId());
-//                                        UpdatesFragment f = (UpdatesFragment) fragment;
-//                                        f.navigateToRead();
+
 
                                         Intent intent = new Intent(context, MangaShowContentActivity.class);
                                         intent.putExtra("Item",(Parcelable)chapterUpdateds.get(holder.getAdapterPosition()).getManga());
@@ -137,12 +139,6 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             }
                         }.start();
 
-//                Intent i = new Intent(context, MangaReaderActivity.class);
-//                i.putExtra("idChap",chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getId());
-//                i.putExtra("idMangaApi",chapterUpdateds.get(holder.getAdapterPosition()).getManga().getId());
-//                i.putExtra("language",chapterUpdateds.get(holder.getAdapterPosition()).getManga().getLanguage());
-//                i.putExtra("logoManga",chapterUpdateds.get(holder.getAdapterPosition()).getManga().getImage());
-//                context.startActivity(i);
                     }
                 });
             }
