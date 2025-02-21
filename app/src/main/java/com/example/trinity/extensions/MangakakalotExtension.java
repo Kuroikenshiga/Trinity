@@ -173,6 +173,7 @@ public class MangakakalotExtension implements Extensions {
         Request request = new Request.Builder().url(urlApi).build();
         try (Response response = client.newCall(request).execute()) {
             html = response.body().string();
+
             Manga manga = idManga.contains(CHAPMANGANATO) ? responseToFullValueObjectChapManganato(html) : responseToFullValueObjectMangakakalot(html);
 
             if (this.onMangaLoaded != null) {

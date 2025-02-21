@@ -242,12 +242,6 @@ public class LibraryFragment extends Fragment {
                     hidden.start();
 
                     binding.searchField.setText("");
-//                    new Thread(()->{
-//                        if(isSearching)return;
-//                        isSearching = true;
-//                        model.loadSearch(binding.searchField.getText().toString(), null);
-//                        isSearching = false;
-//                    }).start();
                     loadLibrary(true);
 
                     return;
@@ -350,9 +344,9 @@ public class LibraryFragment extends Fragment {
                         loadLibrary(true);
                     }
                 });
-                mangasFromDataBaseViewModel.setMangas(dataSet);
-                adapter.setDataSet(mangasFromDataBaseViewModel.getMangas());
-                recyclerView.setAdapter(adapter);
+                mangasFromDataBaseViewModel.getMangaMutableLiveData().setValue(dataSet);
+//                adapter.setDataSet(mangasFromDataBaseViewModel.getMangas());
+//                recyclerView.setAdapter(adapter);
             });
         }).start();
     }
@@ -363,9 +357,9 @@ public class LibraryFragment extends Fragment {
 
             dataSet = model.selectAllMangas(false);
             requireActivity().runOnUiThread(()->{
-                mangasFromDataBaseViewModel.setMangas(dataSet);
-                adapter.setDataSet(mangasFromDataBaseViewModel.getMangas());
-                recyclerView.setAdapter(adapter);
+                mangasFromDataBaseViewModel.getMangaMutableLiveData().setValue(dataSet);
+//                adapter.setDataSet(mangasFromDataBaseViewModel.getMangas());
+//                recyclerView.setAdapter(adapter);
             });
         }).start();
     }
