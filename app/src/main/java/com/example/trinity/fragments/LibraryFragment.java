@@ -67,6 +67,7 @@ public class LibraryFragment extends Fragment {
     private boolean searchFildIsShowed = false;
     MangasFromDataBaseViewModel mangasFromDataBaseViewModel;
     private boolean isSearching = false;
+
     public LibraryFragment() {
         // Required empty public constructor
     }
@@ -111,55 +112,33 @@ public class LibraryFragment extends Fragment {
         View view = binding.getRoot();
         recyclerView = binding.reciclerViewMangas;
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
-        adapter = new AdapterMangas(getActivity(), this.mangasFromDataBaseViewModel.getMangas(),this).setShowLanguageIcon(true).setShowAmountChapterToRead(true);
+        adapter = new AdapterMangas(getActivity(), this.mangasFromDataBaseViewModel.getMangas(), this).setShowLanguageIcon(true).setShowAmountChapterToRead(true);
 
         mangasFromDataBaseViewModel.getMangaMutableLiveData().observe(requireActivity(), new Observer<ArrayList<Manga>>() {
             @Override
             public void onChanged(ArrayList<Manga> mangas) {
-                adapter = new AdapterMangas(requireActivity(),mangas);
+                adapter = new AdapterMangas(requireActivity(), mangas);
                 recyclerView.setAdapter(adapter);
             }
         });
 
         recyclerView.setAdapter(adapter);
 
-        loadLibrary();
+
 
 
         myActivity = (MainActivity) getActivity();
-
-//        binding.searchField.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//                new Thread() {
-//                    @Override
-//                    public void run() {
-//                        model.loadSearch(s.toString(), LibraryFragment.this);
-//                    }
-//                }.start();
-//            }
-//        });
 
         binding.searchField.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
 
-                if(keyCode == KeyEvent.KEYCODE_ENTER){
-                    new Thread(()->{
-                        if(isSearching)return;
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    new Thread(() -> {
+                        if (isSearching) return;
                         isSearching = true;
-                        ArrayList<Manga>listResult = model.loadSearch(binding.searchField.getText().toString(), null);
-                        requireActivity().runOnUiThread(()->{
+                        ArrayList<Manga> listResult = model.loadSearch(binding.searchField.getText().toString(), null);
+                        requireActivity().runOnUiThread(() -> {
                             mangasFromDataBaseViewModel.getMangaMutableLiveData().setValue(listResult);
                         });
                         isSearching = false;
@@ -172,8 +151,8 @@ public class LibraryFragment extends Fragment {
         binding.searchAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new Thread(()->{
-                    if(isSearching)return;
+                new Thread(() -> {
+                    if (isSearching) return;
                     isSearching = true;
 //                    model.loadSearch(binding.searchField.getText().toString(), LibraryFragment.this);
                     isSearching = false;
@@ -184,8 +163,8 @@ public class LibraryFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 binding.searchField.setText("");
-                new Thread(()->{
-                    if(isSearching)return;
+                new Thread(() -> {
+                    if (isSearching) return;
                     isSearching = true;
 //                    model.loadSearch(binding.searchField.getText().toString(), LibraryFragment.this);
                     isSearching = false;
@@ -209,7 +188,7 @@ public class LibraryFragment extends Fragment {
                         @Override
                         public void onAnimationUpdate(@NonNull ValueAnimator animation) {
                             LinearLayout.LayoutParams lp1 = (LinearLayout.LayoutParams) binding.titleContainer.getLayoutParams();
-                            lp1.topMargin = (int)(((int)animation.getAnimatedValue())*getActivity().getResources().getDisplayMetrics().density);
+                            lp1.topMargin = (int) (((int) animation.getAnimatedValue()) * getActivity().getResources().getDisplayMetrics().density);
                             binding.titleContainer.setLayoutParams(lp1);
 
                         }
@@ -234,7 +213,7 @@ public class LibraryFragment extends Fragment {
                         @Override
                         public void onAnimationUpdate(@NonNull ValueAnimator animation) {
                             LinearLayout.LayoutParams lp1 = (LinearLayout.LayoutParams) binding.titleContainer.getLayoutParams();
-                            lp1.topMargin = (int)(((int)animation.getAnimatedValue())*getActivity().getResources().getDisplayMetrics().density);
+                            lp1.topMargin = (int) (((int) animation.getAnimatedValue()) * getActivity().getResources().getDisplayMetrics().density);
                             binding.titleContainer.setLayoutParams(lp1);
 
                         }
@@ -242,12 +221,7 @@ public class LibraryFragment extends Fragment {
                     hidden.start();
 
                     binding.searchField.setText("");
-//                    new Thread(()->{
-//                        if(isSearching)return;
-//                        isSearching = true;
-//                        model.loadSearch(binding.searchField.getText().toString(), null);
-//                        isSearching = false;
-//                    }).start();
+
                     loadLibrary(true);
 
                     return;
@@ -278,10 +252,11 @@ public class LibraryFragment extends Fragment {
         binding = null;
 
     }
+
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
-        if(searchFildIsShowed){
+        if (searchFildIsShowed) {
             LinearLayout.LayoutParams lp1 = (LinearLayout.LayoutParams) binding.titleContainer.getLayoutParams();
             lp1.topMargin = 0;
             binding.titleContainer.setLayoutParams(lp1);
@@ -292,11 +267,12 @@ public class LibraryFragment extends Fragment {
     }
 
     @Override
-    public void onStart(){
+    public void onStart() {
         super.onStart();
 //
         loadLibrary();
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -308,61 +284,34 @@ public class LibraryFragment extends Fragment {
             mainActivity.isInReadFragment = false;
         }
 
+       new Thread(()->{
+           if(this.model != null && this.mangasFromDataBaseViewModel.getMangas().size() != this.model.getMangaCount()){
+                loadLibrary(true);
+           }
+       }).start();
+
     }
 
-    private void loadLibrary(){
-
-        if(!mangasFromDataBaseViewModel.getMangas().isEmpty()){
+    private void loadLibrary() {
+        if (!mangasFromDataBaseViewModel.getMangas().isEmpty()) {
             return;
         }
-        new Thread(()->{
+        new Thread(() -> {
             model = Model.getInstance(requireActivity());
-
             dataSet = model.selectAllMangas(false);
-            requireActivity().runOnUiThread(()->{
-                if(model.getObserversSize() < 1){
-                    model.addOnMangaRemovedListener(new Model.OnMangaRemovedListener() {
-                        @Override
-                        public int getOwner() {
-                            return Model.OnMangaRemovedListener.LIBRARY_OWNER;
-                        }
-                        @Override
-                        public void onMangaRemoved(String language, String idAPI) {
-                            for(int i = 0;i <mangasFromDataBaseViewModel.getMangas().size();i++){
-                                if(mangasFromDataBaseViewModel.getMangas().get(i).getId().equals(idAPI) && mangasFromDataBaseViewModel.getMangas().get(i).getLanguage().equals(language)){
-                                    mangasFromDataBaseViewModel.getMangas().remove(i);
-                                    adapter.notifyItemRemoved(i);
-                                    break;
-                                }
-                            }
-                        }
-
-                    });
-                }
-                model.addNotifier(new Model.OnMangaAddedNotifier() {
-                    @Override
-                    public int getOwner() {
-                        return Model.OnMangaAddedNotifier.LIBRARY_OWNER;
-                    }
-
-                    @Override
-                    public void someMangaAdded() {
-                        loadLibrary(true);
-                    }
-                });
+            requireActivity().runOnUiThread(() -> {
                 mangasFromDataBaseViewModel.setMangas(dataSet);
                 adapter.setDataSet(mangasFromDataBaseViewModel.getMangas());
                 recyclerView.setAdapter(adapter);
             });
         }).start();
     }
-    private void loadLibrary(boolean forceLoad){
 
-        new Thread(()->{
+    private void loadLibrary(boolean forceLoad) {
+        new Thread(() -> {
             model = Model.getInstance(requireActivity());
-
             dataSet = model.selectAllMangas(false);
-            requireActivity().runOnUiThread(()->{
+            requireActivity().runOnUiThread(() -> {
                 mangasFromDataBaseViewModel.setMangas(dataSet);
                 adapter.setDataSet(mangasFromDataBaseViewModel.getMangas());
                 recyclerView.setAdapter(adapter);

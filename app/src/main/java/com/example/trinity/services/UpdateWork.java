@@ -64,7 +64,7 @@ public class UpdateWork extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        this.createChannerNotification();
+        this.createChannelNotification();
         Model model = Model.getInstance(context);
         SharedPreferences sharedPreferences = context.getSharedPreferences(ConfigClass.TAG_PREFERENCE, Context.MODE_PRIVATE);
         String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY,"dataSaver");
@@ -131,7 +131,7 @@ public class UpdateWork extends Worker {
         return Result.success();
     }
 
-    private void createChannerNotification() {
+    private void createChannelNotification() {
         this.notificationChannel = new NotificationChannel(CHANNEL_NOTIFICATION_ID, CHANNEL_NOTIFICATION, NotificationManager.IMPORTANCE_LOW);
         this.notificationChannel.setLightColor(Color.BLUE);
         notificationChannel.setSound(null, null);

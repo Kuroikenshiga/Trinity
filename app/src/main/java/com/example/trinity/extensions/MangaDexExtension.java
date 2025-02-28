@@ -789,6 +789,11 @@ public class MangaDexExtension implements Extensions {
             return 0;
         }
     }
+
+    @Override
+    public ArrayList<ChapterManga> viewChapters(String mangaId, Handler h) {
+        return null;
+    }
 }
 
 
