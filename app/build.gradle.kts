@@ -11,7 +11,7 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = 1
-        versionName = "2.4.1"
+        versionName = "2.4.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -60,5 +60,6 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
+    implementation ("androidx.webkit:webkit:1.9.0")
 //    implementation ("com.github.chrisbanes:PhotoView:2.3.0")
 }

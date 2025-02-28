@@ -32,6 +32,8 @@ import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,6 +60,7 @@ import com.example.trinity.services.DownloadChapterWork;
 import com.example.trinity.services.broadcasts.ActionsPending;
 import com.example.trinity.storageAcess.LogoMangaStorage;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
+import com.example.trinity.utilities.DdosBypass;
 import com.example.trinity.utilities.OrderEnum;
 import com.example.trinity.utilities.SortUtilities;
 import com.example.trinity.valueObject.ChapterManga;
@@ -162,7 +165,58 @@ public class InfoMangaFragment extends Fragment {
 
         mangaDataViewModel = new ViewModelProvider(getActivity()).get(MangaDataViewModel.class);
         manga = mangaDataViewModel.getManga();
+        mainHandler = new Handler(Looper.getMainLooper()){
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                super.handleMessage(msg);
+                if(msg.what == Extensions.RESPONSE_REQUEST_BYPASS){
+//                    DdosBypass.bypass(requireContext(),mainHandler,msg.getData().getString("url"));
+                }
 
+                else if (msg.what == Extensions.RESPONSE_REQUEST_NEW_CONTENT_CALL) {
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            allChapters = mangaDataViewModel.getManga().getChapters() != null && !mangaDataViewModel.getManga().getChapters().isEmpty() ? mangaDataViewModel.getManga().getChapters() : (mangaDexExtension instanceof MangaDexExtension?mangaDexExtension.viewChapters(manga.getId()):mangaDexExtension.viewChapters(manga.getId(),mainHandler));
+                            mangaDataViewModel.getManga().setChapters(allChapters);
+                            try {
+                                SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
+                            } catch (NoSuchMethodException e) {
+                                throw new RuntimeException(e);
+                            } catch (ClassNotFoundException e) {
+                                throw new RuntimeException(e);
+                            } catch (IllegalAccessException e) {
+                                throw new RuntimeException(e);
+                            } catch (InvocationTargetException e) {
+                                throw new RuntimeException(e);
+                            }
+                            chapterMangasListed.clear();
+                            indexSubLists = 0;
+
+                            if (getActivity() == null) {
+                                return;
+                            }
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!manga.isOngoing(allChapters)) binding.status.setText("Concluído");
+                                    binding.numChapters.setText(allChapters.size() + " Capítulos");
+                                    binding.progressChapter.setVisibility(View.GONE);
+                                    mangaDataViewModel.getManga().setChapters(allChapters);
+                                    chaptersAdapter = new AdapterChapters(requireActivity(), allChapters);
+                                    chaptersAdapter.setMangaDataViewModel(mangaDataViewModel);
+                                    chaptersAdapter.setFragment(InfoMangaFragment.this);
+                                    binding.chapterContainer.setAdapter(chaptersAdapter);
+
+                                }
+                            });
+
+
+                        }
+                    }.start();
+                }
+            }
+        };
         binding.title.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -361,20 +415,6 @@ public class InfoMangaFragment extends Fragment {
         loadChapters();
         showMore();
 
-//        binding.scrollParent.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
-//            @Override
-//            public void onScrollChange(@NonNull NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-//
-//                manageSubLists();
-//            }
-//        });
-
-//        binding.chapterContainer.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-//            @Override
-//            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-//                manageSubLists();
-//            }
-//        });
         binding.downloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -400,35 +440,6 @@ public class InfoMangaFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-//        if (this.isAdded) {
-//            for (ChapterManga ch : this.chapterMangasListed) {
-//                ch.setAlredyRead(model.isChapterAlredyRead(ch.getId()));
-//            }
-//            if(mangaDataViewModel != null && mangaDataViewModel.getManga().getChapters() != null && !mangaDataViewModel.getManga().getChapters().isEmpty()){
-//                System.out.println("entrou");
-//                new Thread(){
-//                    @Override
-//                    public void run(){
-//                        ArrayList<Boolean>status = model.verifyReadStatus(manga.getId(), manga.getLanguage());
-//                        for(int i = 0;i < chaptersAdapter.getDataSet().size();i++){
-////                            mangaDataViewModel.getManga().getChapters().get(i).setAlredyRead(status.get(i));
-////                            System.out.println("Status: "+status.toString());
-//                            chaptersAdapter.getDataSet().get(i).setAlredyRead(status.get(i));
-//                        }
-//                        getActivity().runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                chaptersAdapter.notifyDataSetChanged();
-//                            }
-//                        });
-//                    }
-//
-//                }.start();
-//
-//            }
-//        }
-//        chaptersAdapter.notifyDataSetChanged();
-
     }
 
     private void favorite() {
@@ -616,7 +627,7 @@ public class InfoMangaFragment extends Fragment {
         new Thread() {
             @Override
             public void run() {
-                allChapters = mangaDataViewModel.getManga().getChapters() != null && !mangaDataViewModel.getManga().getChapters().isEmpty() ? mangaDataViewModel.getManga().getChapters() : (mangaDexExtension.viewChapters(manga.getId()));
+                allChapters = mangaDataViewModel.getManga().getChapters() != null && !mangaDataViewModel.getManga().getChapters().isEmpty() ? mangaDataViewModel.getManga().getChapters() : (mangaDexExtension instanceof MangaDexExtension?mangaDexExtension.viewChapters(manga.getId()):mangaDexExtension.viewChapters(manga.getId(),mainHandler));
                 mangaDataViewModel.getManga().setChapters(allChapters);
                 try {
                     SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
@@ -653,21 +664,6 @@ public class InfoMangaFragment extends Fragment {
 
             }
         }.start();
-//            }
-//            else {
-//                binding.numChapters.setText(manga.getChapters().size() + " Capítulos");
-//                try {
-//                    SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", chapterMangasListed, OrderEnum.DECRESCENTE);
-//                } catch (NoSuchMethodException ex) {
-//                    throw new RuntimeException(ex);
-//                } catch (ClassNotFoundException ex) {
-//                    throw new RuntimeException(ex);
-//                } catch (IllegalAccessException ex) {
-//                    throw new RuntimeException(ex);
-//                } catch (InvocationTargetException ex) {
-//                    throw new RuntimeException(ex);
-//                }
-//            }
     }
 
     @Deprecated
@@ -753,28 +749,6 @@ public class InfoMangaFragment extends Fragment {
         mangaDataViewModel = null;
 
     }
-//        private void manageSubLists () {
-//            if (sublListsChapters != null && indexSubLists < sublListsChapters.length) {
-//                int currentSize = chapterMangasListed.size();
-////            System.out.println(chapterMangasListed.size());
-//                chapterMangasListed.addAll(sublListsChapters[indexSubLists]);
-//                chaptersAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-//                    @Override
-//                    public void onItemRangeInserted(int positionStart, int itemCount) {
-//                        super.onItemRangeInserted(positionStart, itemCount);
-//
-//                    }
-//                });
-////            System.out.println(currentSize);
-//                if (currentSize != 0)
-//                    chaptersAdapter.notifyItemRangeInserted(currentSize, sublListsChapters[indexSubLists].size());
-//                else chaptersAdapter.notifyDataSetChanged();
-//                //            chaptersAdapter.notifyItemRangeChanged(currentSize,sublListsChapters[indexSubLists].size());
-////                chaptersAdapter.notifyDataSetChanged();
-//                indexSubLists++;
-//
-//            }
-//        }
 
     private ChapterManga getChapterFromDataSet(ArrayList<ChapterManga> data, String
             idChapter) {

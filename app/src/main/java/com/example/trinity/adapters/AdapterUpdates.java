@@ -77,10 +77,10 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 Glide.with(fragment)
                         .load(storage.getLogoFromStorage(this.chapterUpdateds.get(holder.getAdapterPosition()).getManga().getId()))
                         .override((int) context.getResources().getDisplayMetrics().density * 50, (int) context.getResources().getDisplayMetrics().density * 50)
-                        .into(((UpdatesViewHolder)holder).binding.mangaCover);
+                        .into(((UpdatesViewHolder) holder).binding.mangaCover);
 
-                ((UpdatesViewHolder)holder).binding.chapterTitle.setText(new StringBuilder().append(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getChapter()).append(" CH. ").append(this.chapterUpdateds.get(holder.getAdapterPosition()).getManga().getTitulo()).toString());
-                
+                ((UpdatesViewHolder) holder).binding.chapterTitle.setText(new StringBuilder().append(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getChapter()).append(" CH. ").append(this.chapterUpdateds.get(holder.getAdapterPosition()).getManga().getTitulo()).toString());
+
                 Calendar mangaDate = Calendar.getInstance();
                 Instant instant = Instant.parse(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getDateRFC3339());
                 Date dateDate = new Date(instant.toEpochMilli());
@@ -88,12 +88,12 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().setData(mangaDate);
 
 
-                ((UpdatesViewHolder)holder).binding.chapDate.setText(new StringBuilder().append("Há ").append(chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().returnTimeReleased()).toString());
+                ((UpdatesViewHolder) holder).binding.chapDate.setText(new StringBuilder().append("Há ").append(chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().returnTimeReleased()).toString());
 
                 TypedValue typedValue = new TypedValue();
-                context.getTheme().resolveAttribute(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().isAlredyRead()?com.google.android.material.R.attr.colorPrimary:com.google.android.material.R.attr.colorTertiary,typedValue,true);
-                ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(typedValue.data);
-                ((UpdatesViewHolder)holder).binding.getRoot().setOnClickListener(new View.OnClickListener() {
+                context.getTheme().resolveAttribute(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().isAlredyRead() ? com.google.android.material.R.attr.colorPrimary : com.google.android.material.R.attr.colorTertiary, typedValue, true);
+                ((UpdatesViewHolder) holder).binding.chapterTitle.setTextColor(typedValue.data);
+                ((UpdatesViewHolder) holder).binding.getRoot().setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Model model = Model.getInstance(context);
@@ -101,22 +101,17 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         new Thread() {
                             @Override
                             public void run() {
-//                                ArrayList<ChapterManga>allChapterByMangaID = model.getAllChapterByMangaID(chapterUpdateds.get(holder.getAdapterPosition()).getManga().getId(), chapterUpdateds.get(holder.getAdapterPosition()).getManga().getLanguage());
-                                ((Activity)context).runOnUiThread(new Runnable() {
+
+                                ((Activity) context).runOnUiThread(new Runnable() {
 
                                     @Override
                                     public void run() {
-//                                        chapterUpdateds.get(holder.getAdapterPosition()).getManga().setChapters(allChapterByMangaID);
-//                                        mangaDataViewModel.setManga(chapterUpdateds.get(holder.getAdapterPosition()).getManga());
-//                                        mangaDataViewModel.setIdChap(chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getId());
-//                                        UpdatesFragment f = (UpdatesFragment) fragment;
-//                                        f.navigateToRead();
 
                                         Intent intent = new Intent(context, MangaShowContentActivity.class);
-                                        intent.putExtra("Item",(Parcelable)chapterUpdateds.get(holder.getAdapterPosition()).getManga());
-                                        intent.putExtra("route",MangaShowContentActivity.TO_LOADING);
-                                        intent.putExtra("idChap",chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getId());
-                                        intent.putExtra("Extension",chapterUpdateds.get(holder.getAdapterPosition()).getManga().getId().contains("kakalot")||chapterUpdateds.get(holder.getAdapterPosition()).getManga().getId().contains("manganato")?Extensions.MANGAKAKALOT:Extensions.MANGADEX);
+                                        intent.putExtra("Item", (Parcelable) chapterUpdateds.get(holder.getAdapterPosition()).getManga());
+                                        intent.putExtra("route", MangaShowContentActivity.TO_LOADING);
+                                        intent.putExtra("idChap", chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getId());
+                                        intent.putExtra("Extension", chapterUpdateds.get(holder.getAdapterPosition()).getManga().getId().contains("kakalot") || chapterUpdateds.get(holder.getAdapterPosition()).getManga().getId().contains("manganato") ? Extensions.MANGAKAKALOT : Extensions.MANGADEX);
                                         context.startActivity(intent);
 
                                     }
@@ -129,28 +124,20 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                         @Override
                                         public void run() {
                                             TypedValue value = new TypedValue();
-                                            context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary,value,false);
-                                            ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(value.data);
+                                            context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, value, true);
+                                            ((UpdatesViewHolder) holder).binding.chapterTitle.setTextColor(value.data);
                                         }
                                     });
                                 }
                             }
                         }.start();
-
-//                Intent i = new Intent(context, MangaReaderActivity.class);
-//                i.putExtra("idChap",chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getId());
-//                i.putExtra("idMangaApi",chapterUpdateds.get(holder.getAdapterPosition()).getManga().getId());
-//                i.putExtra("language",chapterUpdateds.get(holder.getAdapterPosition()).getManga().getLanguage());
-//                i.putExtra("logoManga",chapterUpdateds.get(holder.getAdapterPosition()).getManga().getImage());
-//                context.startActivity(i);
                     }
                 });
             }
 
-        }
-        else{
-            if(position != chapterUpdateds.size() - 1){
-                ((DateGroupViewHolder)holder).binding.dateGroup.setText(chapterUpdateds.get(position+1).getChapterManga().returnTimeReleased());
+        } else {
+            if (position != chapterUpdateds.size() - 1) {
+                ((DateGroupViewHolder) holder).binding.dateGroup.setText(chapterUpdateds.get(position + 1).getChapterManga().returnTimeReleased());
             }
         }
     }

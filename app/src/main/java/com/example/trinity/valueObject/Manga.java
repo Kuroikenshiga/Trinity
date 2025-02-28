@@ -81,9 +81,21 @@ public class Manga implements Parcelable, Serializable {
 //    }
 
     public Manga() {
-        this.chapters = new ArrayList<>();
+        this.coverName = "";
+        this.uuid = 0; // ou qualquer valor padrão para long
+        this.id = "";
+        this.titulo = "";
+        this.image = null; // Bitmap pode ser null
+        this.language = "";
         this.autores = new ArrayList<>();
+        this.descricao = "";
         this.tags = new ArrayList<>();
+        this.chapters = new ArrayList<>();
+        this.idOfLastChapterOpen = "";
+        this.amountChaptersToRead = 0;
+        this.isAdded = false;
+        this.lastChapter = 0.0; // ou qualquer valor padrão para double
+        this.isVisible = true;
     }
 
 

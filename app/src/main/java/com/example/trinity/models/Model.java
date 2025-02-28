@@ -824,11 +824,7 @@ public class Model extends SQLiteOpenHelper {
             }
         }
         if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.setTransactionSuccessful();
-        ((Activity)context).runOnUiThread(()->{
-            for(OnMangaAddedNotifier notifier:notifiers){
-                notifier.someMangaAdded();
-            }
-        });
+
 
         return true;
     }

@@ -26,6 +26,8 @@ public interface Extensions {
     public final int RESPONSE_ERROR = 3;
     public final int RESPONSE_FINAL = 4;
     public final int RESPONSE_EMPTY = 5;
+    public final int RESPONSE_REQUEST_NEW_CONTENT_CALL = 6;
+    public final int RESPONSE_REQUEST_BYPASS = 7;
 
     void updates( Handler h);
     void loadMangaLogo(Handler h, ArrayList<Manga> mangaArrayList);
@@ -34,8 +36,8 @@ public interface Extensions {
 
     ArrayList<Manga> responseToValueObject(String response);
     void setLanguage(String language);
-    ArrayList<ChapterManga> viewChapters(String mangaId);
 
+    ArrayList<ChapterManga> viewChapters(String mangaId);
     void getChapterPages(Handler h, String idChapter);
 
     void loadChapterPages(Handler h, JsonArray array, String hash, String urlBase);
@@ -55,5 +57,5 @@ public interface Extensions {
     void setContext(Context context);
 
     double getMangaStatus(String idApiManga);
-
+    public ArrayList<ChapterManga> viewChapters(String mangaId,Handler h);
 }

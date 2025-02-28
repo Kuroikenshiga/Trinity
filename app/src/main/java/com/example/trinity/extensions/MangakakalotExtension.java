@@ -160,7 +160,7 @@ public class MangakakalotExtension implements Extensions {
         }
     }
 
-    public String loadMangaInfo(String idManga) {
+    public String loadMangaInfo(String idManga,Handler h) {
         String url = idManga.contains(BASE_URL) ? idManga : (BASE_URL + idManga);
         URL urlApi = null;
         String html = "";
@@ -173,6 +173,15 @@ public class MangakakalotExtension implements Extensions {
         Request request = new Request.Builder().url(urlApi).build();
         try (Response response = client.newCall(request).execute()) {
             html = response.body().string();
+            if(html.contains("ddg-l10n-title")){
+                Message msg = Message.obtain();
+                Bundle bundle = new Bundle();
+                bundle.putString("url",url);
+                msg.setData(bundle);
+                msg.what = RESPONSE_REQUEST_BYPASS;
+                h.sendMessage(msg);
+                return "";
+            }
             Manga manga = idManga.contains(CHAPMANGANATO) ? responseToFullValueObjectChapManganato(html) : responseToFullValueObjectMangakakalot(html);
 
             if (this.onMangaLoaded != null) {
@@ -226,6 +235,7 @@ public class MangakakalotExtension implements Extensions {
     private Manga responseToFullValueObjectChapManganato(String html) {
         Document document = Jsoup.parse(html);
         Element table = document.getElementsByClass("variations-tableInfo").first();
+        if(table == null)return new Manga();
         Elements values = table.getElementsByClass("table-value");
         ArrayList<String> authors = new ArrayList<>();
         String status = "";
@@ -300,9 +310,10 @@ public class MangakakalotExtension implements Extensions {
     }
 
     public ArrayList<ChapterManga> viewChaptersChapmanganato(String html) {
-        if (html == null) {
-            return new ArrayList<>();
-        }
+
+        if(html == null)return new ArrayList<>();
+        if(html.isEmpty())return new ArrayList<>();
+
         Document document = Jsoup.parse(html);
         if(document.getElementsByClass("panel-story-chapter-list").isEmpty())return new ArrayList<>();
         if(document.getElementsByClass("panel-story-chapter-list").first().getElementsByClass("row-content-chapter").isEmpty())return new ArrayList<>();
@@ -322,6 +333,9 @@ public class MangakakalotExtension implements Extensions {
     }
 
     public ArrayList<ChapterManga> viewChaptersMangakakalot(String html) {
+        if(html == null)return new ArrayList<>();
+        if(html.isEmpty())return new ArrayList<>();
+
         Document document = Jsoup.parse(html);
         if(document.getElementsByClass("chapter-list").isEmpty())return new ArrayList<>();
         if(document.getElementsByClass("chapter-list").first().getElementsByClass("row").isEmpty())return new ArrayList<>();
@@ -343,11 +357,10 @@ public class MangakakalotExtension implements Extensions {
         return chapterMangas;
     }
 
-    @Override
-    public ArrayList<ChapterManga> viewChapters(String mangaId) {
+    public ArrayList<ChapterManga> viewChapters(String mangaId,Handler h) {
         mangaId = mangaId.replace("@", "/");
         String urlApi = mangaId.contains(BASE_URL) ? mangaId : (BASE_URL + mangaId);
-        String html = loadMangaInfo(mangaId);
+        String html = loadMangaInfo(mangaId,h);
 
         return mangaId.contains(MANGAKAKALOT) ? viewChaptersMangakakalot(html) : viewChaptersChapmanganato(html);
     }
@@ -605,5 +618,10 @@ public class MangakakalotExtension implements Extensions {
     }
     public void setLanguage(String language){
 
+    }
+
+    @Override
+    public ArrayList<ChapterManga> viewChapters(String mangaId) {
+        return null;
     }
 }
