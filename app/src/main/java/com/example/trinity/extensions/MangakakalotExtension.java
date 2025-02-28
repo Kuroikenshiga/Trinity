@@ -174,6 +174,7 @@ public class MangakakalotExtension implements Extensions {
         try (Response response = client.newCall(request).execute()) {
             html = response.body().string();
             if(html.contains("ddg-l10n-title")){
+                if(h == null)return "";
                 Message msg = Message.obtain();
                 Bundle bundle = new Bundle();
                 bundle.putString("url",url);
@@ -622,6 +623,10 @@ public class MangakakalotExtension implements Extensions {
 
     @Override
     public ArrayList<ChapterManga> viewChapters(String mangaId) {
-        return null;
+        mangaId = mangaId.replace("@", "/");
+        String urlApi = mangaId.contains(BASE_URL) ? mangaId : (BASE_URL + mangaId);
+        String html = loadMangaInfo(mangaId,null);
+
+        return mangaId.contains(MANGAKAKALOT) ? viewChaptersMangakakalot(html) : viewChaptersChapmanganato(html);
     }
 }
