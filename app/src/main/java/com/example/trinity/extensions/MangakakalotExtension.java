@@ -67,7 +67,7 @@ public class MangakakalotExtension implements Extensions {
 
     @Override
     public void updates(Handler h) {
-        String url = "https://mangakakalot.com/manga_list?type=latest&category=all&state=all&page=" + currentPage;
+        String url = "https://www.mangakakalot.gg/genre/all?page=" + currentPage;
         URL urlApi;
         try {
             urlApi = new URL(url);
@@ -103,7 +103,7 @@ public class MangakakalotExtension implements Extensions {
                         e.printStackTrace();
                     }
 
-                    Request request = new Request.Builder().url(urlApiImage).build();
+                    Request request = new Request.Builder().url(urlApiImage).header("Referer","https://www.mangakakalot.gg/").build();
                     try (Response response = httpClient.newCall(request).execute()) {
                         if (response.isSuccessful() && response.body().contentType().toString().contains("image/")) {
                             InputStream inputStream = response.body().byteStream();
@@ -134,11 +134,11 @@ public class MangakakalotExtension implements Extensions {
 
     @Override
     public void search(String title, Handler h) {
-        String baseUrlSearch = "https://mangakakalot.com/search/story/";
-        System.out.println(baseUrlSearch+title.replace(" ","_"));
+        String baseUrlSearch = "https://mangakakalot.gg/search/story/";
+//        System.out.println(baseUrlSearch+title.replace(" ","-"));
         URL urlApi;
         try {
-            urlApi = new URL(baseUrlSearch+title.replace(" ","_"));
+            urlApi = new URL(baseUrlSearch+title.replace(" ","-"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return;
@@ -299,7 +299,7 @@ public class MangakakalotExtension implements Extensions {
             }
         }
 
-        description = document.getElementById("noidungm").text();
+        description = document.getElementById("contentBox").text();
 
         manga.setAutor(authors);
         if (!status.equals("Ongoing")) {
@@ -349,7 +349,7 @@ public class MangakakalotExtension implements Extensions {
             String id = item.getElementsByTag("span").first().getElementsByTag("a").first().attr("href").split("//")[1];
             String title = item.getElementsByTag("span").first().getElementsByTag("a").first().attr("title");
 
-            double chapter = Double.parseDouble(item.getElementsByTag("a").attr("href").split("chapter_")[1]);
+            double chapter = Double.parseDouble(item.getElementsByTag("a").text().split(" ")[1]);
 //            String RFC3339 = simpleDateFormat.format(dateFormaterMangakakalot(item.getElementsByTag("span").last().text()).getTime());
 //            System.out.println(dateFormaterMangakakalot(item.getElementsByTag("span").last().text()).getTime());
             String RFC3339 = dateTimeFormatter.format(dateFormaterMangakakalot(item.getElementsByTag("span").last().attr("title")).getTime().toInstant().atZone(ZoneId.systemDefault()));
@@ -409,7 +409,7 @@ public class MangakakalotExtension implements Extensions {
                 e.printStackTrace();
             }
             OkHttpClient client = new OkHttpClient.Builder().build();
-            Request request = new Request.Builder().url(url).header("Referer", img.attr("src").contains("manganato") ? "https://chapmanganato.to" : "https://mangakakalot.com").build();
+            Request request = new Request.Builder().url(url).header("Referer", "https://www.mangakakalot.gg/").build();
             try (Response response = client.newCall(request).execute()) {
 
                 if (response.body().contentType().toString().contains("image/")) {
