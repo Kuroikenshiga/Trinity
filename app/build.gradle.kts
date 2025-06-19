@@ -42,8 +42,8 @@ android {
 
 dependencies {
 
-    implementation(files("C:\\Users\\TeresaShySmile\\Downloads\\subsampling-scale-image-view-3.10.0.aar"))
-    implementation(files("C:/Users/TeresaShySmile/Downloads/jsoup-1.18.1.jar"))
+    implementation(files("C:\\Users\\TeresaShySmile\\AndroidStudioProjects\\Trinity\\dependences\\subsampling-scale-image-view-3.10.0.aar"))
+    implementation(files("C:\\Users\\TeresaShySmile\\AndroidStudioProjects\\Trinity\\dependences\\jsoup-1.20.1.jar"))
     val work_version = "2.9.0"
     // (Java only)
     implementation("androidx.work:work-runtime:$work_version")

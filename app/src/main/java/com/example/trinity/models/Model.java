@@ -730,10 +730,10 @@ public class Model extends SQLiteOpenHelper {
         return true;
     }
 
-    public ArrayList<Manga> loadSearch(String mangaTitle, LibraryFragment libraryFragment) {
+    public ArrayList<Manga> loadSearch(String mangaTitle, int limit) {
         ArrayList<Manga> mangaArrayList = new ArrayList<>();
 
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM mangas WHERE title LIKE ? ORDER BY id DESC", new String[]{"%" + mangaTitle + "%"});) {
+        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM mangas WHERE title LIKE ? ORDER BY title DESC LIMIT ?", new String[]{"%" + mangaTitle + "%",Integer.toString(limit)});) {
 //            System.out.println("quantidade de linhas: " + row.getCount());
             if (row.getCount() == 0) {
 

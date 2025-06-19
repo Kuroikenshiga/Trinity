@@ -79,7 +79,7 @@ public class AdapterHistory extends RecyclerView.Adapter<AdapterHistory.HistoryV
         return histories.size();
     }
 
-    public class HistoryViewHoler extends RecyclerView.ViewHolder {
+    public static class HistoryViewHoler extends RecyclerView.ViewHolder {
         HistoryItemBinding binding;
 
         public HistoryViewHoler(HistoryItemBinding binding) {
