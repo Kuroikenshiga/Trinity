@@ -49,6 +49,7 @@ public class Model extends SQLiteOpenHelper {
     private Context context;
     private ArrayList<OnMangaRemovedListener> observers = new ArrayList<>();
     private ArrayList<OnMangaAddedNotifier> notifiers = new ArrayList<>();
+    private boolean MANGA_TABLE_HAS_CHANGES = false;
     private Model(@Nullable Context context) {
         super(context, dataBaseName, null, version);
         this.context = context;
@@ -360,11 +361,11 @@ public class Model extends SQLiteOpenHelper {
         return returnValue;
     }
 
-    public ArrayList<Manga> selectAllMangas(boolean loadChaptersToo) {
+    public ArrayList<Manga> selectAllMangas(boolean loadChaptersToo, int limit,int offSet) {
         ArrayList<Manga> mangaArrayList = new ArrayList<>();
 
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM mangas ORDER BY id DESC", new String[]{});) {
-//            System.out.println("quantidade de linhas: " + row.getCount());
+        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM mangas ORDER BY id DESC "+(limit > 0?"LIMIT ? OFFSET ?":""), (limit > 0?new String[]{Integer.toString(limit),Integer.toString(offSet)}:new String[]{}))) {
+
             if (row.getCount() == 0) {
 
                 return mangaArrayList;
@@ -375,11 +376,6 @@ public class Model extends SQLiteOpenHelper {
 
                 String id = row.getString(2);
                 String cover = row.getString(1);
-//                int indexLogo = row.getColumnIndex("logo_path");
-//                String imageByte = row.getString(indexLogo);
-//                BitmapFactory.Options op = new BitmapFactory.Options();
-//                op.inSampleSize = 2;
-//                Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length,op);
                 int indexLastChapter = row.getColumnIndex("last_chapter");
                 String desc = row.getString(4);
                 String title = row.getString(6);
@@ -733,10 +729,9 @@ public class Model extends SQLiteOpenHelper {
     public ArrayList<Manga> loadSearch(String mangaTitle, int limit) {
         ArrayList<Manga> mangaArrayList = new ArrayList<>();
 
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM mangas WHERE title LIKE ? ORDER BY title DESC LIMIT ?", new String[]{"%" + mangaTitle + "%",Integer.toString(limit)});) {
+        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM mangas WHERE title LIKE ?  LIMIT ?", new String[]{mangaTitle + "%",Integer.toString(limit)});) {
 //            System.out.println("quantidade de linhas: " + row.getCount());
             if (row.getCount() == 0) {
-
                 return mangaArrayList;
             }
 
@@ -757,19 +752,8 @@ public class Model extends SQLiteOpenHelper {
 
             }
         }
-        MainActivity mainActivity = (MainActivity) context;
-
-//        if (libraryFragment != null) {
-//            mainActivity.runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    libraryFragment.searchResult(mangaArrayList);
-//                }
-//            });
-//        }
 
         return mangaArrayList;
-
 
     }
 
@@ -825,7 +809,7 @@ public class Model extends SQLiteOpenHelper {
         }
         if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.setTransactionSuccessful();
 
-
+        MANGA_TABLE_HAS_CHANGES = true;
         return true;
     }
 
@@ -886,6 +870,7 @@ public class Model extends SQLiteOpenHelper {
                 listener.onMangaRemoved(manga.getLanguage(),manga.getId());
             }
         });
+        MANGA_TABLE_HAS_CHANGES = true;
         return true;
     }
 
@@ -1362,27 +1347,21 @@ public class Model extends SQLiteOpenHelper {
         int getOwner();
         void someMangaAdded();
     }
-    public void addNotifier(OnMangaAddedNotifier notifier){
-        if(notifiers.stream().anyMatch(notifier1 -> notifier1.getOwner() == OnMangaAddedNotifier.LIBRARY_OWNER))return;
-        this.notifiers.add(notifier);
-    }
-    public void addOnMangaRemovedListener(OnMangaRemovedListener listener){
-        if(observers.stream().anyMatch(observer -> observer.getOwner() == OnMangaRemovedListener.LIBRARY_OWNER))return;
-        this.observers.add(listener);
-    }
-    public int getObserversSize(){return this.observers.size();}
-    public void removeOnMangaRemovedListener(OnMangaRemovedListener listener){
-        this.observers.remove(listener);
+
+    public int getAmountMangasSalved(){
+        try(Cursor row = this.sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM mangas ",new String[]{})){
+            row.moveToNext();
+            return  row.getInt(0);
+        }
     }
 
-//    public void removeLastChapter(){
-//
-//        try(SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("UPDATE mangas set last_chapter = ?")){
-//            stmt.bindString(1,"0");
-//            stmt.executeUpdateDelete();
-//        }catch (SQLiteException ex){
-//            ex.printStackTrace();
-//        }
-//    }
+    public boolean mangaTableHasChanges(){
+        if(MANGA_TABLE_HAS_CHANGES){
+            MANGA_TABLE_HAS_CHANGES = false;
+            return true;
+        }
+        return false;
+
+    }
 
 }

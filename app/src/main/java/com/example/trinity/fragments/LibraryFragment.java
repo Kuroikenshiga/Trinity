@@ -29,6 +29,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.example.trinity.ExtensionShowContentActivity;
 import com.example.trinity.MainActivity;
 import com.example.trinity.R;
 import com.example.trinity.adapters.AdapterMangas;
@@ -42,6 +43,7 @@ import com.example.trinity.viewModel.MangasFromDataBaseViewModel;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -66,16 +68,17 @@ public class LibraryFragment extends Fragment {
     private AdapterMangas adapter;
     private RecyclerView recyclerView;
     private ArrayList<Manga> dataSet = new ArrayList<>();
-    private ArrayList<Manga> resultSet = new ArrayList<>();
+    private ArrayList<Manga> resultSet;
     private Model model;
     private Timer timer;
-    private TimerTask task;
+    private int LIMIT = 21,OFF_SET = 21;
     private boolean isTimerCanceled = false;
     private long last_time_key_pressed = 0;
     private boolean search_has_change = false;
     private boolean searchFildIsShowed = false;
     MangasFromDataBaseViewModel mangasFromDataBaseViewModel;
     private boolean isSearching = false;
+    private boolean supressManyLoad = false;
 
     public LibraryFragment() {
         // Required empty public constructor
@@ -132,7 +135,7 @@ public class LibraryFragment extends Fragment {
         });
 
         recyclerView.setAdapter(adapter);
-
+        this.resultSet = new ArrayList<>();
 
         AdapterSearchItensResult adapterSearchItensResult = new AdapterSearchItensResult(resultSet, requireContext());
         binding.searchItens.setAdapter(adapterSearchItensResult);
@@ -177,7 +180,7 @@ public class LibraryFragment extends Fragment {
                         @Override
                         public void run() {
 
-                            if (search_has_change && !Objects.requireNonNull(binding.searchField.getText()).toString().isEmpty() && !isSearching && Instant.now().toEpochMilli() - last_time_key_pressed > 1000) {
+                            if (model != null && search_has_change && !Objects.requireNonNull(binding.searchField.getText()).toString().isEmpty() && !isSearching && Instant.now().toEpochMilli() - last_time_key_pressed > 700) {
                                 search_has_change = false;
                                 isSearching = true;
                                 resultSet = model.loadSearch(Objects.requireNonNull(binding.searchField.getText()).toString(), 5);
@@ -210,10 +213,7 @@ public class LibraryFragment extends Fragment {
                     });
 
                     show.start();
-
                 }
-
-
             }
         });
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
@@ -258,7 +258,24 @@ public class LibraryFragment extends Fragment {
             }
         };
         getActivity().getOnBackPressedDispatcher().addCallback(getActivity(), callback);
-//
+
+        binding.reciclerViewMangas.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                if(!recyclerView.canScrollVertically(1) && !supressManyLoad){
+
+                    supressManyLoad = true;
+                    loadLibrary(LIMIT,OFF_SET);
+                }
+            }
+        });
+
+        binding.backToTop.setOnClickListener((v)->{
+            forceLoadLibrary();
+        });
+
         return view;
     }
 
@@ -280,14 +297,12 @@ public class LibraryFragment extends Fragment {
             searchFildIsShowed = false;
 
         }
-
+        binding.searchItens.setVisibility(View.GONE);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-//
-        loadLibrary();
     }
 
     @Override
@@ -300,38 +315,50 @@ public class LibraryFragment extends Fragment {
             mainActivity.isInFirstDestination = true;
             mainActivity.isInReadFragment = false;
         }
-
+        model = Model.getInstance(requireContext());
         new Thread(() -> {
-            if (this.model != null && this.mangasFromDataBaseViewModel.getMangas().size() != this.model.getMangaCount()) {
-                loadLibrary(true);
+            if (this.model != null && model.mangaTableHasChanges()) {
+                forceLoadLibrary();
             }
         }).start();
 
     }
 
-    private void loadLibrary() {
-        if (!mangasFromDataBaseViewModel.getMangas().isEmpty()) {
-            return;
+    private void loadLibrary(int limit, int offSet) {
+        if(mangasFromDataBaseViewModel.getMangas().size() > 50){
+            binding.backToTop.setVisibility(View.VISIBLE);
+            mangasFromDataBaseViewModel.getMangas().subList(0, 25).clear();
+            adapter.notifyItemRangeRemoved(0,25);
         }
+
         new Thread(() -> {
             model = Model.getInstance(requireActivity());
-            dataSet = model.selectAllMangas(false);
+            dataSet = model.selectAllMangas(false,limit,offSet);
+
+            if(dataSet.isEmpty())return;
+
             requireActivity().runOnUiThread(() -> {
-                mangasFromDataBaseViewModel.setMangas(dataSet);
-                adapter.setDataSet(mangasFromDataBaseViewModel.getMangas());
-                recyclerView.setAdapter(adapter);
+                int indexStart = mangasFromDataBaseViewModel.getMangas().size();
+                mangasFromDataBaseViewModel.getMangas().addAll(dataSet);
+                adapter.notifyItemRangeInserted(indexStart,dataSet.size());
+                supressManyLoad = false;
+                OFF_SET += LIMIT;
             });
         }).start();
+
     }
 
-    private void loadLibrary(boolean forceLoad) {
+    private void forceLoadLibrary() {
+
         new Thread(() -> {
             model = Model.getInstance(requireActivity());
-            dataSet = model.selectAllMangas(false);
+            dataSet = model.selectAllMangas(false,LIMIT,0);
             requireActivity().runOnUiThread(() -> {
                 mangasFromDataBaseViewModel.setMangas(dataSet);
                 adapter.setDataSet(mangasFromDataBaseViewModel.getMangas());
                 recyclerView.setAdapter(adapter);
+                OFF_SET = 21;
+                binding.backToTop.setVisibility(View.GONE);
             });
         }).start();
     }

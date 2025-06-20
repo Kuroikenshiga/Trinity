@@ -54,6 +54,7 @@ public class UpdateWork extends Worker {
     private ArrayList<ChapterUpdated> dataSet;
     private boolean isAlredyChecked = false;
     public static final String WORK_NAME = "WorkUpdateLibrary";
+    private static int OFF_SET_INCREMENT = 10;
     private Uri sound;
     public UpdateWork(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -74,49 +75,53 @@ public class UpdateWork extends Worker {
 
         PendingIntent cancelPending = PendingIntent.getBroadcast(context,0,cancelUpdateIntent,PendingIntent.FLAG_IMMUTABLE);
 
-        ArrayList<Manga> mangas = model.selectAllMangas(false);
-
-
+        int tableSize = model.getAmountMangasSalved();
 
         NotificationCompat.Builder notification = new NotificationCompat.Builder(context, CHANNEL_NOTIFICATION_ID)
                 .setSmallIcon(R.drawable.app_icon)
-                .setContentTitle("Atualizando biblioteca ("+1+" de "+mangas.size()+")")
+                .setContentTitle("Atualizando biblioteca ("+1+" de "+tableSize+")")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setProgress(mangas.size(), 0, false)
+                .setProgress(tableSize, 0, false)
                 .addAction(R.drawable.cancel_work_shape,"Cancelar atualização", cancelPending);
 
 
         this.notify(notification);
-        int progress = 0;
-        for (Manga m : mangas) {
-            isAlredyChecked = false;
-            notification.setContentTitle("Atualizando biblioteca ("+(progress+1)+" de "+mangas.size()+")");
-            notification.setContentText(m.getTitulo());
-            this.notify(notification);
+        int progress = 0,offSet = 0;
 
-            if(CancelCurrentWorkReceiver.isIsWorkUpdatesLibraryCanceled()){
-                break;
-            }
-            Extensions mangaDexExtension = m.getId().contains("mangakakalot")||m.getId().contains("manganato")?new MangakakalotExtension(null):new MangaDexExtension("",imageQuality);
-            mangaDexExtension.setLanguage(m.getLanguage());
-            ArrayList<ChapterManga> chaptersFromApi = mangaDexExtension.viewChapters(m.getId());
-            double lastChapter = mangaDexExtension.getMangaStatus(m.getId());
-            if(lastChapter != 0){
-                model.setLastChapterManga(m.getId(),m.getLanguage(),lastChapter);
-            }
-            m.setChapters(model.getAllChapterByMangaID(m.getId(), m.getLanguage()));
-            for (ChapterManga chapterManga : chaptersFromApi) {
-                if (!m.isChapterAlredySaved(chapterManga.getId())) {
-                    ChapterUpdated chapterUpdated = new ChapterUpdated(m, chapterManga);
-                    model.addNewChapter(chapterUpdated);
-                    this.haveNewChapters = true;
+        ArrayList<Manga> mangas = model.selectAllMangas(false,10,offSet);
+        while(!mangas.isEmpty()){
+            for (Manga m : mangas) {
+                isAlredyChecked = false;
+                notification.setContentTitle("Atualizando biblioteca ("+(progress+1)+" de "+tableSize+")");
+                notification.setContentText(m.getTitulo());
+                this.notify(notification);
+
+                if(CancelCurrentWorkReceiver.isIsWorkUpdatesLibraryCanceled()){
+                    break;
                 }
-            }
-            m.getChapters().clear();
-            progress++;
-            notification.setProgress(mangas.size(), progress, false);
+                Extensions mangaDexExtension = m.getId().contains("mangakakalot")||m.getId().contains("manganato")?new MangakakalotExtension(null):new MangaDexExtension("",imageQuality);
+                mangaDexExtension.setLanguage(m.getLanguage());
+                ArrayList<ChapterManga> chaptersFromApi = mangaDexExtension.viewChapters(m.getId());
+                double lastChapter = mangaDexExtension.getMangaStatus(m.getId());
+                if(lastChapter != 0){
+                    model.setLastChapterManga(m.getId(),m.getLanguage(),lastChapter);
+                }
+                m.setChapters(model.getAllChapterByMangaID(m.getId(), m.getLanguage()));
+                for (ChapterManga chapterManga : chaptersFromApi) {
+                    if (!m.isChapterAlredySaved(chapterManga.getId())) {
+                        ChapterUpdated chapterUpdated = new ChapterUpdated(m, chapterManga);
+                        model.addNewChapter(chapterUpdated);
+                        this.haveNewChapters = true;
+                    }
+                }
+                m.getChapters().clear();
+                progress++;
+                notification.setProgress(tableSize, progress, false);
 
-            this.notify(notification);
+                this.notify(notification);
+            }
+            offSet += OFF_SET_INCREMENT;
+            mangas = model.selectAllMangas(false,10,offSet);
         }
 
         notification = new NotificationCompat.Builder(context, CHANNEL_NOTIFICATION_ID)

@@ -140,16 +140,12 @@ public class MainActivity extends AppCompatActivity {
 //                model.removeImagesFromDataBase();
                 //Retirar a migração após a atualização
                 if (!migrated) {
-                    System.out.println("Entrou");
+
                     model.doUpdateLogos();
                 }
 
-                dataSet = model.selectAllMangas(false);
+                dataSet = model.selectAllMangas(false,21,0);
 
-
-//                for(Manga manga:dataSet){
-////                    model.updateLocalStorageOfLogos(manga.getId(),manga.getLanguage(),storage.insertLogoManga(manga.getImage(), manga.getId()));
-//                }
                 MainActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -160,13 +156,6 @@ public class MainActivity extends AppCompatActivity {
         }.start();
 
 
-//        binding.menuNavi.post(()->{
-//            animatorHide = ValueAnimator.ofInt(0,binding.menuNavi.getMeasuredHeight()*-1);
-//            animatorHide.setDuration(500);
-//
-//            animatorShow = ValueAnimator.ofInt(binding.menuNavi.getMeasuredHeight()*-1,0);
-//            animatorShow.setDuration(500);
-//        });
 
         MangaDataViewModel mangaDataViewModel = new ViewModelProvider(this).get(MangaDataViewModel.class);
         initNavigation();

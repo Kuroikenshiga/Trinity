@@ -76,11 +76,9 @@ public class UpdatesFragment extends Fragment {
     private OneTimeWorkRequest workRequest;
     private WorkManager workManager;
     private boolean isUpdatingLibray = false;
-    private View v;
     private MangaDataViewModel mangaDataViewModel;
     private NotificationManager notificationManager;
     private final static String CHANNEL_NOTIFICATION_ID = "CHANNEL1";
-    private int librarySize = 0;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private long lastUpadate;
@@ -160,21 +158,6 @@ public class UpdatesFragment extends Fragment {
         loadUpdates();
         realodUpdates();
 
-//        binding.updatesConteiner.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//                System.out.println(dy);
-//                if (dy > 0) {
-//                    ((MainActivity) requireActivity()).hideBottomNavigation();
-//                }
-//                if (dy < 0) {
-//                    ((MainActivity)requireActivity()).showBottomNavigation();
-//                }
-//            }
-//
-//        });
-
         return binding.getRoot();
     }
 
@@ -186,12 +169,12 @@ public class UpdatesFragment extends Fragment {
                     @Override
                     public void run() {
                         model = Model.getInstance(myActivity);
-//                        System.out.println("Load chamado");
+
                         ArrayList<ChapterManga> chapterUpdatedArrayList = model.loadUpdates();
                         if (getActivity() == null) return;
                         MangasFromDataBaseViewModel mangasFromDataBaseViewModel = new ViewModelProvider(requireActivity()).get(MangasFromDataBaseViewModel.class);
-                        ArrayList<Manga> mangas = mangasFromDataBaseViewModel.getMangas().isEmpty() ? model.selectAllMangas(false) : mangasFromDataBaseViewModel.getMangas();
-                        librarySize = mangas.size();
+
+
                         updatesViewModel.getChapterUpdatedLiveData().getValue().clear();
 
                         if (getActivity() != null) {
@@ -202,21 +185,26 @@ public class UpdatesFragment extends Fragment {
                                 }
                             });
                         }
-
-                        for (ChapterManga chapU : chapterUpdatedArrayList) {
-                            for (Manga m : mangas) {
-                                if (m.uuid == chapU.mangaUUID) {
-                                    ChapterUpdated capU = new ChapterUpdated(m, chapU);
-                                    if (getActivity() != null) {
-                                        getActivity().runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                updatesViewModel.addChapterInLiveData(capU);
-                                            }
-                                        });
+                        int offSet = 0;
+                        ArrayList<Manga> mangas = model.selectAllMangas(false,10,offSet);
+                        while(!mangas.isEmpty()){
+                            for (ChapterManga chapU : chapterUpdatedArrayList) {
+                                for (Manga m : mangas) {
+                                    if (m.uuid == chapU.mangaUUID) {
+                                        ChapterUpdated capU = new ChapterUpdated(m, chapU);
+                                        if (getActivity() != null) {
+                                            getActivity().runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    updatesViewModel.addChapterInLiveData(capU);
+                                                }
+                                            });
+                                        }
                                     }
                                 }
                             }
+                            offSet += 10;
+                            mangas = model.selectAllMangas(false,10,offSet);
                         }
                         isUpdatingLibray = false;
                     }
@@ -245,7 +233,7 @@ public class UpdatesFragment extends Fragment {
                         @Override
                         public void onChanged(WorkInfo workInfo) {
 
-                            if(workInfo == null)return;
+                            if (workInfo == null) return;
 
                             if (workInfo.getState().isFinished()) {
                                 isUpdatingLibray = false;

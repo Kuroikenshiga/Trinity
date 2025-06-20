@@ -49,14 +49,14 @@
         <LinearLayout
             android:id="@+id/searchToolContainer"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="50dp"
             app:layout_constraintTop_toBottomOf="@+id/titleContainer"
             android:gravity="center"
             android:visibility="visible">
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:background="@drawable/search_field_shape"
                 android:orientation="vertical"
                 >
@@ -122,9 +122,27 @@
         app:layout_constraintTop_toBottomOf="@id/header"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:background="@drawable/dialog_shape"
+        android:background="@drawable/search_itens_shape"
         android:backgroundTint="?attr/colorSurface"
         android:padding="10dp"
         android:visibility="gone"
         />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/backToTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="15dp"
+        android:src="@drawable/arrow_down"
+        android:rotation="180"
+        android:contentDescription="De volta para o topo"
+        app:backgroundTint="?attr/colorSecondary"
+        android:tint="?attr/colorTertiary"
+        android:visibility="gone"
+        >
+
+    </com.google.android.material.floatingactionbutton.FloatingActionButton>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
