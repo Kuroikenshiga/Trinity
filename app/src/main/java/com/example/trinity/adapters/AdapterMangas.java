@@ -3,7 +3,6 @@ package com.example.trinity.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Parcelable;
 import android.view.LayoutInflater;
@@ -12,13 +11,11 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.trinity.Interfeces.Extensions;
 import com.example.trinity.MainActivity;
@@ -31,7 +28,6 @@ import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 import com.example.trinity.valueObject.Manga;
 
 import java.io.Serializable;
-import java.security.cert.Extension;
 import java.util.ArrayList;
 
 public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewHolder> {

@@ -206,15 +206,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
          adapter = new AdapterMangas(ExtensionShowContentActivity.this, mangasFromDataBaseViewModel.getMangas(),this.language);
          adapter.setFromUpdates(true);
         startUphandler();
-//        binding.search.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(ExtensionShowContentActivity.this,SearchResultActivity.class);
-//                intent.putExtra("language",language);
-//                intent.putExtra("SearchField",binding.searchField.getText().toString());
-//                ExtensionShowContentActivity.this.startActivity(intent);
-//            }
-//        });
+
         binding.searchAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -327,7 +319,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
         binding.searchField.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if(!alredyClicked){
+                if(!alredyClicked && keyCode == KeyEvent.KEYCODE_ENTER){
                     alredyClicked = true;
                     Intent intent = new Intent(ExtensionShowContentActivity.this,SearchResultActivity.class);
                     intent.putExtra("language",language);

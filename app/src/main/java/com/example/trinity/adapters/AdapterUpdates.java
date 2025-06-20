@@ -101,7 +101,9 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     @Override
                     public void onClick(View v) {
                         Model model = Model.getInstance(context);
-
+                        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary,typedValue,true);
+                        chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().setAlredyRead(true);
+                        ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(typedValue.data);
                         new Thread() {
                             @Override
                             public void run() {
@@ -123,16 +125,17 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                 });
 
                                 if (model.chapterRead(chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga())) {
+
                                     MainActivity mangaShowContentActivity = (MainActivity) context;
                                     chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().setAlredyRead(true);
-                                    mangaShowContentActivity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            TypedValue value = new TypedValue();
-                                            context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary,value,false);
-                                            ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(value.data);
-                                        }
-                                    });
+//                                    mangaShowContentActivity.runOnUiThread(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+////                                            TypedValue value = new TypedValue();
+//                                            context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary,typedValue,true);
+//                                            ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(typedValue.data);
+//                                        }
+//                                    });
                                 }
                             }
                         }.start();

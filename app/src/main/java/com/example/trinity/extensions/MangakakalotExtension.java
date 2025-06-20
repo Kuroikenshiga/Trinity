@@ -1,6 +1,7 @@
 package com.example.trinity.extensions;
 
 import static java.util.Calendar.HOUR_OF_DAY;
+import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
 
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -67,7 +69,7 @@ public class MangakakalotExtension implements Extensions {
 
     @Override
     public void updates(Handler h) {
-        String url = "https://www.mangakakalot.gg/genre/all?page=" + currentPage;
+        String url = "https://www.mangakakalot.gg/manga-list/latest-manga?page=" + currentPage;
         URL urlApi;
         try {
             urlApi = new URL(url);
@@ -134,7 +136,9 @@ public class MangakakalotExtension implements Extensions {
 
     @Override
     public void search(String title, Handler h) {
-        String baseUrlSearch = "https://mangakakalot.gg/search/story/";
+        String baseUrlSearch = "https://www.mangakakalot.gg/manga/";
+        title = title.replace("~","");
+        title = title.replace(",","");
 //        System.out.println(baseUrlSearch+title.replace(" ","-"));
         URL urlApi;
         try {
@@ -148,11 +152,17 @@ public class MangakakalotExtension implements Extensions {
         try (Response response = httpClient.newCall(request).execute()) {
 //            System.out.println(response.body().string());
             ArrayList<Manga> mangas = this.responseSearchToValueObject(response.body().string());
+
             if(mangas.isEmpty()){
                 Message msg = Message.obtain();
                 msg.what = RESPONSE_EMPTY;
                 h.sendMessage(msg);
+                return;
             }
+            mangas.get(0).setId(baseUrlSearch+title.replace(" ","-"));
+            mangas.get(0).setId(mangas.get(0).getId().split("//")[1]);
+            mangas.get(0).setId(mangas.get(0).getId().replace("/", "@"));
+
             loadMangaLogo(h, mangas);
             currentPage++;
         } catch (IOException e) {
@@ -217,16 +227,14 @@ public class MangakakalotExtension implements Extensions {
     public ArrayList<Manga> responseSearchToValueObject(String response) {
         ArrayList<Manga> mangas = new ArrayList<>();
         Document document = Jsoup.parse(response);
-        Elements mangaElements = document.getElementsByClass("story_item");
+        Elements mangaElements = document.getElementsByClass("manga-info-top");
         if(mangaElements == null) return new ArrayList<>();
         for (Element element : mangaElements) {
             Manga manga = new Manga();
-            manga.setCoverName(element.getElementsByTag("img").first().attr("src"));
-            manga.setTitulo(element.getElementsByTag("h3").first().getElementsByTag("a").first().text());
-            manga.setId(element.getElementsByTag("a").first().attr("href"));
+            manga.setCoverName(Objects.requireNonNull(element.getElementsByTag("img").first()).attr("src"));
+            manga.setTitulo(Objects.requireNonNull(element.getElementsByTag("h1").first()).text());
+//            manga.setId(Objects.requireNonNull(element.getElementsByTag("a").first()).attr("href"));
 
-            manga.setId(manga.getId().split("//")[1]);
-            manga.setId(manga.getId().replace("/", "@"));
             manga.setLanguage(language);
             mangas.add(manga);
 
@@ -341,7 +349,7 @@ public class MangakakalotExtension implements Extensions {
         if(document.getElementsByClass("chapter-list").isEmpty())return new ArrayList<>();
         if(document.getElementsByClass("chapter-list").first().getElementsByClass("row").isEmpty())return new ArrayList<>();
         Element div = document.getElementsByClass("chapter-list").first();
-        Elements divsChap = div.getElementsByTag("div");
+        Elements divsChap = div.getElementsByClass("row");
         ArrayList<ChapterManga> chapterMangas = new ArrayList<>();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
@@ -608,6 +616,9 @@ public class MangakakalotExtension implements Extensions {
                 }
             }
         }
+
+        calendar.set(HOUR_OF_DAY,calendar.get(HOUR_OF_DAY)+11);
+        calendar.set(MINUTE,calendar.get(MINUTE)+59);
         return calendar;
     }
 

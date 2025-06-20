@@ -15,6 +15,7 @@ import android.os.Bundle;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.widget.NestedScrollView;
@@ -436,7 +437,12 @@ public class InfoMangaFragment extends Fragment {
         getActivity().getOnBackPressedDispatcher().addCallback(getActivity(), callback);
         return v;
     }
+    @Override
+    public void onStart(){
+        super.onStart();
+        new Thread(this::continueReading).start();
 
+    }
     @Override
     public void onResume() {
         super.onResume();
@@ -576,7 +582,7 @@ public class InfoMangaFragment extends Fragment {
                     chapterMangasListed.clear();
                     indexSubLists = 0;
 //                    allChapters = chapters;
-                    lastChapter = model.getIdApiOfLastChapterRead(manga.getId(), manga.getLanguage());
+
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -587,20 +593,9 @@ public class InfoMangaFragment extends Fragment {
                             if (manga.getLastChapter() != 0 && !manga.isOngoing(allChapters))
                                 binding.status.setText("Concluído");
                         }
-                    });
-                    if (!lastChapter.isEmpty()) {
-
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ChapterManga chapterManga = getChapterFromDataSet(allChapters, lastChapter);
-                                if (chapterManga == null) return;
-                                binding.resumeRead.setImageResource(R.drawable.resume_read_ative);
-                                binding.resumeState.setText("Cuntinuar leitura do capítulo " + chapterManga.getChapter());
-
-                            }
-                        });
                     }
+                    );
+                    continueReading();
 
                     if (getActivity() == null) {
                         return;
@@ -627,8 +622,11 @@ public class InfoMangaFragment extends Fragment {
         new Thread() {
             @Override
             public void run() {
+                if(mangaDataViewModel == null)return;
                 allChapters = mangaDataViewModel.getManga().getChapters() != null && !mangaDataViewModel.getManga().getChapters().isEmpty() ? mangaDataViewModel.getManga().getChapters() : (mangaDexExtension instanceof MangaDexExtension?mangaDexExtension.viewChapters(manga.getId()):mangaDexExtension.viewChapters(manga.getId(),mainHandler));
-                mangaDataViewModel.getManga().setChapters(allChapters);
+                if(mangaDataViewModel == null)return;
+                Objects.requireNonNull(mangaDataViewModel.getManga()).setChapters(allChapters);
+                if(mangaDataViewModel == null)return;
                 try {
                     SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
                 } catch (NoSuchMethodException e) {
@@ -646,7 +644,7 @@ public class InfoMangaFragment extends Fragment {
                 if (getActivity() == null) {
                     return;
                 }
-                getActivity().runOnUiThread(new Runnable() {
+                requireActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         if (!manga.isOngoing(allChapters)) binding.status.setText("Concluído");
@@ -703,36 +701,6 @@ public class InfoMangaFragment extends Fragment {
         bundle.putString("mangaIdApi", manga.getId());
         bundle.putString("mangaLanguage", manga.getLanguage());
         Navigation.findNavController(v).navigate(R.id.action_infoMangaFragment2_to_readerMangaFragment, bundle);
-    }
-
-    private boolean loadSubLists(ArrayList<ChapterManga> array) {
-        if (array == null) return false;
-        int numOfSubLists = 0;
-        try {
-            SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", array, OrderEnum.DECRESCENTE);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-        if (array.size() <= 100) {
-            return false;
-        }
-        numOfSubLists = (int) (array.size() / 100);
-        numOfSubLists += (numOfSubLists * 100 == array.size() ? 0 : 1);
-        sublListsChapters = new List[numOfSubLists];
-
-        int numItens = 100;
-        int offSet = 0;
-        for (int i = 0; i < numOfSubLists; i++) {
-            sublListsChapters[i] = array.subList(offSet, array.size() % 100 != 0 && i != numOfSubLists - 1 ? numItens + offSet : array.size());
-            offSet += 100;
-        }
-        return true;
     }
 
     @Override
@@ -825,7 +793,25 @@ public class InfoMangaFragment extends Fragment {
         }
 
     }
+    @WorkerThread
+    public void continueReading(){
+        lastChapter = model.getIdApiOfLastChapterRead(manga.getId(), manga.getLanguage());
+        if (!lastChapter.isEmpty()) {
 
+            requireActivity().runOnUiThread(()->{
+                TypedValue typedValue = new TypedValue();
+
+                requireContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
+
+                binding.resumeRead.getDrawable().setTint(typedValue.data);
+
+                ChapterManga chapterManga = getChapterFromDataSet(allChapters, lastChapter);
+                if (chapterManga == null) return;
+
+                binding.resumeState.setText("Continuar leitura do capítulo " + chapterManga.getChapter());
+            });
+        }
+    }
     public boolean isMangaAdded() {
         return isAdded;
     }

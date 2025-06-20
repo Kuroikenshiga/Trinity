@@ -125,7 +125,7 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
                     return true;
                 }
                 TypedValue typedValueText = new TypedValue();
-                context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary,typedValueText,false);
+                context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary,typedValueText,true);
                 holder.binding.chapNumber.setTextColor(typedValueText.data);
                 new Thread() {
                     @Override
