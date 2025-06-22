@@ -302,7 +302,7 @@ public class MangakakalotExtension implements Extensions {
                     }
                     break;
                 case 2:
-                    status = values.get(i).text().split(" : ")[1];
+                    status = values.get(i).text().split(" : ").length > 1?values.get(i).text().split(" : ")[1]:"";
                     break;
                 case 6:
                     Elements tags = values.get(i).getElementsByTag("a");
