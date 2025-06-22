@@ -74,6 +74,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Timer;
@@ -180,17 +181,18 @@ public class InfoMangaFragment extends Fragment {
                         public void run() {
                             allChapters = mangaDataViewModel.getManga().getChapters() != null && !mangaDataViewModel.getManga().getChapters().isEmpty() ? mangaDataViewModel.getManga().getChapters() : (mangaDexExtension instanceof MangaDexExtension?mangaDexExtension.viewChapters(manga.getId()):mangaDexExtension.viewChapters(manga.getId(),mainHandler));
                             mangaDataViewModel.getManga().setChapters(allChapters);
-                            try {
-                                SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
-                            } catch (NoSuchMethodException e) {
-                                throw new RuntimeException(e);
-                            } catch (ClassNotFoundException e) {
-                                throw new RuntimeException(e);
-                            } catch (IllegalAccessException e) {
-                                throw new RuntimeException(e);
-                            } catch (InvocationTargetException e) {
-                                throw new RuntimeException(e);
-                            }
+                            allChapters.sort(Comparator.comparingDouble((ChapterManga ch)->Double.parseDouble(ch.getChapter())).reversed());
+//                            try {
+//                                SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
+//                            } catch (NoSuchMethodException e) {
+//                                throw new RuntimeException(e);
+//                            } catch (ClassNotFoundException e) {
+//                                throw new RuntimeException(e);
+//                            } catch (IllegalAccessException e) {
+//                                throw new RuntimeException(e);
+//                            } catch (InvocationTargetException e) {
+//                                throw new RuntimeException(e);
+//                            }
                             chapterMangasListed.clear();
                             indexSubLists = 0;
 
@@ -535,17 +537,18 @@ public class InfoMangaFragment extends Fragment {
     private void loadChapters() {
         if (mangaDataViewModel != null && mangaDataViewModel.getManga() != null && mangaDataViewModel.getManga().getChapters() != null) {
             if (!mangaDataViewModel.getManga().getChapters().isEmpty()) {
-                try {
-                    SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", mangaDataViewModel.getManga().getChapters(), OrderEnum.DECRESCENTE);
-                } catch (NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                } catch (InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
+                mangaDataViewModel.getManga().getChapters().sort(Comparator.comparingDouble((ChapterManga c)->Double.parseDouble(c.getChapter())).reversed());
+//                try {
+//                    SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", mangaDataViewModel.getManga().getChapters(), OrderEnum.DECRESCENTE);
+//                } catch (NoSuchMethodException e) {
+//                    throw new RuntimeException(e);
+//                } catch (ClassNotFoundException e) {
+//                    throw new RuntimeException(e);
+//                } catch (IllegalAccessException e) {
+//                    throw new RuntimeException(e);
+//                } catch (InvocationTargetException e) {
+//                    throw new RuntimeException(e);
+//                }
                 chaptersAdapter = new AdapterChapters(requireActivity(), mangaDataViewModel.getManga().getChapters());
                 chaptersAdapter.setFragment(this);
                 chaptersAdapter.setMangaDataViewModel(mangaDataViewModel);
@@ -567,17 +570,18 @@ public class InfoMangaFragment extends Fragment {
                 public void run() {
                     model = Model.getInstance(getActivity());
                     allChapters = model.getAllChapterByMangaID(manga.getId(), manga.getLanguage());
-                    try {
-                        SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
-                    } catch (NoSuchMethodException e) {
-                        throw new RuntimeException(e);
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    } catch (InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
+                    allChapters.sort(Comparator.comparingDouble((ChapterManga ch)->Double.parseDouble(ch.getChapter())).reversed());
+//                    try {
+//                        SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
+//                    } catch (NoSuchMethodException e) {
+//                        throw new RuntimeException(e);
+//                    } catch (ClassNotFoundException e) {
+//                        throw new RuntimeException(e);
+//                    } catch (IllegalAccessException e) {
+//                        throw new RuntimeException(e);
+//                    } catch (InvocationTargetException e) {
+//                        throw new RuntimeException(e);
+//                    }
                     mangaDataViewModel.getManga().setChapters(allChapters);
                     chapterMangasListed.clear();
                     indexSubLists = 0;
@@ -627,17 +631,18 @@ public class InfoMangaFragment extends Fragment {
                 if(mangaDataViewModel == null)return;
                 Objects.requireNonNull(mangaDataViewModel.getManga()).setChapters(allChapters);
                 if(mangaDataViewModel == null)return;
-                try {
-                    SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
-                } catch (NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                } catch (InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
+                allChapters.sort(Comparator.comparingDouble((ChapterManga c)->Double.parseDouble(c.getChapter())).reversed());
+//                try {
+//                    SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
+//                } catch (NoSuchMethodException e) {
+//                    throw new RuntimeException(e);
+//                } catch (ClassNotFoundException e) {
+//                    throw new RuntimeException(e);
+//                } catch (IllegalAccessException e) {
+//                    throw new RuntimeException(e);
+//                } catch (InvocationTargetException e) {
+//                    throw new RuntimeException(e);
+//                }
                 chapterMangasListed.clear();
                 indexSubLists = 0;
 
@@ -670,17 +675,19 @@ public class InfoMangaFragment extends Fragment {
         chapterMangasListed.addAll(arrayList);
 
         binding.numChapters.setText(chapterMangasListed.size() + " Capítulos");
-        try {
-            SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", chapterMangasListed, OrderEnum.DECRESCENTE);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
+
+        chapterMangasListed.sort(Comparator.comparingDouble((ChapterManga ch)->Double.parseDouble(ch.getChapter())).reversed());
+        //        try {
+//            SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", chapterMangasListed, OrderEnum.DECRESCENTE);
+//        } catch (NoSuchMethodException e) {
+//            throw new RuntimeException(e);
+//        } catch (ClassNotFoundException e) {
+//            throw new RuntimeException(e);
+//        } catch (IllegalAccessException e) {
+//            throw new RuntimeException(e);
+//        } catch (InvocationTargetException e) {
+//            throw new RuntimeException(e);
+//        }
 
         isdescendingOrder = true;
         chaptersAdapter.notifyDataSetChanged();

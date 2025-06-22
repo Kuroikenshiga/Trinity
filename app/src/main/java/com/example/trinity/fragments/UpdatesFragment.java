@@ -45,7 +45,9 @@ import com.example.trinity.viewModel.MangasFromDataBaseViewModel;
 import com.example.trinity.viewModel.UpdatesViewModel;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -153,6 +155,10 @@ public class UpdatesFragment extends Fragment {
                 adapter.notifyDataSetChanged();
             }
         });
+//        this.updatesViewModel.getChapterUpdatedLiveData().observe(getViewLifecycleOwner(),(ArrayList)->{
+//            adapter.setChapterUpdateds(ArrayList);
+//            adapter.notifyDataSetChanged();
+//        });
 
         this.chapContainer.setLayoutManager(new LinearLayoutManager(myActivity));
         loadUpdates();
@@ -172,8 +178,6 @@ public class UpdatesFragment extends Fragment {
 
                         ArrayList<ChapterManga> chapterUpdatedArrayList = model.loadUpdates();
                         if (getActivity() == null) return;
-                        MangasFromDataBaseViewModel mangasFromDataBaseViewModel = new ViewModelProvider(requireActivity()).get(MangasFromDataBaseViewModel.class);
-
 
                         updatesViewModel.getChapterUpdatedLiveData().getValue().clear();
 
@@ -185,6 +189,7 @@ public class UpdatesFragment extends Fragment {
                                 }
                             });
                         }
+                        ArrayList<ChapterUpdated> chapterUpdateds = new ArrayList<>();
                         int offSet = 0;
                         ArrayList<Manga> mangas = model.selectAllMangas(false,10,offSet);
                         while(!mangas.isEmpty()){
@@ -193,12 +198,7 @@ public class UpdatesFragment extends Fragment {
                                     if (m.uuid == chapU.mangaUUID) {
                                         ChapterUpdated capU = new ChapterUpdated(m, chapU);
                                         if (getActivity() != null) {
-                                            getActivity().runOnUiThread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    updatesViewModel.addChapterInLiveData(capU);
-                                                }
-                                            });
+                                            chapterUpdateds.add(capU);
                                         }
                                     }
                                 }
@@ -206,6 +206,15 @@ public class UpdatesFragment extends Fragment {
                             offSet += 10;
                             mangas = model.selectAllMangas(false,10,offSet);
                         }
+                        chapterUpdateds.sort(Comparator.comparingLong((ChapterUpdated c)->OffsetDateTime.parse(c.getChapterManga().getDateRFC3339()).toEpochSecond()).reversed());
+                        requireActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                for(ChapterUpdated c:chapterUpdateds){
+                                    updatesViewModel.addChapterInLiveData(c);
+                                }
+                            }
+                        });
                         isUpdatingLibray = false;
                     }
                 }.start();

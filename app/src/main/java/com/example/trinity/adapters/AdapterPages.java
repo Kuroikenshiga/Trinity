@@ -28,6 +28,7 @@ import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.ViewCompat;
@@ -78,6 +79,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
     private boolean isFavorited = false;
     private LogoMangaStorage logoMangaStorage;
     private LogoMangaStorageTemp logoMangaStorageTemp;
+    private int numPagesIgnored = 0;
     public AdapterPages(Context c, String[] array) {
         this.context = c;
         this.resourcesImage = array;
@@ -106,7 +108,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
         
         
         
-        if (holder.getAdapterPosition() == this.resourcesImage.length - 1) {
+        if (holder.getAdapterPosition() == this.resourcesImage.length - 1 - numPagesIgnored) {
 
             holder.binding.timeWaste.setText(timeWasteString);
             holder.binding.imgContainer.setVisibility(View.GONE);
@@ -225,16 +227,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
                             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                 float zoomScale = 1f;
                                 img.setImage(ImageSource.bitmap(resource));
-//                                if(resource.getWidth() < resource.getHeight() && resource.getHeight() > screenHeight && ((float) resource.getHeight() /resource.getWidth())>1.5f){
-//
-////                                    img.post(new Runnable() {
-////                                        @Override
-////                                        public void run() {
-////                                            img.setScaleAndCenter(1,new PointF((float)screenWidth/2,0));
-////                                        }
-////                                    });
-//
-//                                }
+
                                 img.setDoubleTapZoomScale(2f);
                                 img.setMinScale(1f);
                             }
@@ -257,10 +250,8 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
     
     @Override
     public int getItemCount() {
-        return this.resourcesImage.length;
+        return this.resourcesImage.length-numPagesIgnored;
     }
-
-
 
     public static class ImageViewHolder extends RecyclerView.ViewHolder {
 
@@ -327,6 +318,17 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
         this.fragment = f;
     }
 
+    @UiThread
+    public void ignorePage(){
+        if(numPagesIgnored == 0){
+            numPagesIgnored = 1;
+        }
+        this.numPagesIgnored++;
+        this.notifyItemRemoved(this.resourcesImage.length - 1);
+    }
+    public int getAmountPagesIgnored(){
+        return this.numPagesIgnored;
+    }
 //    public void setFavorited(boolean favorited) {
 //        isFavorited = favorited;
 ////        System.out.println(isFavorited);

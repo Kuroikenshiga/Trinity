@@ -31,6 +31,8 @@ import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.viewModel.MangaDataViewModel;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -73,7 +75,7 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
     @Override
     public void onBindViewHolder(@NonNull ChapterViewHolder holder, @SuppressLint("RecyclerView") int position) {
         Calendar mangaDate = Calendar.getInstance();
-        Instant instant = Instant.parse(this.chapters.get(position).getDateRFC3339());
+        Instant instant = OffsetDateTime.parse(this.chapters.get(position).getDateRFC3339(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant();
         Date dateDate = new Date(instant.toEpochMilli());
         mangaDate.setTime(dateDate);
         this.chapters.get(position).setData(mangaDate);
