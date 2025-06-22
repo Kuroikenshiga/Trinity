@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:gravity="center"
+        >
+        <ImageView
+            android:layout_width="17dp"
+            android:layout_height="17dp"
+            android:layout_margin="5dp"
+            android:src="@drawable/search_icon"
+            app:tint="?attr/colorTertiary"/>
+        <TextView
+            android:layout_marginStart="5dp"
+            android:id="@+id/mangaTitle"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:textColor="?attr/colorTertiary"
+            android:text="Nome do mangá"
+            android:textSize="14sp"
+            android:fontFamily="@font/open_sans"
+            android:textAlignment="center"
+            android:ellipsize="end"
+            android:maxLines="2"
+
+            />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

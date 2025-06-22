@@ -63,6 +63,7 @@ import com.example.trinity.fragments.ReaderMangaFragment;
 import com.example.trinity.fragments.UpdatesFragment;
 import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
+import com.example.trinity.services.AniListApiRequester;
 import com.example.trinity.services.ClearLogosTemp;
 import com.example.trinity.services.ClearPageCacheWork;
 import com.example.trinity.storageAcess.ChapterStorageManager;
@@ -75,6 +76,8 @@ import com.example.trinity.viewModel.MangaDataViewModel;
 import com.example.trinity.viewModel.MangasFromDataBaseViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 
@@ -139,10 +142,9 @@ public class MainActivity extends AppCompatActivity {
                 boolean migrated = sharedPreferences.getBoolean(ConfigClass.ConfigLogoMigration.ALREDY_MIGRATED, false);
 //                model.removeImagesFromDataBase();
                 //Retirar a migração após a atualização
-                if (!migrated) {
-
-                    model.doUpdateLogos();
-                }
+//                if (!migrated) {
+//                    model.doUpdateLogos();
+//                }
 
                 dataSet = model.selectAllMangas(false,21,0);
 
@@ -154,8 +156,6 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         }.start();
-
-
 
         MangaDataViewModel mangaDataViewModel = new ViewModelProvider(this).get(MangaDataViewModel.class);
         initNavigation();

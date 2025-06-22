@@ -19,6 +19,7 @@ import com.example.trinity.Interfeces.Extensions;
 import com.example.trinity.R;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 import com.example.trinity.storageAcess.PageCacheManager;
+import com.example.trinity.utilities.ImageValidate;
 import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.Manga;
 import com.example.trinity.valueObject.TagManga;
@@ -139,16 +140,20 @@ public class MangakakalotExtension implements Extensions {
         String baseUrlSearch = "https://www.mangakakalot.gg/manga/";
         title = title.replace("~","");
         title = title.replace(",","");
+        title = title.replace(".","");
+        title = title.replace("?","");
+        title = title.replace("!","");
 //        System.out.println(baseUrlSearch+title.replace(" ","-"));
         URL urlApi;
         try {
-            urlApi = new URL(baseUrlSearch+title.replace(" ","-"));
+            urlApi = new URL(baseUrlSearch+title.replace(" ","-").toLowerCase());
+//            System.out.println("URL: "+baseUrlSearch+title.replace(" ","-"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return;
         }
         OkHttpClient httpClient = new OkHttpClient.Builder().build();
-        Request request = new Request.Builder().url(urlApi).build();
+        Request request = new Request.Builder().header("Referer", "https://www.mangakakalot.gg/").url(urlApi).build();
         try (Response response = httpClient.newCall(request).execute()) {
 //            System.out.println(response.body().string());
             ArrayList<Manga> mangas = this.responseSearchToValueObject(response.body().string());
@@ -179,8 +184,9 @@ public class MangakakalotExtension implements Extensions {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+
         OkHttpClient client = new OkHttpClient.Builder().build();
-        Request request = new Request.Builder().url(urlApi).build();
+        Request request = new Request.Builder().header("Referer", "https://www.mangakakalot.gg/").url(urlApi).build();
         try (Response response = client.newCall(request).execute()) {
             html = response.body().string();
             if(html.contains("ddg-l10n-title")){
@@ -407,8 +413,14 @@ public class MangakakalotExtension implements Extensions {
     }
 
     private void loadChapterPages(Handler h, Elements imgs) {
-        int index = 1;
-        for (Element img : imgs) {
+        int index = 1,countImageControl = 1;
+
+        boolean continueVerification = false,canVerify = false;
+
+        Bitmap bit = null, bitAux = null;
+
+        for (int i = 0;i < imgs.size();i++) {
+            Element img = imgs.get(i);
             URL url = null;
             try {
                 url = new URL(img.attr("src"));
@@ -420,41 +432,83 @@ public class MangakakalotExtension implements Extensions {
             Request request = new Request.Builder().url(url).header("Referer", "https://www.mangakakalot.gg/").build();
             try (Response response = client.newCall(request).execute()) {
 
-                if (response.body().contentType().toString().contains("image/")) {
+                assert response.body() != null;
+                if (Objects.requireNonNull(response.body().contentType()).toString().contains("image/")) {
                     InputStream imageInput = response.body().byteStream();
-                    if (index == 1) {
+                    if (i == 0) {
                         PageCacheManager.getInstance(context).clearCache();
                     }
                     BitmapFactory.Options op = new BitmapFactory.Options();
                     op.inJustDecodeBounds = false;
-                    Bitmap bit = BitmapFactory.decodeStream(imageInput, null, op);
-
-                    String urlImage = PageCacheManager.getInstance(context).insertBitmapInCache(bit, String.valueOf(index) + ".jpeg");
-
-                    if (bit != null) {
-                        bit.recycle();
+                    if(bit == null){
+                        bit = BitmapFactory.decodeStream(imageInput, null, op);
                     }
-                    Message msg = Message.obtain();
-                    msg.what = RESPONSE_PAGE;
-                    Bundle bundle = new Bundle();
-                    bundle.putString("img", urlImage);
-                    bundle.putInt("index", index);
-                    msg.setData(bundle);
-                    h.sendMessage(msg);
+                    else{
+                        bitAux = BitmapFactory.decodeStream(imageInput, null, op);
+                    }
+
+                    if(countImageControl > 1 || continueVerification){
+
+                        assert bitAux != null;
+                        if(ImageValidate.isSubImage(bitAux)){
+                            String urlImage = PageCacheManager.getInstance(context).insertBitmapInCache(ImageValidate.BitmapConcat(bit,bitAux), String.valueOf(index) + ".jpeg");
+
+                            Message msg = Message.obtain();
+                            msg.what = RESPONSE_PAGE;
+                            Bundle bundle = new Bundle();
+                            bundle.putString("img", urlImage);
+                            bundle.putInt("index", index);
+                            msg.setData(bundle);
+                            h.sendMessage(msg);
+                            index++;
+
+                            msg = Message.obtain();
+                            msg.what = RESPONSE_COUNT_ITENS_DECREASED_BY_ONE;
+                            h.sendMessage(msg);
+
+                            continueVerification = false;
+                            bit = null;
+                            bitAux = null;
+                            countImageControl = 0;
+
+                        }
+                        else {
+                            String urlImage = PageCacheManager.getInstance(context).insertBitmapInCache(bit, String.valueOf(index) + ".jpeg");
+
+                            Message msg = Message.obtain();
+                            msg.what = RESPONSE_PAGE;
+                            Bundle bundle = new Bundle();
+                            bundle.putString("img", urlImage);
+                            bundle.putInt("index", index);
+                            msg.setData(bundle);
+                            h.sendMessage(msg);
+                            index++;
+
+                            bit = bitAux;
+                            bitAux = null;
+                            continueVerification = true;
+
+                        }
+
+
+                    }
                 }
             } catch (ConnectException ex) {
                 Message msg = Message.obtain();
                 msg.what = RESPONSE_PAGE;
                 Bundle bundle = new Bundle();
-                Bitmap bit = BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.time_out);
-                bundle.putParcelable("img", bit);
+                Bitmap bitError = BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.time_out);
+                bundle.putParcelable("img", bitError);
                 bundle.putInt("index", index);
                 msg.setData(bundle);
                 h.sendMessage(msg);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            index++;
+            if(countImageControl > 1){
+                countImageControl = 0;
+            }
+            countImageControl++;
         }
     }
 
@@ -617,8 +671,8 @@ public class MangakakalotExtension implements Extensions {
             }
         }
 
-        calendar.set(HOUR_OF_DAY,calendar.get(HOUR_OF_DAY)+11);
-        calendar.set(MINUTE,calendar.get(MINUTE)+59);
+        calendar.set(HOUR_OF_DAY,calendar.get(HOUR_OF_DAY)+9);
+        calendar.set(MINUTE,calendar.get(MINUTE));
         return calendar;
     }
 

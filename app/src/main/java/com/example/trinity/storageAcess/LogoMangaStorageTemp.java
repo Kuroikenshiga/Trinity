@@ -85,6 +85,7 @@ public class LogoMangaStorageTemp {
 
     public String getLogoFromTempStorage(String idApiManga){
         idApiManga += ".jpeg";
+
         File dir = new File(absolutePath);
         if(!dir.exists())return "";
         try{

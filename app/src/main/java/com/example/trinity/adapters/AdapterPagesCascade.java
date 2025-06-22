@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -53,6 +54,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private LogoMangaStorage logoMangaStorage;
     private LogoMangaStorageTemp logoMangaStorageTemp;
+    private int numPagesIgnored = 0;
 
     public AdapterPagesCascade(Context context, String[] dataSet) {
         this.context = context;
@@ -211,9 +213,19 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
     }
     @Override
     public int getItemCount() {
-        return this.imagesResource.length;
+        return this.imagesResource.length - this.numPagesIgnored;
     }
-
+    @UiThread
+    public void ignorePage(){
+        if(numPagesIgnored == 0){
+            numPagesIgnored = 1;
+        }
+        this.numPagesIgnored++;
+        this.notifyItemRemoved(this.imagesResource.length - 1);
+    }
+    public int getAmountPagesIgnored(){
+        return this.numPagesIgnored;
+    }
     public static class ViewHolderItem extends RecyclerView.ViewHolder {
         public PageCascadeItemBinding binding;
 

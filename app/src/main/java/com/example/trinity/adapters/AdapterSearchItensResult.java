@@ -1,5 +1,7 @@
 package com.example.trinity.adapters;
 
+import static androidx.databinding.DataBindingUtil.getBinding;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -28,10 +30,14 @@ public class AdapterSearchItensResult extends RecyclerView.Adapter<AdapterSearch
     private Context context;
     private LogoMangaStorage storage;
 
+
+    private int viewType;
+
     public AdapterSearchItensResult(ArrayList<Manga> resultSet,Context context) {
         this.resultSet = resultSet;
         this.context = context;
         storage = new LogoMangaStorage(context);
+
     }
     public void setData(ArrayList<Manga> resultSet){
         this.resultSet = resultSet;
@@ -75,12 +81,14 @@ public class AdapterSearchItensResult extends RecyclerView.Adapter<AdapterSearch
         return this.resultSet.size();
     }
 
-    public static class SearchItemResultViewHolder extends RecyclerView.ViewHolder{
-        SearchItemLayoutBinding binding;
+    public static class SearchItemResultViewHolder extends RecyclerView.ViewHolder {
+        private SearchItemLayoutBinding binding;
+
         public SearchItemResultViewHolder(@NonNull SearchItemLayoutBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
 
         }
     }
+
 }

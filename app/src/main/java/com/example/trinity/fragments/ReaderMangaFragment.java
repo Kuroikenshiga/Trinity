@@ -93,6 +93,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -236,12 +237,13 @@ public class ReaderMangaFragment extends Fragment {
 //            configDialogLoyoutBinding.cascade.setChecked(true);
             binding.cascadeRead.setVisibility(View.VISIBLE);
             binding.pageContainer.setVisibility(View.GONE);
+            binding.seekBar.setVisibility(View.GONE);
         }
 
         binding.alpha.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                alphaDialog = new AlertDialog.Builder(requireContext(),R.style.RoundAlertDialog);
+                alphaDialog = new AlertDialog.Builder(requireContext(), R.style.RoundAlertDialog);
                 alphaDialogLayoutBinding = ReaderAlphaDialogLayoutBinding.inflate(LayoutInflater.from(requireContext()));
                 alphaDialogLayoutBinding.alphaController.setProgress(alpha);
                 alphaControllerSetup();
@@ -279,17 +281,18 @@ public class ReaderMangaFragment extends Fragment {
         String mangaName = mangaDataViewModel.getManga().getTitulo();
         chapters = mangaDataViewModel.getManga().getChapters();
 
-        try {
-            SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", chapters, OrderEnum.CRESCENTE);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
+        chapters.sort(Comparator.comparingDouble(c -> Double.parseDouble(c.getChapter())));
+//        try {
+//            SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", chapters, OrderEnum.CRESCENTE);
+//        } catch (NoSuchMethodException e) {
+//            throw new RuntimeException(e);
+//        } catch (ClassNotFoundException e) {
+//            throw new RuntimeException(e);
+//        } catch (IllegalAccessException e) {
+//            throw new RuntimeException(e);
+//        } catch (InvocationTargetException e) {
+//            throw new RuntimeException(e);
+//        }
 
         chapterIndex = this.getChapterIndex(idChap);
         new Thread() {
@@ -309,11 +312,11 @@ public class ReaderMangaFragment extends Fragment {
                 adapterPages.currentItem = position;
                 binding.seekBar.setProgress(position + 1);
 
-                if (position == imageURI.length - 1) {
+                if (position == imageURI.length - 1 - adapterPages.getAmountPagesIgnored()) {
                     Instant now = Instant.now();
                     endTime = now.getEpochSecond();
                     adapterPages.setTimeWasteOnRead(endTime - initialTime);
-                    adapterPages.notifyItemChanged(imageURI.length - 1);
+                    adapterPages.notifyItemChanged(imageURI.length - 1 - adapterPages.getAmountPagesIgnored());
 
                     binding.seekBar.setVisibility(View.GONE);
 
@@ -390,7 +393,7 @@ public class ReaderMangaFragment extends Fragment {
                         binding.nextChap.setVisibility(View.VISIBLE);
                         binding.nextChap.setVisibility(View.VISIBLE);
                     }
-                    binding.seekBar.setMax(imageURI.length);
+                    binding.seekBar.setMax(imageURI.length-adapterPages.getAmountPagesIgnored());
                     binding.seekBar.setMin(1);
 
                     binding.pageContainer.setAdapter(adapterPages);
@@ -425,14 +428,14 @@ public class ReaderMangaFragment extends Fragment {
                     binding.pageContainer.setLayoutDirection(readDirection == 1 ? View.LAYOUT_DIRECTION_LTR : View.LAYOUT_DIRECTION_RTL);
                     binding.numPages.bringToFront();
                     binding.errorContainer.setVisibility(View.GONE);
-                    binding.numPages.setText("1 / " + imageURI.length);
+                    binding.numPages.setText("1 / " + (imageURI.length - adapterPages.getAmountPagesIgnored()));
 
 
                     binding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                         @Override
                         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                             if (binding.pageContainer.isUserInputEnabled()) {
-                                binding.numPages.setText(progress + " / " + imageURI.length);
+                                binding.numPages.setText(progress + " / " + (imageURI.length - adapterPages.getAmountPagesIgnored()));
 
                                 if (fromUser) {
                                     binding.cascadeRead.scrollToPosition(progress - 1);
@@ -486,6 +489,11 @@ public class ReaderMangaFragment extends Fragment {
 
                 } else if (msg.what == Extensions.RESPONSE_ERROR) {
                     binding.errorContainer.setVisibility(View.VISIBLE);
+                } else if (msg.what == Extensions.RESPONSE_COUNT_ITENS_DECREASED_BY_ONE) {
+                    adapterPages.ignorePage();
+                    adapterPagesCascade.ignorePage();
+                    binding.numPages.setText(String.format("1 / %d", 0));
+                    binding.seekBar.setMax(imageURI.length - adapterPages.getAmountPagesIgnored());
                 }
 
             }
@@ -552,26 +560,27 @@ public class ReaderMangaFragment extends Fragment {
         binding.settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                binding.readConfigsContainer.setVisibility(View.VISIBLE);
-//                binding.readConfigsContainer.bringToFront();
-//                binding.alphaControlContainer.setVisibility(View.GONE);
+
                 configDialogLoyoutBinding = ReaderConfigDialogLoyoutBinding.inflate(LayoutInflater.from(requireContext()));
                 if (readDirection == 1) {
                     configDialogLoyoutBinding.leftToRight.setChecked(true);
+                    binding.seekBar.setVisibility(View.VISIBLE);
                 } else if (readDirection == 2) {
                     configDialogLoyoutBinding.rightToLeft.setChecked(true);
+                    binding.seekBar.setVisibility(View.VISIBLE);
                 } else {
                     configDialogLoyoutBinding.cascade.setChecked(true);
                     binding.cascadeRead.setVisibility(View.VISIBLE);
                     binding.pageContainer.setVisibility(View.GONE);
+                    binding.seekBar.setVisibility(View.GONE);
                 }
                 startUpRadioGroup();
 //                if(configDialog == null){
-                    configDialog = new AlertDialog.Builder(requireActivity(),R.style.RoundAlertDialog);
+                configDialog = new AlertDialog.Builder(requireActivity(), R.style.RoundAlertDialog);
 //                    configDialogLoyoutBinding.leftToRight.setChecked(true);
-                    configDialog.setView(configDialogLoyoutBinding.getRoot());
+                configDialog.setView(configDialogLoyoutBinding.getRoot());
 
-                    configDialog.setTitle("Definir a horientação de leitura");
+                configDialog.setTitle("Definir a horientação de leitura");
 
 
 //                }
@@ -851,7 +860,7 @@ public class ReaderMangaFragment extends Fragment {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                Drawable drawable = AppCompatResources.getDrawable(requireContext(),R.drawable.light_controll_active);
+                Drawable drawable = AppCompatResources.getDrawable(requireContext(), R.drawable.light_controll_active);
                 TypedValue typedValue = new TypedValue();
                 requireActivity().getTheme().resolveAttribute(com.google.android.material.R.attr.colorTertiary, typedValue, true);
                 assert drawable != null;
@@ -861,7 +870,7 @@ public class ReaderMangaFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Drawable drawable = AppCompatResources.getDrawable(requireContext(),R.drawable.light_controll_active);
+                Drawable drawable = AppCompatResources.getDrawable(requireContext(), R.drawable.light_controll_active);
                 TypedValue typedValue = new TypedValue();
                 requireActivity().getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
                 assert drawable != null;
@@ -948,7 +957,7 @@ public class ReaderMangaFragment extends Fragment {
             @Override
             public void run() {
                 model = Model.getInstance(getActivity());
-                model.setChapterLastPage(chapters.get(chapterIndex).getId(),binding.pageContainer.getCurrentItem());
+                model.setChapterLastPage(chapters.get(chapterIndex).getId(), binding.pageContainer.getCurrentItem());
             }
         }.start();
 
@@ -1095,7 +1104,7 @@ public class ReaderMangaFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        if(loadingFragmentContent){
+        if (loadingFragmentContent) {
             newChapterAnimationStartUp();
             loadingFragmentContent = false;
         }

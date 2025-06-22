@@ -34,6 +34,8 @@ import com.example.trinity.valueObject.ChapterUpdated;
 import com.example.trinity.viewModel.MangaDataViewModel;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -83,7 +85,7 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 ((UpdatesViewHolder)holder).binding.chapterTitle.setText(new StringBuilder().append(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getChapter()).append(" CH. ").append(this.chapterUpdateds.get(holder.getAdapterPosition()).getManga().getTitulo()).toString());
 
                 Calendar mangaDate = Calendar.getInstance();
-                Instant instant = Instant.parse(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getDateRFC3339());
+                Instant instant = OffsetDateTime.parse(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getDateRFC3339(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant();
                 Date dateDate = new Date(instant.toEpochMilli());
                 mangaDate.setTime(dateDate);
                 this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().setData(mangaDate);
@@ -191,6 +193,9 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.fragment = fragment;
     }
 
+    public void setChapterUpdateds(ArrayList<ChapterUpdated> chapterUpdateds) {
+        this.chapterUpdateds = chapterUpdateds;
+    }
 //    public static void bubbleSortDataSet(ArrayList<ChapterUpdated>chapterUpdateds){
 //
 //        boolean dataSetChanged = true;

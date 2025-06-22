@@ -90,6 +90,7 @@ public final class PageCacheManager {
         return image.getAbsolutePath();
     }
     public void clearCache(){
+        if(absolutePath == null)createIfNotExistCacheChapterFolder();
         dirCache = new File(absolutePath);
         for(File file: Objects.requireNonNull(dirCache.listFiles())){
             file.delete();
