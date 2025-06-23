@@ -177,6 +177,7 @@ public class MangakakalotExtension implements Extensions {
 
     public String loadMangaInfo(String idManga,Handler h) {
         String url = idManga.contains(BASE_URL) ? idManga : (BASE_URL + idManga);
+        url = url.toLowerCase();
         URL urlApi = null;
         String html = "";
         try {
@@ -199,6 +200,7 @@ public class MangakakalotExtension implements Extensions {
                 h.sendMessage(msg);
                 return "";
             }
+
             Manga manga = idManga.contains(CHAPMANGANATO) ? responseToFullValueObjectChapManganato(html) : responseToFullValueObjectMangakakalot(html);
 
             if (this.onMangaLoaded != null) {

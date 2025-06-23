@@ -186,6 +186,8 @@ public class ChapterManga implements Parcelable {
         long currentDate = Instant.now().getEpochSecond();
         long time = currentDate - dateReleased;
 
+        time *= time < 0?-1:1;
+
         long year = time / 31556926;
         time = year > 0?time % 31556926:time;
         long month = time / 2592000;

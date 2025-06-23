@@ -130,14 +130,7 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                                     MainActivity mangaShowContentActivity = (MainActivity) context;
                                     chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().setAlredyRead(true);
-//                                    mangaShowContentActivity.runOnUiThread(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-////                                            TypedValue value = new TypedValue();
-//                                            context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary,typedValue,true);
-//                                            ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(typedValue.data);
-//                                        }
-//                                    });
+
                                 }
                             }
                         }.start();
