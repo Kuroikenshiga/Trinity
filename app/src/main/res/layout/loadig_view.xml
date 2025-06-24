@@ -6,7 +6,10 @@ android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:id="@+id/animationContainer"
 android:orientation="horizontal"
-android:gravity="center">
+android:gravity="center"
+    android:maxHeight="30dp"
+    android:minHeight="30dp"
+    >
 
 <View
     android:id="@+id/left"

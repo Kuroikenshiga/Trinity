@@ -8,6 +8,8 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Animatable2;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -120,8 +122,9 @@ public class InfoMangaFragment extends Fragment {
     private WorkManager workManager;
     private LogoMangaStorageTemp storageTemp;
     private LogoMangaStorage storage;
-
+    Animatable2.AnimationCallback animationCallback;
     private boolean canScroll = false;
+    private boolean isOrdenedReverse = false;
 
     public InfoMangaFragment() {
         // Required empty public constructor
@@ -182,17 +185,7 @@ public class InfoMangaFragment extends Fragment {
                             allChapters = mangaDataViewModel.getManga().getChapters() != null && !mangaDataViewModel.getManga().getChapters().isEmpty() ? mangaDataViewModel.getManga().getChapters() : (mangaDexExtension instanceof MangaDexExtension?mangaDexExtension.viewChapters(manga.getId()):mangaDexExtension.viewChapters(manga.getId(),mainHandler));
                             mangaDataViewModel.getManga().setChapters(allChapters);
                             allChapters.sort(Comparator.comparingDouble((ChapterManga ch)->Double.parseDouble(ch.getChapter())).reversed());
-//                            try {
-//                                SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
-//                            } catch (NoSuchMethodException e) {
-//                                throw new RuntimeException(e);
-//                            } catch (ClassNotFoundException e) {
-//                                throw new RuntimeException(e);
-//                            } catch (IllegalAccessException e) {
-//                                throw new RuntimeException(e);
-//                            } catch (InvocationTargetException e) {
-//                                throw new RuntimeException(e);
-//                            }
+
                             chapterMangasListed.clear();
                             indexSubLists = 0;
 
@@ -204,6 +197,7 @@ public class InfoMangaFragment extends Fragment {
                                 public void run() {
                                     if (!manga.isOngoing(allChapters)) binding.status.setText("Concluído");
                                     binding.numChapters.setText(allChapters.size() + " Capítulos");
+                                    binding.sortChapterIcon.setVisibility(View.VISIBLE);
                                     binding.progressChapter.setVisibility(View.GONE);
                                     mangaDataViewModel.getManga().setChapters(allChapters);
                                     chaptersAdapter = new AdapterChapters(requireActivity(), allChapters);
@@ -283,6 +277,8 @@ public class InfoMangaFragment extends Fragment {
             allChapters = manga.getChapters();
 //            manageSubLists();
         }
+
+
 
         Glide.with(getActivity())
                 .load(manga.getLanguage().equals("pt-br") ? R.drawable.brazil_flag : manga.getLanguage().equals("en") ? R.drawable.usa_flag : R.drawable.spain_flag)
@@ -437,13 +433,55 @@ public class InfoMangaFragment extends Fragment {
             }
         };
         getActivity().getOnBackPressedDispatcher().addCallback(getActivity(), callback);
+
+
+
+
+        binding.sortChapterIcon.setOnClickListener((v)->{
+            if(allChapters != null && !allChapters.isEmpty()){
+                if(!isOrdenedReverse)allChapters.sort(Comparator.comparingDouble((ChapterManga c)->Double.parseDouble(c.getChapter())));
+                else allChapters.sort(Comparator.comparingDouble((ChapterManga c)->Double.parseDouble(c.getChapter())).reversed());
+                chaptersAdapter.notifyDataSetChanged();
+            }
+
+            if(binding.sortChapterIcon.getDrawable() instanceof AnimatedVectorDrawable){
+                ((AnimatedVectorDrawable)binding.sortChapterIcon.getDrawable()).start();
+                if(binding.sortChapterIcon.getDrawable() instanceof AnimatedVectorDrawable){
+                    if(animationCallback != null){
+                        ((AnimatedVectorDrawable)binding.sortChapterIcon.getDrawable()).unregisterAnimationCallback(animationCallback);
+                    }
+                     animationCallback = new Animatable2.AnimationCallback() {
+                        @Override
+                        public void onAnimationEnd(Drawable drawable) {
+
+                            super.onAnimationEnd(drawable);
+                            if(!isOrdenedReverse){
+                                binding.sortChapterIcon.setImageResource(R.drawable.animated_vector_sort_reverse);
+                                isOrdenedReverse = true;
+                                return;
+                            }
+                            binding.sortChapterIcon.setImageResource(R.drawable.animated_vector_sort);
+                            isOrdenedReverse = false;
+
+                        }
+                    };
+                    ((AnimatedVectorDrawable)binding.sortChapterIcon.getDrawable()).registerAnimationCallback(animationCallback);
+                }
+
+            }
+        });
+
         return v;
     }
     @Override
     public void onStart(){
         super.onStart();
         new Thread(this::continueReading).start();
-
+        if(allChapters != null && !allChapters.isEmpty()){
+            binding.numChapters.setText(allChapters.size() + " Capítulos");
+            binding.sortChapterIcon.setVisibility(View.VISIBLE);
+        }
+        binding.sortChapterIcon.setImageResource(R.drawable.animated_vector_sort);
     }
     @Override
     public void onResume() {
@@ -454,11 +492,18 @@ public class InfoMangaFragment extends Fragment {
         binding.readState.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(binding.readState.getDrawable() instanceof AnimatedVectorDrawable){
+                    ((AnimatedVectorDrawable)binding.readState.getDrawable()).start();
+                }
+                TypedValue typedValue = new TypedValue();
+                requireContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
+                binding.readState.getDrawable().setTint(typedValue.data);
+                binding.inLibraryText.setText("Acompanhando obra");
                 workerThread = new Thread() {
                     @Override
                     public void run() {
                         model = Model.getInstance(getActivity());
-                        if (unlockAddManga && (manga.getChapters() != null || allChapters.size() != 0)) {
+                        if (unlockAddManga && (manga.getChapters() != null || !allChapters.isEmpty())) {
                             unlockAddManga = false;
                             manga.setChapters(allChapters);
 
@@ -466,16 +511,14 @@ public class InfoMangaFragment extends Fragment {
                                 if (!storage.receiveFile(manga.getId())) return;
                                 if (model.addInFavorites(manga)) {
                                     isAdded = true;
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-//                                            binding.readState.setImageResource(R.drawable.adicionado_a_biblioteca);
-                                            TypedValue typedValue = new TypedValue();
-                                            requireContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
-                                            binding.readState.getDrawable().setTint(typedValue.data);
-                                            binding.inLibraryText.setText("Acompanhando obra");
-                                        }
-                                    });
+//                                    getActivity().runOnUiThread(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//
+////                                            binding.readState.setImageResource(R.drawable.adicionado_a_biblioteca);
+//
+//                                        }
+//                                    });
                                 }
                                 unlockAddManga = true;
                                 return;
@@ -483,7 +526,9 @@ public class InfoMangaFragment extends Fragment {
                             if (!storage.removeLogo(manga.getId())) return;
                             if (model.removeFromFavorites(manga)) {
                                 isAdded = false;
-
+                                if(binding.readState.getDrawable() instanceof AnimatedVectorDrawable){
+                                    ((AnimatedVectorDrawable)binding.readState.getDrawable()).reset();
+                                }
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -609,6 +654,7 @@ public class InfoMangaFragment extends Fragment {
                         public void run() {
 
                             binding.numChapters.setText(allChapters.size() + " Capítulos");
+                            binding.sortChapterIcon.setVisibility(View.VISIBLE);
                             binding.progressChapter.setVisibility(View.GONE);
 
 //                            manageSubLists();
@@ -654,6 +700,7 @@ public class InfoMangaFragment extends Fragment {
                     public void run() {
                         if (!manga.isOngoing(allChapters)) binding.status.setText("Concluído");
                         binding.numChapters.setText(allChapters.size() + " Capítulos");
+                        binding.sortChapterIcon.setVisibility(View.VISIBLE);
                         binding.progressChapter.setVisibility(View.GONE);
                         mangaDataViewModel.getManga().setChapters(allChapters);
                         chaptersAdapter = new AdapterChapters(requireActivity(), allChapters);
@@ -811,7 +858,9 @@ public class InfoMangaFragment extends Fragment {
                 requireContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
 
                 binding.resumeRead.getDrawable().setTint(typedValue.data);
-
+                if(this.binding.resumeRead.getDrawable() instanceof AnimatedVectorDrawable){
+                    ((AnimatedVectorDrawable) this.binding.resumeRead.getDrawable()).start();
+                }
                 ChapterManga chapterManga = getChapterFromDataSet(allChapters, lastChapter);
                 if (chapterManga == null) return;
 
