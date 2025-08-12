@@ -1,6 +1,5 @@
 package com.example.trinity;
 
-import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,15 +11,10 @@ import android.view.View;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.adapters.AdapterMangas;
 import com.example.trinity.databinding.ActivitySearchResultBinding;
 import com.example.trinity.extensions.MangaDexExtension;
@@ -29,8 +23,6 @@ import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.valueObject.Manga;
 
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class SearchResultActivity extends AppCompatActivity {
     private String language;

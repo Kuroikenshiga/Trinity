@@ -3,16 +3,14 @@ package com.example.trinity.storageAcess;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.models.Model;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Objects;

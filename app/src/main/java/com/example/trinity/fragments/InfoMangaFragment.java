@@ -1,8 +1,6 @@
 package com.example.trinity.fragments;
 
-import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -18,14 +16,11 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.Data;
@@ -41,15 +36,12 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.MangaShowContentActivity;
 import com.example.trinity.R;
 import com.example.trinity.adapters.AdapterChapters;
@@ -63,24 +55,17 @@ import com.example.trinity.services.DownloadChapterWork;
 import com.example.trinity.services.broadcasts.ActionsPending;
 import com.example.trinity.storageAcess.LogoMangaStorage;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
-import com.example.trinity.utilities.DdosBypass;
-import com.example.trinity.utilities.OrderEnum;
-import com.example.trinity.utilities.SortUtilities;
 import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.History;
 import com.example.trinity.valueObject.Manga;
 
 import com.example.trinity.viewModel.MangaDataViewModel;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * A simple {@link Fragment} subclass.

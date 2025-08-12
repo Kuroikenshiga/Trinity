@@ -1,11 +1,9 @@
-package com.example.trinity.Interfeces;
+package com.example.trinity.Interfaces;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
-
-import androidx.fragment.app.Fragment;
 
 import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.Manga;

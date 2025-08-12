@@ -32,7 +32,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.adapters.AdapterMangas;
 import com.example.trinity.adapters.AdapterSearchItensSimpleResult;
 import com.example.trinity.databinding.ActivityExtensionShowContentBinding;

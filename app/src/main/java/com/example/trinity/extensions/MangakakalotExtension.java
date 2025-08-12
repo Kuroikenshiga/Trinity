@@ -15,7 +15,7 @@ import android.os.Message;
 
 import androidx.fragment.app.Fragment;
 
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.R;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 import com.example.trinity.storageAcess.PageCacheManager;
@@ -40,7 +40,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
@@ -451,8 +450,8 @@ public class MangakakalotExtension implements Extensions {
 
                     if(countImageControl > 1 || continueVerification){
 
-                        assert bitAux != null;
-                        if(ImageValidate.isSubImage(bitAux)){
+//                        assert bitAux != null;
+                        if(bitAux != null && ImageValidate.isSubImage(bitAux)){
                             String urlImage = PageCacheManager.getInstance(context).insertBitmapInCache(ImageValidate.BitmapConcat(bit,bitAux), String.valueOf(index) + ".jpeg");
 
                             Message msg = Message.obtain();

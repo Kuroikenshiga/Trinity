@@ -1,34 +1,26 @@
 package com.example.trinity.services;
 
-import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.media.AudioAttributes;
 import android.net.Uri;
-import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.work.Data;
-import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.R;
 import com.example.trinity.extensions.MangaDexExtension;
 import com.example.trinity.extensions.MangakakalotExtension;
-import com.example.trinity.fragments.UpdatesFragment;
 import com.example.trinity.models.Model;
 
 import com.example.trinity.preferecesConfig.ConfigClass;
@@ -37,10 +29,8 @@ import com.example.trinity.services.broadcasts.CancelCurrentWorkReceiver;
 import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.ChapterUpdated;
 import com.example.trinity.valueObject.Manga;
-import com.example.trinity.viewModel.UpdatesViewModel;
 
 import java.util.ArrayList;
-import java.util.Stack;
 
 public class UpdateWork extends Worker {
     private Context context;
@@ -65,6 +55,7 @@ public class UpdateWork extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+
         this.createChannelNotification();
         Model model = Model.getInstance(context);
         SharedPreferences sharedPreferences = context.getSharedPreferences(ConfigClass.TAG_PREFERENCE, Context.MODE_PRIVATE);
@@ -97,7 +88,16 @@ public class UpdateWork extends Worker {
                 this.notify(notification);
 
                 if(CancelCurrentWorkReceiver.isIsWorkUpdatesLibraryCanceled()){
-                    break;
+                    notification = new NotificationCompat.Builder(context, CHANNEL_NOTIFICATION_ID)
+                            .setSmallIcon(R.drawable.app_icon)
+                            .setContentTitle("Atualização cancelada 😢")
+                            .setContentText("A biblioteca não foi totalmente atualizada. Pode haver capítulos não rastreados")
+                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                            .setProgress(0, 0, false);
+
+
+                    this.notify(notification);
+                    return Result.failure();
                 }
                 Extensions mangaDexExtension = m.getId().contains("mangakakalot")||m.getId().contains("manganato")?new MangakakalotExtension(null):new MangaDexExtension("",imageQuality);
                 mangaDexExtension.setLanguage(m.getLanguage());
@@ -148,14 +148,7 @@ public class UpdateWork extends Worker {
     public void notify(NotificationCompat.Builder n) {
         if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
             this.notificationManager.notify(this.NOTIFICATION_ID, n.build());
-
-
         }
-
-
     }
-    public void setCancelPending(PendingIntent p){}
-
-
 
 }

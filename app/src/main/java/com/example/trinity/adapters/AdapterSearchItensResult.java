@@ -1,7 +1,5 @@
 package com.example.trinity.adapters;
 
-import static androidx.databinding.DataBindingUtil.getBinding;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -14,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.MainActivity;
 import com.example.trinity.MangaShowContentActivity;
 import com.example.trinity.databinding.SearchItemLayoutBinding;

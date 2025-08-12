@@ -7,9 +7,7 @@ import android.os.Message;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import androidx.webkit.WebViewCompat;
-
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
 
 public abstract class DdosBypass {
     @Deprecated
