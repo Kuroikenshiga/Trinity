@@ -1,29 +1,20 @@
 package com.example.trinity.extensions;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ColorSpace;
-import android.graphics.ImageDecoder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-
-import com.example.trinity.Interfeces.Extensions;
-import com.example.trinity.MangaShowContentActivity;
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.R;
-import com.example.trinity.fragments.InfoMangaFragment;
 import com.example.trinity.services.broadcasts.CancelCurrentWorkReceiver;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 import com.example.trinity.storageAcess.PageCacheManager;
-import com.example.trinity.utilities.ImageEditor;
 import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.Manga;
 import com.example.trinity.valueObject.TagManga;
@@ -32,12 +23,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;

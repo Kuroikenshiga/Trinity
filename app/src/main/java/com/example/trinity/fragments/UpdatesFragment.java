@@ -24,6 +24,7 @@ import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.trinity.MainActivity;
@@ -191,8 +192,8 @@ public class UpdatesFragment extends Fragment {
                         }
                         ArrayList<ChapterUpdated> chapterUpdateds = new ArrayList<>();
                         int offSet = 0;
-                        ArrayList<Manga> mangas = model.selectAllMangas(false,10,offSet);
-                        while(!mangas.isEmpty()){
+                        ArrayList<Manga> mangas = model.selectAllMangas(false, 10, offSet);
+                        while (!mangas.isEmpty()) {
                             for (ChapterManga chapU : chapterUpdatedArrayList) {
                                 for (Manga m : mangas) {
                                     if (m.uuid == chapU.mangaUUID) {
@@ -204,13 +205,13 @@ public class UpdatesFragment extends Fragment {
                                 }
                             }
                             offSet += 10;
-                            mangas = model.selectAllMangas(false,10,offSet);
+                            mangas = model.selectAllMangas(false, 10, offSet);
                         }
-                        chapterUpdateds.sort(Comparator.comparingLong((ChapterUpdated c)->OffsetDateTime.parse(c.getChapterManga().getDateRFC3339()).toEpochSecond()).reversed());
+                        chapterUpdateds.sort(Comparator.comparingLong((ChapterUpdated c) -> OffsetDateTime.parse(c.getChapterManga().getDateRFC3339()).toEpochSecond()).reversed());
                         requireActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                for(ChapterUpdated c:chapterUpdateds){
+                                for (ChapterUpdated c : chapterUpdateds) {
                                     updatesViewModel.addChapterInLiveData(c);
                                 }
                             }
@@ -227,6 +228,11 @@ public class UpdatesFragment extends Fragment {
             @Override
             public void onRefresh() {
 
+                if (workRequest != null){
+                    binding.swipe.setRefreshing(false);
+                    return;
+                }
+
                 lastUpadate = Instant.now().getEpochSecond();
                 editor.putLong(ConfigClass.ConfigUpdates.LAST_UPDATE, lastUpadate);
                 editor.apply();
@@ -238,7 +244,8 @@ public class UpdatesFragment extends Fragment {
 
                     workManager.enqueueUniqueWork(UpdateWork.WORK_NAME, ExistingWorkPolicy.KEEP, workRequest);
 //                    workManager.enqueue(workRequest);
-                    workManager.getWorkInfoByIdLiveData(workRequest.getId()).observe(UpdatesFragment.this.getActivity(), new Observer<WorkInfo>() {
+
+                    workManager.getWorkInfoByIdLiveData(workRequest.getId()).observe(UpdatesFragment.this.requireActivity(), new Observer<WorkInfo>() {
                         @Override
                         public void onChanged(WorkInfo workInfo) {
 
@@ -253,6 +260,7 @@ public class UpdatesFragment extends Fragment {
                                 loadUpdates();
                                 binding.lastUpdate.setText("Última atualização feita " + returnLastUpdateTime(lastUpadate, Instant.now().getEpochSecond()));
 
+                                workRequest = null;
                             }
 
                         }

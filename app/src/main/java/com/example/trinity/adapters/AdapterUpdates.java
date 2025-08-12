@@ -10,26 +10,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.MainActivity;
 
 import com.example.trinity.MangaShowContentActivity;
-import com.example.trinity.R;
 import com.example.trinity.databinding.DateGroupItemLayoutBinding;
 import com.example.trinity.databinding.UpdatesItemLayoutBinding;
-import com.example.trinity.extensions.MangaDexExtension;
-import com.example.trinity.extensions.MangakakalotExtension;
-import com.example.trinity.fragments.UpdatesFragment;
 import com.example.trinity.models.Model;
 import com.example.trinity.storageAcess.LogoMangaStorage;
-import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.ChapterUpdated;
 import com.example.trinity.viewModel.MangaDataViewModel;
 

@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.MainActivity;
 import com.example.trinity.MangaShowContentActivity;
 import com.example.trinity.R;

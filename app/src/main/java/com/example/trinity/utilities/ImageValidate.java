@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 public abstract class ImageValidate {
 
     public static boolean isSubImage(@NonNull Bitmap bitmap) {
+
         return bitmap.getHeight() <  401;
     }
 

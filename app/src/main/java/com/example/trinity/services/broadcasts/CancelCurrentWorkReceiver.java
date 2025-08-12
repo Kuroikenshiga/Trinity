@@ -14,7 +14,7 @@ public class CancelCurrentWorkReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction() == null) return;
         if (intent.getAction().equals(ActionsPending.CANCEL_UPDATES)) {
-            WorkManager.getInstance(context).cancelAllWorkByTag(ActionsPending.UPDATE_WORK_TAG);
+//            WorkManager.getInstance(context).cancelUniqueWork(ActionsPending.UPDATE_WORK_TAG);
             isWorkUpdatesLibraryCanceled = true;
         } else if (intent.getAction().equals(ActionsPending.CANCEL_DOWNLOADS)) {
             WorkManager.getInstance(context).cancelAllWorkByTag(ActionsPending.DOWNLOAD_CHAPTER_TAG);
