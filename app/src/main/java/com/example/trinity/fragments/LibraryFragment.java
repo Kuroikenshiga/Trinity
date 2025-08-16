@@ -117,9 +117,9 @@ public class LibraryFragment extends Fragment {
 
     @SuppressLint("RestrictedApi")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        this.mangasFromDataBaseViewModel = new ViewModelProvider(getActivity()).get(MangasFromDataBaseViewModel.class);
+        this.mangasFromDataBaseViewModel = new ViewModelProvider(requireActivity()).get(MangasFromDataBaseViewModel.class);
         binding = FragmentLibraryBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
         recyclerView = binding.reciclerViewMangas;

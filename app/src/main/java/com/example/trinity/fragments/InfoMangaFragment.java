@@ -496,14 +496,6 @@ public class InfoMangaFragment extends Fragment {
                                 if (!storage.receiveFile(manga.getId())) return;
                                 if (model.addInFavorites(manga)) {
                                     isAdded = true;
-//                                    getActivity().runOnUiThread(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//
-////                                            binding.readState.setImageResource(R.drawable.adicionado_a_biblioteca);
-//
-//                                        }
-//                                    });
                                 }
                                 unlockAddManga = true;
                                 return;

@@ -65,7 +65,7 @@ import java.util.Objects;
 
 public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHolder> {
     private Context context;
-    private String[] resourcesImage;
+    private ArrayList<String> resourcesImage;
     private String timeWasteString = "";
     private boolean isLastChapter = false;
     private boolean isFirstChapter = false;
@@ -80,7 +80,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
     private LogoMangaStorage logoMangaStorage;
     private LogoMangaStorageTemp logoMangaStorageTemp;
     private int numPagesIgnored = 0;
-    public AdapterPages(Context c, String[] array) {
+    public AdapterPages(Context c, @NonNull ArrayList<String> array) {
         this.context = c;
         this.resourcesImage = array;
         alpha = 1f;
@@ -108,7 +108,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
         
         
         
-        if (holder.getAdapterPosition() == this.resourcesImage.length - 1 - numPagesIgnored) {
+        if (holder.getAdapterPosition() == this.resourcesImage.size() - 1 - numPagesIgnored) {
 
             holder.binding.timeWaste.setText(timeWasteString);
             holder.binding.imgContainer.setVisibility(View.GONE);
@@ -191,7 +191,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
         holder.binding.nextChapterContainer.setVisibility(View.GONE);
         holder.binding.imgContainer.setVisibility(View.VISIBLE);
 
-        if (resourcesImage[holder.getAdapterPosition()] != null) {
+        if (resourcesImage.get(holder.getAdapterPosition()) != null) {
 
             holder.page = holder.getAdapterPosition();
 
@@ -217,7 +217,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
 
                 Glide.with(fragment.getActivity().getApplicationContext())
                         .asBitmap()
-                        .load(resourcesImage[holder.getAdapterPosition()])
+                        .load(resourcesImage.get(holder.getAdapterPosition()))
                         .override(context.getResources().getDisplayMetrics().widthPixels, context.getResources().getDisplayMetrics().heightPixels)
                         .apply(RequestOptions.skipMemoryCacheOf(true))
                         .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -250,7 +250,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
     
     @Override
     public int getItemCount() {
-        return this.resourcesImage.length-numPagesIgnored;
+        return this.resourcesImage.size();
     }
 
     public static class ImageViewHolder extends RecyclerView.ViewHolder {
@@ -320,12 +320,11 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
 
     @UiThread
     public void ignorePage(){
-        if(numPagesIgnored == 0){
-            numPagesIgnored = 1;
-        }
-        this.numPagesIgnored++;
-        this.notifyItemRemoved(this.resourcesImage.length - 1);
+        int toRemove = this.resourcesImage.size() - 1;
+        this.resourcesImage.remove(toRemove);
+        this.notifyItemRemoved(toRemove);
     }
+    @Deprecated
     public int getAmountPagesIgnored(){
         return this.numPagesIgnored;
     }

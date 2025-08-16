@@ -2,9 +2,11 @@ package com.example.trinity;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -18,11 +20,13 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -36,12 +40,15 @@ import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.adapters.AdapterMangas;
 import com.example.trinity.adapters.AdapterSearchItensSimpleResult;
 import com.example.trinity.databinding.ActivityExtensionShowContentBinding;
+import com.example.trinity.dialogs.TagShowMangaDexDialog;
+import com.example.trinity.dialogs.TagShowMangakakalotDialog;
 import com.example.trinity.extensions.MangaDexExtension;
 import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.services.AniListApiRequester;
 import com.example.trinity.services.ClearLogosTemp;
+import com.example.trinity.services.MangakakalotTagsSaver;
 import com.example.trinity.storageAcess.LogoMangaStorage;
 import com.example.trinity.valueObject.TagManga;
 import com.example.trinity.viewModel.MangasFromDataBaseViewModel;
@@ -54,19 +61,18 @@ import java.util.TimerTask;
 
 public class ExtensionShowContentActivity extends AppCompatActivity {
     private String language;
-
     private ActivityExtensionShowContentBinding binding;
     private boolean searchIsShowed = false;
-
     private boolean supressManyLoad = true;
     private boolean controllClick = false;
     private Handler mainHandler;
-    private Extensions mangaDexExtension;
+    private Extensions extension;
     private ArrayList<String[]> data = new ArrayList<>();
     private AdapterMangas adapter;
     private int controllLoad = 0;
     private boolean alredyClicked = false;
-    private boolean isAdvancedSearchShow = false;
+    private ArrayList<TagManga> tags;
+    private ArrayList<String> selectedTags;
     private boolean isAdvancedSearchSettingsChanged = false;
     private Thread workerThread;
     private MangasFromDataBaseViewModel mangasFromDataBaseViewModel;
@@ -85,6 +91,8 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
 
         ConfigClass.ConfigTheme.setTheme(this);
 
+        SharedPreferences sharedPreferences = getSharedPreferences(ConfigClass.TAG_PREFERENCE, MODE_PRIVATE);
+
         EdgeToEdge.enable(this);
         binding = ActivityExtensionShowContentBinding.inflate(getLayoutInflater());
         mangasFromDataBaseViewModel = new ViewModelProvider(this).get(MangasFromDataBaseViewModel.class);
@@ -102,103 +110,146 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, callback);
 
 
-        new Thread() {
-            @Override
-            public void run() {
-                new LogoMangaStorage(ExtensionShowContentActivity.this).createIfNotExistsFolderForLogos();
+        new Thread(()->{
+            new LogoMangaStorage(ExtensionShowContentActivity.this).createIfNotExistsFolderForLogos();
+
+            if(extension instanceof MangaDexExtension){
                 Model model = Model.getInstance(ExtensionShowContentActivity.this);
-                ArrayList<TagManga> tags = model.selectAllTags();
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                TypedValue typedValue = new TypedValue();
-                getTheme().resolveAttribute(com.google.android.material.R.attr.colorTertiary, typedValue, true);
-                for (TagManga t : tags) {
-                    CheckBox checkBox = getCheckBox(t, lp, typedValue);
-                    ExtensionShowContentActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            binding.tagsContainer.addView(checkBox);
-                        }
-                    });
+                tags = model.selectAllTags();
+            }
+            else{
+                tags = new MangakakalotTagsSaver(ExtensionShowContentActivity.this).getTags();
+            }
+
+        }).start();
+
+        binding.releasesMangas.setOnClickListener((v)->{
+            if(supressManyLoad){
+                Toast.makeText(this,"Carregando obras",Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if(extension instanceof MangaDexExtension){
+                ((MangaDexExtension)extension).switchStatus("ongoing");
+                ((MangaDexExtension)extension).addTags(new ArrayList<>());
+            }
+            else((MangakakalotExtension)extension).switchStatus("latest-manga");
+
+            if (workerThread != null && workerThread.isAlive()) {
+                workerThread.interrupt();
+            }
+            ExtensionShowContentActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mangasFromDataBaseViewModel.getMangas().clear();
+                    adapter.notifyDataSetChanged();
+                    binding.progressTop.setVisibility(View.VISIBLE);
                 }
+            });
+            supressManyLoad = true;
+            workerThread = new Thread(()->extension.updates(mainHandler));
+            workerThread.start();
+            v.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape_fill));
+            binding.completedMangas.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape));
+            binding.genres.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape));
+        });
+        binding.completedMangas.setOnClickListener((v)->{
+            if(supressManyLoad){
+                Toast.makeText(this,"Carregando obras",Toast.LENGTH_SHORT).show();
+                return;
             }
-
-            private @NonNull CheckBox getCheckBox(TagManga t, LinearLayout.LayoutParams lp, TypedValue typedValue) {
-                CheckBox checkBox = new CheckBox(ExtensionShowContentActivity.this);
-                checkBox.setLayoutParams(lp);
-                checkBox.setText(t.getNome());
-                checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-                checkBox.setTextColor(typedValue.data);
-                checkBox.setTag(t.getId());
-                checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        isAdvancedSearchSettingsChanged = true;
-                    }
-                });
-                return checkBox;
+            if(extension instanceof MangaDexExtension){
+                ((MangaDexExtension)extension).switchStatus("completed");
+                ((MangaDexExtension)extension).addTags(new ArrayList<>());
             }
-        }.start();
-        binding.showAdvancedSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ValueAnimator animator = isAdvancedSearchShow ? ValueAnimator.ofInt(0, -400) : ValueAnimator.ofInt(-400, 0);
-                animator.setDuration(500);
+            else((MangakakalotExtension)extension).switchStatus("completed-manga");
 
-                animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-                        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) binding.configSearch.getLayoutParams();
-                        lp.bottomMargin = (int) ((int) animation.getAnimatedValue() * getResources().getDisplayMetrics().density);
-                        binding.configSearch.setLayoutParams(lp);
+            if (workerThread != null && workerThread.isAlive()) {
+                workerThread.interrupt();
+            }
+            ExtensionShowContentActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mangasFromDataBaseViewModel.getMangas().clear();
+                    adapter.notifyDataSetChanged();
+                    binding.progressTop.setVisibility(View.VISIBLE);
+                }
+            });
+            workerThread = new Thread(()->extension.updates(mainHandler));
+            supressManyLoad = true;
+            workerThread.start();
+            v.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape_fill));
+            binding.releasesMangas.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape));
+            binding.genres.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape));
+        });
+        selectedTags = new ArrayList<>();
+        binding.genres.setOnClickListener((v)->{
+
+            if(extension instanceof MangaDexExtension){
+                TagShowMangaDexDialog dialog = new TagShowMangaDexDialog(tags,selectedTags);
+                dialog.setOnDismisslistener(()->{
+                    if (selectedTags.isEmpty())return;
+                    if(supressManyLoad){
+                        Toast.makeText(this,"Carregando obras",Toast.LENGTH_SHORT).show();
+                        return;
                     }
-                });
-                ValueAnimator animatorRotate = !isAdvancedSearchShow ? ValueAnimator.ofInt(180, 0) : ValueAnimator.ofInt(0, 180);
-                animatorRotate.setDuration(500);
-                animatorRotate.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-                        binding.showAdvancedSearch.setRotation((int) animation.getAnimatedValue());
-                    }
-                });
-                animator.start();
-                animatorRotate.start();
-                if (isAdvancedSearchShow && isAdvancedSearchSettingsChanged) {
+                    ((MangaDexExtension)extension).addTags(selectedTags);
                     if (workerThread != null && workerThread.isAlive()) {
                         workerThread.interrupt();
                     }
-                    workerThread = new Thread() {
+                    binding.releasesMangas.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape));
+                    binding.completedMangas.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape));
+                    ExtensionShowContentActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ArrayList<String> tags = new ArrayList<>();
-                            for (int i = 0; i < binding.tagsContainer.getChildCount(); i++) {
-                                CheckBox checkBox = (CheckBox) binding.tagsContainer.getChildAt(i);
-                                if (checkBox.isChecked()) {
-                                    tags.add((String) checkBox.getTag());
-                                }
-
-                            }
-                            ExtensionShowContentActivity.this.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mangasFromDataBaseViewModel.getMangas().clear();
-                                    adapter.notifyDataSetChanged();
-                                    binding.progressTop.setVisibility(View.VISIBLE);
-                                }
-                            });
-                            mangaDexExtension.addTags(tags);
-                            mangaDexExtension.updates(mainHandler);
+                            mangasFromDataBaseViewModel.getMangas().clear();
+                            adapter.notifyDataSetChanged();
+                            binding.progressTop.setVisibility(View.VISIBLE);
                         }
-                    };
+                    });
+                    workerThread = new Thread(()->extension.updates(mainHandler));
+                    supressManyLoad = true;
                     workerThread.start();
-                }
-                isAdvancedSearchShow = !isAdvancedSearchShow;
+                });
+                dialog.show(getSupportFragmentManager(),"TagShowMangaDexDialog");
+            }
+            else{
+                TagShowMangakakalotDialog dialog = new TagShowMangakakalotDialog(tags);
+                dialog.show(getSupportFragmentManager(),"TagShowMangakakalotDialog");
+                dialog.setOnDismissListener(()->{
+                    if(dialog.genre.isEmpty())return;
+                    if(supressManyLoad){
+                        Toast.makeText(this,"Carregando obras",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (workerThread != null && workerThread.isAlive()) {
+                        workerThread.interrupt();
+                    }
+                    binding.releasesMangas.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape));
+                    binding.completedMangas.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape));
+                    v.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape_fill));
+                    ExtensionShowContentActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mangasFromDataBaseViewModel.getMangas().clear();
+                            adapter.notifyDataSetChanged();
+                            binding.progressTop.setVisibility(View.VISIBLE);
+                        }
+                    });
+                    ((MangakakalotExtension)extension).switchToGenresEndPoint(dialog.genre);
+                    workerThread = new Thread(()->extension.updates(mainHandler));
+                    supressManyLoad = true;
+                    workerThread.start();
+
+                });
+
             }
         });
+
         adapterSearchItensSimpleResult = new AdapterSearchItensSimpleResult(this, this.data,binding.searchField);
         binding.searchItens.setAdapter(adapterSearchItensSimpleResult);
         binding.searchItens.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
-        SharedPreferences sharedPreferences = getSharedPreferences(ConfigClass.TAG_PREFERENCE, MODE_PRIVATE);
+
         String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY, "dataSaver");
         setContentView(binding.getRoot());
 
@@ -223,7 +274,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                 Intent intent = new Intent(ExtensionShowContentActivity.this, SearchResultActivity.class);
                 intent.putExtra("language", language);
                 intent.putExtra("SearchField", binding.searchField.getText().toString());
-                intent.putExtra("Extension", mangaDexExtension instanceof MangaDexExtension ? Extensions.MANGADEX : Extensions.MANGAKAKALOT);
+                intent.putExtra("Extension", extension instanceof MangaDexExtension ? Extensions.MANGADEX : Extensions.MANGAKAKALOT);
                 ExtensionShowContentActivity.this.startActivity(intent);
             }
         });
@@ -239,9 +290,47 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new GridLayoutManager(ExtensionShowContentActivity.this, 3));
         recyclerView.setHasFixedSize(false);
 
-        mangaDexExtension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) : new MangakakalotExtension(null);
+        extension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) : new MangakakalotExtension(null);
+        new Thread() {
+            @Override
+            public void run() {
+                new LogoMangaStorage(ExtensionShowContentActivity.this).createIfNotExistsFolderForLogos();
 
-        workerThread = new Thread(()->mangaDexExtension.updates(mainHandler));
+                if(extension instanceof MangaDexExtension){
+                    Model model = Model.getInstance(ExtensionShowContentActivity.this);
+                    tags = model.selectAllTags();
+                }
+//                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//                TypedValue typedValue = new TypedValue();
+//                getTheme().resolveAttribute(com.google.android.material.R.attr.colorTertiary, typedValue, true);
+//                for (TagManga t : tags) {
+//                    CheckBox checkBox = getCheckBox(t, lp, typedValue);
+//                    ExtensionShowContentActivity.this.runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            binding.tagsContainer.addView(checkBox);
+//                        }
+//                    });
+//                }
+            }
+
+//            private @NonNull CheckBox getCheckBox(TagManga t, LinearLayout.LayoutParams lp, TypedValue typedValue) {
+//                CheckBox checkBox = new CheckBox(ExtensionShowContentActivity.this);
+//                checkBox.setLayoutParams(lp);
+//                checkBox.setText(t.getNome());
+//                checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+//                checkBox.setTextColor(typedValue.data);
+//                checkBox.setTag(t.getId());
+//                checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                    @Override
+//                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                        isAdvancedSearchSettingsChanged = true;
+//                    }
+//                });
+//                return checkBox;
+//            }
+        }.start();
+        workerThread = new Thread(()->extension.updates(mainHandler));
         workerThread.start();
 
         binding.searchField.addTextChangedListener(new TextWatcher() {
@@ -373,7 +462,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                     Intent intent = new Intent(ExtensionShowContentActivity.this, SearchResultActivity.class);
                     intent.putExtra("language", language);
                     intent.putExtra("SearchField", binding.searchField.getText().toString());
-                    intent.putExtra("Extension", mangaDexExtension instanceof MangaDexExtension ? Extensions.MANGADEX : Extensions.MANGAKAKALOT);
+                    intent.putExtra("Extension", extension instanceof MangaDexExtension ? Extensions.MANGADEX : Extensions.MANGAKAKALOT);
                     ExtensionShowContentActivity.this.startActivity(intent);
                 }
                 return true;
@@ -400,7 +489,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                                     binding.progressBotton.setVisibility(View.VISIBLE);
                                 }
                             });
-                            mangaDexExtension.updates(mainHandler);
+                            extension.updates(mainHandler);
                         }
                     };
                     workerThread.start();

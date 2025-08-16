@@ -56,11 +56,13 @@ public class MangaDexExtension implements Extensions {
     public static final String LOW_QUALITY = "dataSaver";
     private String imageQuality;
     private Context context;
-
+    private String status = "ongoing";
+    public static final String KEY_NAME_EXTENSION_TAG = "MANGADEX_TAGS_ID";
 
     public MangaDexExtension(String language, String imageQuality) {
         this.language = language;
         this.imageQuality = LOW_QUALITY;
+
     }
 
 //    public MangaDexExtension(String imageQuality) {
@@ -146,7 +148,8 @@ public class MangaDexExtension implements Extensions {
     }
 
     public void updates(Handler h) {
-        String url = "https://api.mangadex.org/manga?availableTranslatedLanguage[]=" + this.language + "&includes[]=cover_art&includes[]=author&limit=" + this.limit + "&offset=" + this.updateOffSet + tags;
+        String url = "https://api.mangadex.org/manga?availableTranslatedLanguage[]=" + this.language + "&includes[]=cover_art&status[]="+status+"&includes[]=author&limit=" + this.limit + "&offset=" + this.updateOffSet + tags;
+        System.out.println(url);
         URL urlApi = null;
 //        System.out.println("Url = " + url);
         if (this.UpdateTotalItens > 0 && this.updateOffSet > this.UpdateTotalItens) {
@@ -695,10 +698,8 @@ public class MangaDexExtension implements Extensions {
 
     public void addTags(ArrayList<String> tags) {
         this.tags = "";
-        if (tags.isEmpty()) {
-            this.updateOffSet = 0;
-            return;
-        }
+        this.updateOffSet = 0;
+
         StringBuilder stringBuilder = new StringBuilder();
         for (String s : tags) {
             stringBuilder.append("&").append("includedTags[]=").append(s);
@@ -776,7 +777,10 @@ public class MangaDexExtension implements Extensions {
             return 0;
         }
     }
-
+    public void switchStatus(String status){
+        this.status = status;
+        this.updateOffSet = 0;
+    }
     @Override
     public ArrayList<ChapterManga> viewChapters(String mangaId, Handler h) {
         return null;

@@ -55,9 +55,11 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.adapters.AdapterNavigation;
 import com.example.trinity.databinding.ActivityMainBinding;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.fragments.LibraryFragment;
 import com.example.trinity.fragments.ReaderMangaFragment;
 import com.example.trinity.fragments.UpdatesFragment;
@@ -66,6 +68,7 @@ import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.services.AniListApiRequester;
 import com.example.trinity.services.ClearLogosTemp;
 import com.example.trinity.services.ClearPageCacheWork;
+import com.example.trinity.services.MangakakalotTagsSaver;
 import com.example.trinity.storageAcess.ChapterStorageManager;
 import com.example.trinity.storageAcess.LogoMangaStorage;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
@@ -119,11 +122,9 @@ public class MainActivity extends AppCompatActivity {
             new Thread() {
                 @Override
                 public void run() {
-
                     MangaDexExtension mangaDexExtension = new MangaDexExtension("", "");
                     ArrayList<TagManga> tags = mangaDexExtension.getTags();
                     model.saveTag(tags);
-//                    System.out.println("Fazendo requisição das tags");
                 }
             }.start();
         }
@@ -139,12 +140,8 @@ public class MainActivity extends AppCompatActivity {
                 LogoMangaStorageTemp storageTemp = new LogoMangaStorageTemp(MainActivity.this);
                 storageTemp.createIfNotExistsFolderTempForLogos();
 
-                boolean migrated = sharedPreferences.getBoolean(ConfigClass.ConfigLogoMigration.ALREDY_MIGRATED, false);
-//                model.removeImagesFromDataBase();
-                //Retirar a migração após a atualização
-//                if (!migrated) {
-//                    model.doUpdateLogos();
-//                }
+                MangakakalotTagsSaver mangakakalotTagsSaver = new MangakakalotTagsSaver(MainActivity.this);
+                mangakakalotTagsSaver.saveIfNotExistsTags();
 
                 dataSet = model.selectAllMangas(false,21,0);
 
