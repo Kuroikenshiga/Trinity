@@ -96,7 +96,7 @@ public class ReaderMangaFragment extends Fragment {
 
     private FragmentReaderMangaBinding binding;
     private AdapterPages adapterPages;
-    private String[] imageURI;
+    private ArrayList<String> imageURI;
     private boolean isShowedTopAndBotton = false;
     private Handler mainHandler;
     private Thread workThread;
@@ -180,7 +180,7 @@ public class ReaderMangaFragment extends Fragment {
         storageManager = new ChapterStorageManager(this.getContext());
 //        windowInsetsCompat = WindowCompat.getInsetsController(getActivity().getWindow(), getActivity().getWindow().getDecorView());
 //        windowInsetsCompat.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        windowInsetsControllerCompat = WindowCompat.getInsetsController(getActivity().getWindow(), getActivity().getWindow().getDecorView());
+        windowInsetsControllerCompat = WindowCompat.getInsetsController(requireActivity().getWindow(), requireActivity().getWindow().getDecorView());
         windowInsetsControllerCompat.hide(WindowInsetsCompat.Type.statusBars());
         if (getArguments() != null) {
             try {
@@ -215,14 +215,18 @@ public class ReaderMangaFragment extends Fragment {
             binding.cascadeRead.setVisibility(View.GONE);
             binding.pageContainer.setVisibility(View.VISIBLE);
             binding.pageContainer.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+            binding.save.setVisibility(View.VISIBLE);
+
         } else if (readDirection == 2) {
             binding.cascadeRead.setVisibility(View.GONE);
             binding.pageContainer.setVisibility(View.VISIBLE);
             binding.pageContainer.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+            binding.save.setVisibility(View.VISIBLE);
         } else {
 //            configDialogLoyoutBinding.cascade.setChecked(true);
             binding.cascadeRead.setVisibility(View.VISIBLE);
             binding.pageContainer.setVisibility(View.GONE);
+            binding.save.setVisibility(View.GONE);
             binding.seekBar.setVisibility(View.GONE);
         }
 
@@ -298,11 +302,11 @@ public class ReaderMangaFragment extends Fragment {
                 adapterPages.currentItem = position;
                 binding.seekBar.setProgress(position + 1);
 
-                if (position == imageURI.length - 1 - adapterPages.getAmountPagesIgnored()) {
+                if (position == imageURI.size() - 1) {
                     Instant now = Instant.now();
                     endTime = now.getEpochSecond();
                     adapterPages.setTimeWasteOnRead(endTime - initialTime);
-                    adapterPages.notifyItemChanged(imageURI.length - 1 - adapterPages.getAmountPagesIgnored());
+                    adapterPages.notifyItemChanged(imageURI.size() - 1);
 
                     binding.seekBar.setVisibility(View.GONE);
 
@@ -314,7 +318,7 @@ public class ReaderMangaFragment extends Fragment {
 
                 }
 
-                if (chapterDownloaded && position > 0 && position < imageURI.length - 1 && imageURI[position] == null) {
+                if (chapterDownloaded && position > 0 && position < imageURI.size() - 1 && imageURI.get(position) == null) {
 
                     new Thread() {
                         @Override
@@ -351,7 +355,9 @@ public class ReaderMangaFragment extends Fragment {
 //                    controllShowBottomTopBar();
                     int numPages = msg.getData().getInt("numPages");
 
-                    imageURI = new String[numPages + 2];
+                    imageURI = new ArrayList<>();
+                    for (int i = 0; i < numPages + 2; i++) imageURI.add(null);
+
                     adapterPages = new AdapterPages(getActivity(), imageURI);
                     adapterPages.setLogoManga(mangaDataViewModel.getManga().getId());
 
@@ -379,7 +385,7 @@ public class ReaderMangaFragment extends Fragment {
                         binding.nextChap.setVisibility(View.VISIBLE);
                         binding.nextChap.setVisibility(View.VISIBLE);
                     }
-                    binding.seekBar.setMax(imageURI.length-adapterPages.getAmountPagesIgnored());
+                    binding.seekBar.setMax(imageURI.size());
                     binding.seekBar.setMin(1);
 
                     binding.pageContainer.setAdapter(adapterPages);
@@ -400,7 +406,7 @@ public class ReaderMangaFragment extends Fragment {
                                     binding.cascadeRead.scrollToPosition(startPage != 0 ? startPage : 0);
                                     binding.seekBar.setProgress(startPage == 0 ? 1 : startPage + 1, true);
                                     if (startPage != 0) {
-                                        binding.numPages.setText((startPage + 1) + " / " + imageURI.length);
+                                        binding.numPages.setText((startPage + 1) + " / " + imageURI.size());
                                     }
                                     startPage = 0;
                                 }
@@ -414,14 +420,14 @@ public class ReaderMangaFragment extends Fragment {
                     binding.pageContainer.setLayoutDirection(readDirection == 1 ? View.LAYOUT_DIRECTION_LTR : View.LAYOUT_DIRECTION_RTL);
                     binding.numPages.bringToFront();
                     binding.errorContainer.setVisibility(View.GONE);
-                    binding.numPages.setText("1 / " + (imageURI.length - adapterPages.getAmountPagesIgnored()));
+                    binding.numPages.setText("1 / " + (imageURI.size()));
 
 
                     binding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                         @Override
                         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                             if (binding.pageContainer.isUserInputEnabled()) {
-                                binding.numPages.setText(progress + " / " + (imageURI.length - adapterPages.getAmountPagesIgnored()));
+                                binding.numPages.setText(progress + " / " + (imageURI.size()));
 
                                 if (fromUser) {
                                     binding.cascadeRead.scrollToPosition(progress - 1);
@@ -466,7 +472,7 @@ public class ReaderMangaFragment extends Fragment {
                     binding.errorContainer.setVisibility(View.GONE);
                     String bit = msg.getData().getString("img");
 
-                    imageURI[msg.getData().getInt("index")] = bit;
+                    imageURI.set(msg.getData().getInt("index"), bit);
 
                     adapterPagesCascade.notifyItemChanged(msg.getData().getInt("index"));
 
@@ -477,9 +483,8 @@ public class ReaderMangaFragment extends Fragment {
                     binding.errorContainer.setVisibility(View.VISIBLE);
                 } else if (msg.what == Extensions.RESPONSE_COUNT_ITENS_DECREASED_BY_ONE) {
                     adapterPages.ignorePage();
-                    adapterPagesCascade.ignorePage();
                     binding.numPages.setText(String.format("1 / %d", 0));
-                    binding.seekBar.setMax(imageURI.length - adapterPages.getAmountPagesIgnored());
+                    binding.seekBar.setMax(imageURI.size());
                 }
 
             }
@@ -551,15 +556,21 @@ public class ReaderMangaFragment extends Fragment {
                 if (readDirection == 1) {
                     configDialogLoyoutBinding.leftToRight.setChecked(true);
                     binding.seekBar.setVisibility(View.VISIBLE);
+
                 } else if (readDirection == 2) {
                     configDialogLoyoutBinding.rightToLeft.setChecked(true);
                     binding.seekBar.setVisibility(View.VISIBLE);
+
                 } else {
                     configDialogLoyoutBinding.cascade.setChecked(true);
                     binding.cascadeRead.setVisibility(View.VISIBLE);
                     binding.pageContainer.setVisibility(View.GONE);
                     binding.seekBar.setVisibility(View.GONE);
+
                 }
+
+
+
                 startUpRadioGroup();
 //                if(configDialog == null){
                 configDialog = new AlertDialog.Builder(requireActivity(), R.style.RoundAlertDialog);
@@ -869,9 +880,7 @@ public class ReaderMangaFragment extends Fragment {
 
     private void startUpRadioGroup() {
 
-        configDialogLoyoutBinding.radio.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
+        configDialogLoyoutBinding.radio.setOnCheckedChangeListener((RadioGroup group, int checkedId)->{
                 if (configDialogLoyoutBinding.leftToRight.isChecked()) {
                     binding.pageContainer.setVisibility(View.VISIBLE);
                     binding.cascadeRead.setVisibility(View.GONE);
@@ -881,6 +890,7 @@ public class ReaderMangaFragment extends Fragment {
                     preferencesEditor.putInt(ConfigClass.ConfigReader.READ_DIRECTION, 1);
                     readDirection = 1;
                     preferencesEditor.apply();
+                    binding.save.setVisibility(View.VISIBLE);
 //                    radioButtomChangeFromUser = true;
                     return;
                 }
@@ -890,6 +900,7 @@ public class ReaderMangaFragment extends Fragment {
 //                    if(radioButtomChangeFromUser){
                     preferencesEditor.putInt(ConfigClass.ConfigReader.READ_DIRECTION, 3);
                     preferencesEditor.apply();
+                    binding.save.setVisibility(View.GONE);
 //                    }
                     readDirection = 3;
 //                    radioButtomChangeFromUser = true;
@@ -902,17 +913,10 @@ public class ReaderMangaFragment extends Fragment {
                 adapterPages.setReverseStartReadLogo(true);
                 adapterPages.notifyDataSetChanged();
                 readDirection = 2;
+            binding.save.setVisibility(View.VISIBLE);
 //                radioButtomChangeFromUser = true;
                 preferencesEditor.apply();
-            }
         });
-//        if(!preferences.getBoolean(ConfigClass.ConfigReader.ALWAYS_CASCADE_WHEN_LONG_STRIP,false))return;
-//        for(TagManga t:mangaDataViewModel.getManga().getTags()){
-//            if(t.getNome().equals("Long Strip")){
-//                radioButtomChangeFromUser = false;
-//                binding.cascade.setChecked(true);
-//            }
-//        }
 
     }
 
@@ -996,7 +1000,7 @@ public class ReaderMangaFragment extends Fragment {
     public void download() {
 
         String imageName = mangaDataViewModel.getManga().getTitulo() + "_" + Instant.now().getEpochSecond() + ".jpeg";
-        String url = imageURI[binding.pageContainer.getCurrentItem()];
+        String url = imageURI.get(binding.pageContainer.getCurrentItem());
         if (url == null) {
             return;
         }
@@ -1071,6 +1075,7 @@ public class ReaderMangaFragment extends Fragment {
         animatorRight.setDuration(300);
 
         animatorLeft.addUpdateListener(animation -> {
+            if (ReaderMangaFragment.this.isDetached()) return;
             layoutParamsLeft.width = (int) animation.getAnimatedValue() * (int) requireActivity().getResources().getDisplayMetrics().density;
             layoutParamsLeft.height = (int) animation.getAnimatedValue() * (int) requireActivity().getResources().getDisplayMetrics().density;
             binding.left.setLayoutParams(layoutParamsLeft);

@@ -25,6 +25,7 @@ import com.example.trinity.MangaShowContentActivity;
 import com.example.trinity.fragments.LibraryFragment;
 import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.storageAcess.LogoMangaStorage;
+import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.ChapterUpdated;
 import com.example.trinity.valueObject.History;
@@ -47,8 +48,6 @@ public class Model extends SQLiteOpenHelper {
     private SQLiteDatabase sqLiteDatabase;
     private static Model instance;
     private Context context;
-    private ArrayList<OnMangaRemovedListener> observers = new ArrayList<>();
-    private ArrayList<OnMangaAddedNotifier> notifiers = new ArrayList<>();
     private boolean MANGA_TABLE_HAS_CHANGES = false;
     private Model(@Nullable Context context) {
         super(context, dataBaseName, null, version);
@@ -59,7 +58,7 @@ public class Model extends SQLiteOpenHelper {
 
     public static Model getInstance(Context context){
         if(instance == null){
-            instance = new Model(context);
+            instance = new Model(context.getApplicationContext());
         }
         return instance;
     }
@@ -413,32 +412,6 @@ public class Model extends SQLiteOpenHelper {
             return 0;
         }
         return this.amountChaptersToRead(id);
-    }
-
-    private ArrayList<Manga> selectAllMangas(String mangaTitle) {
-        ArrayList<Manga> mangaArrayList = new ArrayList<>();
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM mangas WHERE title LIKE ? ORDER BY id DESC", new String[]{"%" + mangaTitle + "%"});) {
-//            System.out.println("quantidade de linhas: " + row.getCount());
-            if (row.getCount() == 0) {
-
-                return mangaArrayList;
-            }
-            while (row.moveToNext()) {
-
-                String id = row.getString(2);
-                String cover = row.getString(1);
-//                String imageByte = row.getString(9);
-//                Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-                String desc = row.getString(4);
-                String title = row.getString(6);
-                String language = row.getString(7);
-                mangaArrayList.add(new Manga(id, title, null, this.selectAllAuthorByIdManga(row.getString(0)), desc, selectAllTagMangasByIdManga(row.getString(0)), language, cover, selectAllChaptersByIdManga(row.getString(0))));
-
-            }
-        }
-
-        return mangaArrayList;
     }
 
     private ArrayList<ChapterManga> selectAllChaptersByIdManga(String id) {
@@ -821,6 +794,7 @@ public class Model extends SQLiteOpenHelper {
 
                 return false;
             }
+            LogoMangaStorageTemp storageTemp = new LogoMangaStorageTemp(context);
             row.moveToNext();
             id = row.getLong(0);
             this.sqLiteDatabase.beginTransaction();
@@ -857,6 +831,8 @@ public class Model extends SQLiteOpenHelper {
 
                 return false;
             }
+            if(!storageTemp.receiveFile(manga.getId()))this.sqLiteDatabase.endTransaction();
+
             if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.setTransactionSuccessful();
             this.sqLiteDatabase.endTransaction();
 
@@ -865,11 +841,11 @@ public class Model extends SQLiteOpenHelper {
 
             return false;
         }
-        ((Activity)context).runOnUiThread(()->{
-            for(OnMangaRemovedListener listener:observers){
-                listener.onMangaRemoved(manga.getLanguage(),manga.getId());
-            }
-        });
+//        ((Activity)context).runOnUiThread(()->{
+//            for(OnMangaRemovedListener listener:observers){
+//                listener.onMangaRemoved(manga.getLanguage(),manga.getId());
+//            }
+//        });
         MANGA_TABLE_HAS_CHANGES = true;
         return true;
     }
@@ -1234,7 +1210,7 @@ public class Model extends SQLiteOpenHelper {
         ArrayList<TagManga> tags = new ArrayList<>();
 
 
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT*FROM tags ORDER BY name_tag ASC", new String[]{})) {
+        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT*FROM tags  name_tag WHERE id_tag NOT LIKE \"%genre%\" ORDER BY name_tag", new String[]{})) {
             if (row.getCount() == 0) {
 
                 return tags;

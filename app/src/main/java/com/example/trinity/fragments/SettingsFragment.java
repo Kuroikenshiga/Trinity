@@ -113,19 +113,6 @@ public class SettingsFragment extends Fragment {
             binding.cascade.setChecked(true);
         }
 
-//        if(imageQuality.equals("dataSaver")){
-//            binding.low.setChecked(true);
-//        }
-//        else{
-//            binding.high.setChecked(true);
-//        }
-//        binding.alwaysCascate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                preferencesEditor.putBoolean(ConfigClass.ConfigReader.ALWAYS_CASCADE_WHEN_LONG_STRIP,isChecked);
-//                preferencesEditor.apply();
-//            }
-//        });
         binding.readOrientation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -250,18 +237,5 @@ public class SettingsFragment extends Fragment {
         });
 
     }
-    private void startUpRadioGroupImageOptions(){
-//        binding.radio2.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(RadioGroup group, int checkedId) {
-//                if(binding.high.isChecked()){
-//                    preferencesEditor.putString(ConfigClass.ConfigContent.IMAGE_QUALITY, MangaDexExtension.HIGH_QUALITY);
-//                    preferencesEditor.apply();
-//                    return;
-//                }
-//                preferencesEditor.putString(ConfigClass.ConfigContent.IMAGE_QUALITY,MangaDexExtension.LOW_QUALITY);
-//                preferencesEditor.apply();
-//            }
-//        });
-    }
+
 }

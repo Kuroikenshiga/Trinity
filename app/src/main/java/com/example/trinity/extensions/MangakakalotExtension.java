@@ -62,14 +62,21 @@ public class MangakakalotExtension implements Extensions {
     private OnMangaLoaded onMangaLoaded;
     public static String CHAPMANGANATO = "chapmanganato";
     public static String MANGAKAKALOT = "mangakakalot";
-
+    private String status = "latest-manga";
+    private enum EndPointType {
+        defaultContent,
+        genresContent
+    }
+    private EndPointType endPointType = EndPointType.defaultContent;
+    private String genre = "";
     public MangakakalotExtension(OnMangaLoaded onMangaLoaded) {
         this.onMangaLoaded = onMangaLoaded;
     }
 
     @Override
     public void updates(Handler h) {
-        String url = "https://www.mangakakalot.gg/manga-list/latest-manga?page=" + currentPage;
+        String url = endPointType == EndPointType.defaultContent?"https://www.mangakakalot.gg/manga-list/"+status+"?page=" + currentPage:"https://www.mangakakalot.gg/genre/"+genre+"?page="+currentPage;
+        System.out.println(url);
         URL urlApi;
         try {
             urlApi = new URL(url);
@@ -685,6 +692,21 @@ public class MangakakalotExtension implements Extensions {
     }
     public void setLanguage(String language){
 
+    }
+    public void switchStatus(String status){
+        this.status = status;
+        this.currentPage = 1;
+        this.endPointType = EndPointType.defaultContent;
+    }
+    public void switchToGenresEndPoint(String genre){
+        this.endPointType = EndPointType.genresContent;
+        this.genre = genre;
+        currentPage = 1;
+    }
+    public void switchToDefaultContentEndPoint(){
+        this.endPointType = EndPointType.defaultContent;
+        this.genre = "";
+        currentPage = 1;
     }
 
     @Override

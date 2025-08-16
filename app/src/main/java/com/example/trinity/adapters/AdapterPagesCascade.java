@@ -34,10 +34,12 @@ import com.example.trinity.fragments.ReaderMangaFragment;
 import com.example.trinity.storageAcess.LogoMangaStorage;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 
+import java.util.ArrayList;
+
 public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
-    private String[] imagesResource;
+    private ArrayList<String> imagesResource;
     private Fragment fragment;
     private float currentXTouch;
     private float currentYTouch;
@@ -56,14 +58,14 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
     private LogoMangaStorageTemp logoMangaStorageTemp;
     private int numPagesIgnored = 0;
 
-    public AdapterPagesCascade(Context context, String[] dataSet) {
+    public AdapterPagesCascade(Context context, ArrayList<String> dataSet) {
         this.context = context;
         this.imagesResource = dataSet;
         screenHeight = context.getResources().getDisplayMetrics().heightPixels;
         screenWidth = context.getResources().getDisplayMetrics().widthPixels;
     }
 
-    public AdapterPagesCascade(Context context, String[] dataSet, Fragment fragment) {
+    public AdapterPagesCascade(Context context, ArrayList<String> dataSet, Fragment fragment) {
         this.context = context;
         this.imagesResource = dataSet;
         this.fragment = fragment;
@@ -92,7 +94,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
     }
     @Override
     public int getItemViewType(int position){
-        return position == 0?VIEW_TYPE_HEADER:position == imagesResource.length-1?VIEW_TYPE_FOOTER:VIEW_TYPE_ITEM;
+        return position == 0?VIEW_TYPE_HEADER:position == imagesResource.size()-1?VIEW_TYPE_FOOTER:VIEW_TYPE_ITEM;
     }
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -131,7 +133,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
             });
             return;
         }
-        if(position == imagesResource.length-1){
+        if(position == imagesResource.size()-1){
             ((EndReadViewHolder)(holder)).binding.timeWaste.setText(timeWasteString);
             ((EndReadViewHolder)(holder)).binding.nextChapterContainer.setVisibility(View.VISIBLE);
             ((EndReadViewHolder)(holder)).binding.actionEnd.setOnClickListener(new View.OnClickListener() {
@@ -157,7 +159,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
             return;
         }
 
-        if(imagesResource[holder.getAdapterPosition()] == null)return;
+        if(imagesResource.get(holder.getAdapterPosition()) == null)return;
 //        System.out.println(position);
         ((ViewHolderItem)(holder)).position = holder.getAdapterPosition();
         SubsamplingScaleImageView img = ((ViewHolderItem)(holder)).binding.img;
@@ -169,7 +171,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
         });
         Glide.with(fragment.getActivity().getApplicationContext())
                 .asBitmap()
-                .load(imagesResource[holder.getAdapterPosition()])
+                .load(imagesResource.get(holder.getAdapterPosition()))
                 .override((int)screenWidth, (int)screenHeight)
                 .apply(RequestOptions.skipMemoryCacheOf(true))
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -213,15 +215,13 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
     }
     @Override
     public int getItemCount() {
-        return this.imagesResource.length - this.numPagesIgnored;
+        return this.imagesResource.size();
     }
     @UiThread
     public void ignorePage(){
-        if(numPagesIgnored == 0){
-            numPagesIgnored = 1;
-        }
-        this.numPagesIgnored++;
-        this.notifyItemRemoved(this.imagesResource.length - 1);
+        int toIgnore = this.imagesResource.size()-1;
+        this.imagesResource.remove(toIgnore);
+        this.notifyItemRemoved(toIgnore);
     }
     public int getAmountPagesIgnored(){
         return this.numPagesIgnored;
