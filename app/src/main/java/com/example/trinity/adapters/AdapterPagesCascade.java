@@ -94,12 +94,15 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
     }
     @Override
     public int getItemViewType(int position){
+
         return position == 0?VIEW_TYPE_HEADER:position == imagesResource.size()-1?VIEW_TYPE_FOOTER:VIEW_TYPE_ITEM;
     }
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 //        holder.position = position;
+
+        if(position >= this.imagesResource.size())return;
 
         if(position == 0){
             ((StartReadViewHolder)(holder)).position = holder.getAdapterPosition();
@@ -133,7 +136,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
             });
             return;
         }
-        if(position == imagesResource.size()-1){
+        if(holder.getAdapterPosition() == imagesResource.size()-1){
             ((EndReadViewHolder)(holder)).binding.timeWaste.setText(timeWasteString);
             ((EndReadViewHolder)(holder)).binding.nextChapterContainer.setVisibility(View.VISIBLE);
             ((EndReadViewHolder)(holder)).binding.actionEnd.setOnClickListener(new View.OnClickListener() {
@@ -218,10 +221,8 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
         return this.imagesResource.size();
     }
     @UiThread
-    public void ignorePage(){
-        int toIgnore = this.imagesResource.size()-1;
-        this.imagesResource.remove(toIgnore);
-        this.notifyItemRemoved(toIgnore);
+    public void ignorePage(int toRemove){
+        this.notifyItemRemoved(toRemove);
     }
     public int getAmountPagesIgnored(){
         return this.numPagesIgnored;
