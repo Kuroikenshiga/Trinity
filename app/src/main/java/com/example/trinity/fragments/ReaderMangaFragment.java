@@ -365,7 +365,7 @@ public class ReaderMangaFragment extends Fragment {
                     adapterPages.setAlpha(alpha);
 
 
-                    adapterPagesCascade = new AdapterPagesCascade(getActivity(), imageURI, ReaderMangaFragment.this);
+                    adapterPagesCascade = new AdapterPagesCascade(requireContext(), imageURI, ReaderMangaFragment.this);
 //                    adapterPagesCascade.setLogoManga(mangaDataViewModel.getManga().getImage());
 //                    binding.cascadeRead.setAlpha((float) alpha / 100);
                     adapterPagesCascade.setLogoManga(mangaDataViewModel.getManga().getId());
@@ -390,7 +390,12 @@ public class ReaderMangaFragment extends Fragment {
 
                     binding.pageContainer.setAdapter(adapterPages);
 
-                    binding.cascadeRead.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+                    binding.cascadeRead.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false){
+                        @Override
+                        public boolean supportsPredictiveItemAnimations() {
+                            return false;
+                        }
+                    });
                     binding.cascadeRead.setAdapter(adapterPagesCascade);
                     binding.cascadeRead.setHasFixedSize(true);
 
@@ -482,7 +487,7 @@ public class ReaderMangaFragment extends Fragment {
                 } else if (msg.what == Extensions.RESPONSE_ERROR) {
                     binding.errorContainer.setVisibility(View.VISIBLE);
                 } else if (msg.what == Extensions.RESPONSE_COUNT_ITENS_DECREASED_BY_ONE) {
-                    adapterPages.ignorePage();
+                    adapterPagesCascade.ignorePage(adapterPages.ignorePage());
                     binding.numPages.setText(String.format("1 / %d", 0));
                     binding.seekBar.setMax(imageURI.size());
                 }

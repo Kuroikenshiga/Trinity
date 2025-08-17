@@ -319,10 +319,11 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
     }
 
     @UiThread
-    public void ignorePage(){
+    public int ignorePage(){
         int toRemove = this.resourcesImage.size() - 1;
         this.resourcesImage.remove(toRemove);
         this.notifyItemRemoved(toRemove);
+        return toRemove;
     }
     @Deprecated
     public int getAmountPagesIgnored(){
