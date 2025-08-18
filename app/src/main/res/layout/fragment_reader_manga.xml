@@ -6,9 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MangaShowContentActivity"
-    android:background="?attr/colorSurface"
-
-    >
+    android:background="?attr/colorSurface">
 
    <FrameLayout
        android:layout_width="match_parent"
@@ -155,17 +153,35 @@
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <SeekBar
-        android:alpha="0.1"
+<!--    <androidx.appcompat.widget.AppCompatSeekBar-->
+<!--        android:alpha="0.1"-->
+<!--        android:id="@+id/seekBar"-->
+<!--        android:layout_width="300dp"-->
+<!--        android:layout_height="50dp"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintBottom_toTopOf="@+id/numPages"-->
+<!--        android:thumb="@drawable/thumb_seekbar"-->
+<!--        android:progressTint="?attr/colorPrimary"-->
+<!--        android:progress="1"-->
+<!--        />-->
+    <com.ramotion.fluidslider.FluidSlider
         android:id="@+id/seekBar"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
+        app:bar_color="?attr/colorPrimary"
+        app:duration="500"
+        app:initial_position=".0"
+        app:size="small"
+        android:alpha="0.1"
+        app:bar_text_color="?attr/colorSecondary"
+        app:bubble_color="?attr/colorSecondary"
+        app:bubble_text_color="?attr/colorTertiary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="35dp"
         app:layout_constraintBottom_toTopOf="@+id/numPages"
-        android:thumb="@drawable/thumb_seekbar"
-        android:progressTint="?attr/colorPrimary"
-        android:progress="1"
+        android:visibility="gone"
         />
     <ImageView
         android:id="@+id/prevChap"
@@ -174,6 +190,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/numPages"
         app:tint="?attr/colorPrimary"
+        android:alpha="0.1"
         android:src="@drawable/back"/>
     <ImageView
         android:id="@+id/nextChap"
@@ -184,6 +201,7 @@
         android:scaleX="-1"
         android:scaleY="-1"
         android:src="@drawable/back"
+        android:alpha="0.1"
         app:tint="?attr/colorPrimary"/>
     <TextView
         android:id="@+id/numPages"

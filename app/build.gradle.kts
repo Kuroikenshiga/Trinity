@@ -48,6 +48,7 @@ dependencies {
     // (Java only)
     implementation("androidx.work:work-runtime:$work_version")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.ramotion.fluidslider:fluid-slider:0.3.1")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

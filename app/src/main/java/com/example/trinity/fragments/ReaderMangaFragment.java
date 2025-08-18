@@ -84,6 +84,10 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function1;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link ReaderMangaFragment#newInstance} factory method to
@@ -300,8 +304,8 @@ public class ReaderMangaFragment extends Fragment {
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 adapterPages.currentItem = position;
-                binding.seekBar.setProgress(position + 1);
-
+                binding.seekBar.setPosition((float) (((position) * 100) / imageURI.size()) / 100);
+                binding.seekBar.setBubbleText(String.valueOf(position + 1));
                 if (position == imageURI.size() - 1) {
                     Instant now = Instant.now();
                     endTime = now.getEpochSecond();
@@ -385,12 +389,12 @@ public class ReaderMangaFragment extends Fragment {
                         binding.nextChap.setVisibility(View.VISIBLE);
                         binding.nextChap.setVisibility(View.VISIBLE);
                     }
-                    binding.seekBar.setMax(imageURI.size());
-                    binding.seekBar.setMin(1);
+                    binding.seekBar.setEndText(String.valueOf(imageURI.size()));
+                    binding.seekBar.setStartText("1");
 
                     binding.pageContainer.setAdapter(adapterPages);
 
-                    binding.cascadeRead.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false){
+                    binding.cascadeRead.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false) {
                         @Override
                         public boolean supportsPredictiveItemAnimations() {
                             return false;
@@ -409,7 +413,7 @@ public class ReaderMangaFragment extends Fragment {
                                 public void run() {
                                     binding.pageContainer.setCurrentItem(startPage != 0 ? startPage : 0);
                                     binding.cascadeRead.scrollToPosition(startPage != 0 ? startPage : 0);
-                                    binding.seekBar.setProgress(startPage == 0 ? 1 : startPage + 1, true);
+                                    binding.seekBar.setPosition(startPage == 0 ? 1 : startPage + 1);
                                     if (startPage != 0) {
                                         binding.numPages.setText((startPage + 1) + " / " + imageURI.size());
                                     }
@@ -427,43 +431,72 @@ public class ReaderMangaFragment extends Fragment {
                     binding.errorContainer.setVisibility(View.GONE);
                     binding.numPages.setText("1 / " + (imageURI.size()));
 
+                    binding.seekBar.setBeginTrackingListener(() -> {
+                        binding.seekBar.setAlpha(1f);
+                        binding.nextChap.setAlpha(1f);
+                        binding.prevChap.setAlpha(1f);
 
-                    binding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                        @Override
-                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                            if (binding.pageContainer.isUserInputEnabled()) {
-                                binding.numPages.setText(progress + " / " + (imageURI.size()));
-
-                                if (fromUser) {
-                                    binding.cascadeRead.scrollToPosition(progress - 1);
-                                    binding.pageContainer.setCurrentItem(progress - 1, true);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onStartTrackingTouch(SeekBar seekBar) {
-                            seekBar.setAlpha(1f);
-                            binding.nextChap.setAlpha(1f);
-                            binding.prevChap.setAlpha(1f);
-                        }
-
-                        @Override
-                        public void onStopTrackingTouch(SeekBar seekBar) {
-                            ValueAnimator valueAnimator = ValueAnimator.ofFloat(1f, 0.1f);
-                            valueAnimator.setDuration(500);
-
-                            valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                                @Override
-                                public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-                                    seekBar.setAlpha((float) animation.getAnimatedValue());
-                                    binding.nextChap.setAlpha((float) animation.getAnimatedValue());
-                                    binding.prevChap.setAlpha((float) animation.getAnimatedValue());
-                                }
-                            });
-                            valueAnimator.start();
-                        }
+                        return Unit.INSTANCE;
                     });
+                    binding.seekBar.setEndTrackingListener(() -> {
+                        ValueAnimator valueAnimator = ValueAnimator.ofFloat(1f, 0.1f);
+                        valueAnimator.setDuration(500);
+                        binding.pageContainer.setCurrentItem((int)(binding.seekBar.getPosition()*imageURI.size()), true);
+                        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(@NonNull ValueAnimator animation) {
+                                binding.seekBar.setAlpha((float) animation.getAnimatedValue());
+                                binding.nextChap.setAlpha((float) animation.getAnimatedValue());
+                                binding.prevChap.setAlpha((float) animation.getAnimatedValue());
+                            }
+                        });
+                        valueAnimator.start();
+
+                        return Unit.INSTANCE;
+                    });
+                    binding.seekBar.setPositionListener((aFloat) -> {
+                        binding.numPages.setText(String.format("%d / %d", binding.pageContainer.getCurrentItem() + 1, imageURI.size()));
+//                        binding.pageContainer.setCurrentItem((int) binding.seekBar.getPosition() * imageURI.size(), true);
+                        binding.seekBar.setBubbleText(String.valueOf((int)(binding.seekBar.getPosition()*imageURI.size())));
+                        return Unit.INSTANCE;
+                    });
+
+//                    binding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//                        @Override
+//                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//                            if (binding.pageContainer.isUserInputEnabled()) {
+//                                binding.numPages.setText(progress + " / " + (imageURI.size()));
+//
+//                                if (fromUser) {
+//                                    binding.cascadeRead.scrollToPosition(progress - 1);
+//                                    binding.pageContainer.setCurrentItem(progress - 1, true);
+//                                }
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onStartTrackingTouch(SeekBar seekBar) {
+//                            seekBar.setAlpha(1f);
+//                            binding.nextChap.setAlpha(1f);
+//                            binding.prevChap.setAlpha(1f);
+//                        }
+//
+//                        @Override
+//                        public void onStopTrackingTouch(SeekBar seekBar) {
+//                            ValueAnimator valueAnimator = ValueAnimator.ofFloat(1f, 0.1f);
+//                            valueAnimator.setDuration(500);
+//
+//                            valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//                                @Override
+//                                public void onAnimationUpdate(@NonNull ValueAnimator animation) {
+//                                    seekBar.setAlpha((float) animation.getAnimatedValue());
+//                                    binding.nextChap.setAlpha((float) animation.getAnimatedValue());
+//                                    binding.prevChap.setAlpha((float) animation.getAnimatedValue());
+//                                }
+//                            });
+//                            valueAnimator.start();
+//                        }
+//                    });
 
                 } else if (msg.what == Extensions.RESPONSE_PAGE) {
                     vm.cancel();
@@ -489,7 +522,7 @@ public class ReaderMangaFragment extends Fragment {
                 } else if (msg.what == Extensions.RESPONSE_COUNT_ITENS_DECREASED_BY_ONE) {
                     adapterPagesCascade.ignorePage(adapterPages.ignorePage());
                     binding.numPages.setText(String.format("1 / %d", 0));
-                    binding.seekBar.setMax(imageURI.size());
+                    binding.seekBar.setEndText(String.valueOf(imageURI.size()));
                 }
 
             }
@@ -573,7 +606,6 @@ public class ReaderMangaFragment extends Fragment {
                     binding.seekBar.setVisibility(View.GONE);
 
                 }
-
 
 
                 startUpRadioGroup();
@@ -885,48 +917,48 @@ public class ReaderMangaFragment extends Fragment {
 
     private void startUpRadioGroup() {
 
-        configDialogLoyoutBinding.radio.setOnCheckedChangeListener((RadioGroup group, int checkedId)->{
-                if (configDialogLoyoutBinding.leftToRight.isChecked()) {
-                    binding.pageContainer.setVisibility(View.VISIBLE);
-                    binding.cascadeRead.setVisibility(View.GONE);
-                    binding.pageContainer.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
-                    adapterPages.setReverseStartReadLogo(false);
-                    adapterPages.notifyDataSetChanged();
-                    preferencesEditor.putInt(ConfigClass.ConfigReader.READ_DIRECTION, 1);
-                    readDirection = 1;
-                    preferencesEditor.apply();
-                    binding.save.setVisibility(View.VISIBLE);
-//                    radioButtomChangeFromUser = true;
-                    return;
-                }
-                if (configDialogLoyoutBinding.cascade.isChecked()) {
-                    binding.pageContainer.setVisibility(View.GONE);
-                    binding.cascadeRead.setVisibility(View.VISIBLE);
-//                    if(radioButtomChangeFromUser){
-                    preferencesEditor.putInt(ConfigClass.ConfigReader.READ_DIRECTION, 3);
-                    preferencesEditor.apply();
-                    binding.save.setVisibility(View.GONE);
-//                    }
-                    readDirection = 3;
-//                    radioButtomChangeFromUser = true;
-                    return;
-                }
+        configDialogLoyoutBinding.radio.setOnCheckedChangeListener((RadioGroup group, int checkedId) -> {
+            if (configDialogLoyoutBinding.leftToRight.isChecked()) {
                 binding.pageContainer.setVisibility(View.VISIBLE);
                 binding.cascadeRead.setVisibility(View.GONE);
-                binding.pageContainer.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-                preferencesEditor.putInt(ConfigClass.ConfigReader.READ_DIRECTION, 2);
-                adapterPages.setReverseStartReadLogo(true);
+                binding.pageContainer.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+                adapterPages.setReverseStartReadLogo(false);
                 adapterPages.notifyDataSetChanged();
-                readDirection = 2;
+                preferencesEditor.putInt(ConfigClass.ConfigReader.READ_DIRECTION, 1);
+                readDirection = 1;
+                preferencesEditor.apply();
+                binding.save.setVisibility(View.VISIBLE);
+//                    radioButtomChangeFromUser = true;
+                return;
+            }
+            if (configDialogLoyoutBinding.cascade.isChecked()) {
+                binding.pageContainer.setVisibility(View.GONE);
+                binding.cascadeRead.setVisibility(View.VISIBLE);
+//                    if(radioButtomChangeFromUser){
+                preferencesEditor.putInt(ConfigClass.ConfigReader.READ_DIRECTION, 3);
+                preferencesEditor.apply();
+                binding.save.setVisibility(View.GONE);
+//                    }
+                readDirection = 3;
+//                    radioButtomChangeFromUser = true;
+                return;
+            }
+            binding.pageContainer.setVisibility(View.VISIBLE);
+            binding.cascadeRead.setVisibility(View.GONE);
+            binding.pageContainer.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+            preferencesEditor.putInt(ConfigClass.ConfigReader.READ_DIRECTION, 2);
+            adapterPages.setReverseStartReadLogo(true);
+            adapterPages.notifyDataSetChanged();
+            readDirection = 2;
             binding.save.setVisibility(View.VISIBLE);
 //                radioButtomChangeFromUser = true;
-                preferencesEditor.apply();
+            preferencesEditor.apply();
         });
 
     }
 
     public void setPageCascade(int item) {
-        binding.seekBar.setProgress(item, true);
+        binding.seekBar.setPosition(item);
     }
 
     @Override
