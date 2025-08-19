@@ -605,6 +605,7 @@ public class ReaderMangaFragment extends Fragment {
                     binding.pageContainer.setVisibility(View.GONE);
                     binding.seekBar.setVisibility(View.GONE);
 
+
                 }
 
 
@@ -928,6 +929,7 @@ public class ReaderMangaFragment extends Fragment {
                 readDirection = 1;
                 preferencesEditor.apply();
                 binding.save.setVisibility(View.VISIBLE);
+                binding.seekBar.setVisibility(View.GONE);
 //                    radioButtomChangeFromUser = true;
                 return;
             }
@@ -938,6 +940,7 @@ public class ReaderMangaFragment extends Fragment {
                 preferencesEditor.putInt(ConfigClass.ConfigReader.READ_DIRECTION, 3);
                 preferencesEditor.apply();
                 binding.save.setVisibility(View.GONE);
+                binding.seekBar.setVisibility(View.GONE);
 //                    }
                 readDirection = 3;
 //                    radioButtomChangeFromUser = true;
@@ -948,6 +951,7 @@ public class ReaderMangaFragment extends Fragment {
             binding.pageContainer.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
             preferencesEditor.putInt(ConfigClass.ConfigReader.READ_DIRECTION, 2);
             adapterPages.setReverseStartReadLogo(true);
+            binding.seekBar.setVisibility(View.GONE);
             adapterPages.notifyDataSetChanged();
             readDirection = 2;
             binding.save.setVisibility(View.VISIBLE);
