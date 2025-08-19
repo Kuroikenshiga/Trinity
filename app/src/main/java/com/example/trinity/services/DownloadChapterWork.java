@@ -65,7 +65,7 @@ public class DownloadChapterWork extends Worker {
                 .setContentTitle("Baixando capítulos ("+1+" de "+ids.length+")")
                 .setSmallIcon(R.drawable.app_icon)
                 .setProgress(ids.length,0,false)
-                .addAction(R.drawable.cancel_work_shape,"Cancelar atualização", pendingIntent);
+                .addAction(R.drawable.cancel_work_shape,"Cancelar Download", pendingIntent);
 
         this.notify(notifiBuilder);
         String folderName = mangaApiID+"_"+language;
