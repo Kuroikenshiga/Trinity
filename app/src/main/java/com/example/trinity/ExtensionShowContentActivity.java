@@ -152,6 +152,190 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
             binding.completedMangas.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape));
             binding.genres.setBackground(AppCompatResources.getDrawable(this,R.drawable.genres_shape));
         });
+        startUpContentButtons();
+
+        adapterSearchItensSimpleResult = new AdapterSearchItensSimpleResult(this, this.data,binding.searchField);
+        binding.searchItens.setAdapter(adapterSearchItensSimpleResult);
+        binding.searchItens.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+
+
+        String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY, "dataSaver");
+        setContentView(binding.getRoot());
+
+        binding.logoHeader.setImageDrawable(AppCompatResources.getDrawable(this,getIntent().getIntExtra("Logo", 0)));
+        binding.textHeader.setText(getIntent().getStringExtra("Titulo"));
+        this.language = getIntent().getStringExtra("Language");
+
+        binding.backIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ExtensionShowContentActivity.this.finish();
+            }
+        });
+
+        adapter = new AdapterMangas(ExtensionShowContentActivity.this, mangasFromDataBaseViewModel.getMangas(), this.language);
+        adapter.setFromUpdates(true);
+        startUphandler();
+
+        binding.searchAction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ExtensionShowContentActivity.this, SearchResultActivity.class);
+                intent.putExtra("language", language);
+                intent.putExtra("SearchField", binding.searchField.getText().toString());
+                intent.putExtra("Extension", extension instanceof MangaDexExtension ? Extensions.MANGADEX : Extensions.MANGAKAKALOT);
+                ExtensionShowContentActivity.this.startActivity(intent);
+            }
+        });
+
+        binding.showSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showSearch();
+            }
+        });
+        RecyclerView recyclerView = binding.reciclerViewMangas;
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new GridLayoutManager(ExtensionShowContentActivity.this, 3));
+        recyclerView.setHasFixedSize(false);
+
+        extension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) : new MangakakalotExtension(null);
+        new Thread() {
+            @Override
+            public void run() {
+                new LogoMangaStorage(ExtensionShowContentActivity.this).createIfNotExistsFolderForLogos();
+
+                if(extension instanceof MangaDexExtension){
+                    Model model = Model.getInstance(ExtensionShowContentActivity.this);
+                    tags = model.selectAllTags();
+                }
+            }
+
+//            private @NonNull CheckBox getCheckBox(TagManga t, LinearLayout.LayoutParams lp, TypedValue typedValue) {
+//                CheckBox checkBox = new CheckBox(ExtensionShowContentActivity.this);
+//                checkBox.setLayoutParams(lp);
+//                checkBox.setText(t.getNome());
+//                checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+//                checkBox.setTextColor(typedValue.data);
+//                checkBox.setTag(t.getId());
+//                checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                    @Override
+//                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                        isAdvancedSearchSettingsChanged = true;
+//                    }
+//                });
+//                return checkBox;
+//            }
+        }.start();
+        workerThread = new Thread(()->extension.updates(mainHandler));
+        workerThread.start();
+
+        binding.searchField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                search_has_change = true;
+                last_time_key_pressed = Instant.now().toEpochMilli();
+                if(s.length() == 0){
+                    binding.loading.setVisibility(View.GONE);
+                    return;
+                }
+                binding.loading.setVisibility(View.VISIBLE);
+            }
+        });
+        binding.close.setOnClickListener((v)->{
+            binding.searchField.setText("");
+
+        });
+        loadMoreContent();
+        onClickEnter();
+    }
+
+    @Override
+    public void onDestroy() {
+//        Glide.with(this).clearOnStop();
+        binding.loading.setVisibility(View.GONE);
+        if (timer != null && !isTimerCanceled) {
+            timer.cancel();
+            isTimerCanceled = true;
+        }
+        WorkRequest workRequest = new OneTimeWorkRequest.Builder(ClearLogosTemp.class).build();
+        WorkManager.getInstance(getApplicationContext()).enqueue(workRequest);
+        super.onDestroy();
+
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        this.controllClick = false;
+        alredyClicked = false;
+    }
+
+    public void showSearch() {
+
+        searchIsShowed = true;
+        binding.headerContainer1.setVisibility(View.VISIBLE);
+        ValueAnimator show = ValueAnimator.ofInt(-60, 0);
+        show.setDuration(500);
+        binding.searchItens.setVisibility(View.VISIBLE);
+        if(!data.isEmpty()){
+            binding.releasesMangas.setVisibility(View.GONE);
+            binding.completedMangas.setVisibility(View.GONE);
+            binding.genres.setVisibility(View.GONE);
+        }
+        timer = new Timer();
+        isTimerCanceled = false;
+        timer.schedule(new TimerTask() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void run() {
+
+                if (search_has_change && !Objects.requireNonNull(binding.searchField.getText()).toString().isEmpty() && !isSearching && Instant.now().toEpochMilli() - last_time_key_pressed > 700) {
+                    search_has_change = false;
+                    isSearching = true;
+                    data = aniListApiRequester.searchTitles(binding.searchField.getText().toString());
+                    adapterSearchItensSimpleResult.setData(data);
+                    ExtensionShowContentActivity.this.runOnUiThread(() -> {
+                        if(!data.isEmpty()){
+                            binding.releasesMangas.setVisibility(View.GONE);
+                            binding.completedMangas.setVisibility(View.GONE);
+                            binding.genres.setVisibility(View.GONE);
+                        }
+                        adapterSearchItensSimpleResult.notifyDataSetChanged();
+                        binding.searchItens.setVisibility(View.VISIBLE);
+                        isSearching = false;
+                        binding.loading.setVisibility(View.GONE);
+                    });
+                    isSearching = false;
+
+                    return;
+                }
+
+            }
+        }, 1500, 1700);
+
+        show.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(@NonNull ValueAnimator animation) {
+                LinearLayout.LayoutParams lp1 = (LinearLayout.LayoutParams) binding.headerContainer1.getLayoutParams();
+                lp1.topMargin = (int) (((int) animation.getAnimatedValue()) * getResources().getDisplayMetrics().density);
+                binding.headerContainer1.setLayoutParams(lp1);
+            }
+        });
+        show.start();
+    }
+    private void startUpContentButtons(){
         binding.completedMangas.setOnClickListener((v)->{
             if(supressManyLoad){
                 Toast.makeText(this,"Carregando obras",Toast.LENGTH_SHORT).show();
@@ -244,193 +428,11 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
 
             }
         });
-
-        adapterSearchItensSimpleResult = new AdapterSearchItensSimpleResult(this, this.data,binding.searchField);
-        binding.searchItens.setAdapter(adapterSearchItensSimpleResult);
-        binding.searchItens.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-
-
-        String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY, "dataSaver");
-        setContentView(binding.getRoot());
-
-        binding.logoHeader.setImageDrawable(getResources().getDrawable(getIntent().getIntExtra("Logo", 0)));
-        binding.textHeader.setText(getIntent().getStringExtra("Titulo"));
-        this.language = getIntent().getStringExtra("Language");
-
-        binding.backIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ExtensionShowContentActivity.this.finish();
-            }
-        });
-
-        adapter = new AdapterMangas(ExtensionShowContentActivity.this, mangasFromDataBaseViewModel.getMangas(), this.language);
-        adapter.setFromUpdates(true);
-        startUphandler();
-
-        binding.searchAction.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ExtensionShowContentActivity.this, SearchResultActivity.class);
-                intent.putExtra("language", language);
-                intent.putExtra("SearchField", binding.searchField.getText().toString());
-                intent.putExtra("Extension", extension instanceof MangaDexExtension ? Extensions.MANGADEX : Extensions.MANGAKAKALOT);
-                ExtensionShowContentActivity.this.startActivity(intent);
-            }
-        });
-
-        binding.showSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showSearch();
-            }
-        });
-        RecyclerView recyclerView = binding.reciclerViewMangas;
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new GridLayoutManager(ExtensionShowContentActivity.this, 3));
-        recyclerView.setHasFixedSize(false);
-
-        extension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) : new MangakakalotExtension(null);
-        new Thread() {
-            @Override
-            public void run() {
-                new LogoMangaStorage(ExtensionShowContentActivity.this).createIfNotExistsFolderForLogos();
-
-                if(extension instanceof MangaDexExtension){
-                    Model model = Model.getInstance(ExtensionShowContentActivity.this);
-                    tags = model.selectAllTags();
-                }
-//                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//                TypedValue typedValue = new TypedValue();
-//                getTheme().resolveAttribute(com.google.android.material.R.attr.colorTertiary, typedValue, true);
-//                for (TagManga t : tags) {
-//                    CheckBox checkBox = getCheckBox(t, lp, typedValue);
-//                    ExtensionShowContentActivity.this.runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            binding.tagsContainer.addView(checkBox);
-//                        }
-//                    });
-//                }
-            }
-
-//            private @NonNull CheckBox getCheckBox(TagManga t, LinearLayout.LayoutParams lp, TypedValue typedValue) {
-//                CheckBox checkBox = new CheckBox(ExtensionShowContentActivity.this);
-//                checkBox.setLayoutParams(lp);
-//                checkBox.setText(t.getNome());
-//                checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-//                checkBox.setTextColor(typedValue.data);
-//                checkBox.setTag(t.getId());
-//                checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                    @Override
-//                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                        isAdvancedSearchSettingsChanged = true;
-//                    }
-//                });
-//                return checkBox;
-//            }
-        }.start();
-        workerThread = new Thread(()->extension.updates(mainHandler));
-        workerThread.start();
-
-        binding.searchField.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                search_has_change = true;
-                last_time_key_pressed = Instant.now().toEpochMilli();
-                if(s.length() == 0){
-                    binding.loading.setVisibility(View.GONE);
-                    return;
-                }
-                binding.loading.setVisibility(View.VISIBLE);
-            }
-        });
-        binding.close.setOnClickListener((v)->{
-            binding.searchField.setText("");
-
-        });
-        loadMoreContent();
-        onClickEnter();
     }
-
-    @Override
-    public void onDestroy() {
-//        Glide.with(this).clearOnStop();
-        binding.loading.setVisibility(View.GONE);
-        if (timer != null && !isTimerCanceled) {
-            timer.cancel();
-            isTimerCanceled = true;
-        }
-        WorkRequest workRequest = new OneTimeWorkRequest.Builder(ClearLogosTemp.class).build();
-        WorkManager.getInstance(getApplicationContext()).enqueue(workRequest);
-        super.onDestroy();
-
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        this.controllClick = false;
-        alredyClicked = false;
-    }
-
-    public void showSearch() {
-
-        searchIsShowed = true;
-        binding.headerContainer1.setVisibility(View.VISIBLE);
-        ValueAnimator show = ValueAnimator.ofInt(-60, 0);
-        show.setDuration(500);
-        binding.searchItens.setVisibility(View.VISIBLE);
-
-        timer = new Timer();
-        isTimerCanceled = false;
-        timer.schedule(new TimerTask() {
-            @SuppressLint("NotifyDataSetChanged")
-            @Override
-            public void run() {
-
-                if (search_has_change && !Objects.requireNonNull(binding.searchField.getText()).toString().isEmpty() && !isSearching && Instant.now().toEpochMilli() - last_time_key_pressed > 700) {
-                    search_has_change = false;
-                    isSearching = true;
-                    data = aniListApiRequester.searchTitles(binding.searchField.getText().toString());
-                    adapterSearchItensSimpleResult.setData(data);
-                    ExtensionShowContentActivity.this.runOnUiThread(() -> {
-                        adapterSearchItensSimpleResult.notifyDataSetChanged();
-                        binding.searchItens.setVisibility(View.VISIBLE);
-                        isSearching = false;
-                        binding.loading.setVisibility(View.GONE);
-                    });
-                    isSearching = false;
-
-                    return;
-                }
-
-            }
-        }, 1500, 1700);
-
-        show.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-                LinearLayout.LayoutParams lp1 = (LinearLayout.LayoutParams) binding.headerContainer1.getLayoutParams();
-                lp1.topMargin = (int) (((int) animation.getAnimatedValue()) * getResources().getDisplayMetrics().density);
-                binding.headerContainer1.setLayoutParams(lp1);
-            }
-        });
-        show.start();
-    }
-
     public void hiddenSearch() {
+        binding.releasesMangas.setVisibility(View.VISIBLE);
+        binding.completedMangas.setVisibility(View.VISIBLE);
+        binding.genres.setVisibility(View.VISIBLE);
         searchIsShowed = false;
         if (!isTimerCanceled) {
             timer.cancel();

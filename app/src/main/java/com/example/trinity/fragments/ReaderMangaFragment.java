@@ -2,6 +2,7 @@ package com.example.trinity.fragments;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -26,6 +27,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.widget.ViewPager2;
+import androidx.work.Logger;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
@@ -109,13 +111,11 @@ public class ReaderMangaFragment extends Fragment {
     private int newDecoration;
     private View decoration;
     private Extensions mangaDexExtension;
-    private GestureDetector gestureDetector;
     private ValueAnimator vm;
     private int chapterIndex;
     private String idChap;
     private ArrayList<ChapterManga> chapters;
-    private boolean radioButtomChangeFromUser = true;
-
+    private int pageCascadeItem = 0;
     private boolean loadingFragmentContent = true;
 
     private boolean isLoadingNewChapter = false;
@@ -180,10 +180,8 @@ public class ReaderMangaFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentReaderMangaBinding.inflate(inflater, container, false);
-
+        binding.seekBar.setVisibility(View.GONE);
         storageManager = new ChapterStorageManager(this.getContext());
-//        windowInsetsCompat = WindowCompat.getInsetsController(getActivity().getWindow(), getActivity().getWindow().getDecorView());
-//        windowInsetsCompat.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         windowInsetsControllerCompat = WindowCompat.getInsetsController(requireActivity().getWindow(), requireActivity().getWindow().getDecorView());
         windowInsetsControllerCompat.hide(WindowInsetsCompat.Type.statusBars());
         if (getArguments() != null) {
@@ -276,17 +274,6 @@ public class ReaderMangaFragment extends Fragment {
         chapters = mangaDataViewModel.getManga().getChapters();
 
         chapters.sort(Comparator.comparingDouble(c -> Double.parseDouble(c.getChapter())));
-//        try {
-//            SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", chapters, OrderEnum.CRESCENTE);
-//        } catch (NoSuchMethodException e) {
-//            throw new RuntimeException(e);
-//        } catch (ClassNotFoundException e) {
-//            throw new RuntimeException(e);
-//        } catch (IllegalAccessException e) {
-//            throw new RuntimeException(e);
-//        } catch (InvocationTargetException e) {
-//            throw new RuntimeException(e);
-//        }
 
         chapterIndex = this.getChapterIndex(idChap);
         new Thread() {
@@ -356,22 +343,19 @@ public class ReaderMangaFragment extends Fragment {
                     isLoadingNewChapter = false;
                     Instant now = Instant.now();
                     initialTime = now.getEpochSecond();
-//                    controllShowBottomTopBar();
+
                     int numPages = msg.getData().getInt("numPages");
 
                     imageURI = new ArrayList<>();
                     for (int i = 0; i < numPages + 2; i++) imageURI.add(null);
+                    binding.numPages.setText(String.format("%d / %d",1,imageURI.size()));
 
                     adapterPages = new AdapterPages(getActivity(), imageURI);
                     adapterPages.setLogoManga(mangaDataViewModel.getManga().getId());
 
-//                    adapterPages.setFavorited(isMangaAdded);
                     adapterPages.setAlpha(alpha);
 
-
                     adapterPagesCascade = new AdapterPagesCascade(requireContext(), imageURI, ReaderMangaFragment.this);
-//                    adapterPagesCascade.setLogoManga(mangaDataViewModel.getManga().getImage());
-//                    binding.cascadeRead.setAlpha((float) alpha / 100);
                     adapterPagesCascade.setLogoManga(mangaDataViewModel.getManga().getId());
                     adapterPages.setFragment(ReaderMangaFragment.this);
                     adapterPages.setLogoManga(mangaDataViewModel.getManga().getId());
@@ -442,61 +426,23 @@ public class ReaderMangaFragment extends Fragment {
                         ValueAnimator valueAnimator = ValueAnimator.ofFloat(1f, 0.1f);
                         valueAnimator.setDuration(500);
                         binding.pageContainer.setCurrentItem((int)(binding.seekBar.getPosition()*imageURI.size()), true);
-                        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                            @Override
-                            public void onAnimationUpdate(@NonNull ValueAnimator animation) {
+                        valueAnimator.addUpdateListener((@NonNull ValueAnimator animation)-> {
                                 binding.seekBar.setAlpha((float) animation.getAnimatedValue());
                                 binding.nextChap.setAlpha((float) animation.getAnimatedValue());
                                 binding.prevChap.setAlpha((float) animation.getAnimatedValue());
-                            }
+                                System.out.println((float) animation.getAnimatedValue());
+                                if((float) animation.getAnimatedValue() - 0.1f < 0.05)binding.seekBar.setVisibility(View.GONE);
                         });
+
                         valueAnimator.start();
 
                         return Unit.INSTANCE;
                     });
                     binding.seekBar.setPositionListener((aFloat) -> {
                         binding.numPages.setText(String.format("%d / %d", binding.pageContainer.getCurrentItem() + 1, imageURI.size()));
-//                        binding.pageContainer.setCurrentItem((int) binding.seekBar.getPosition() * imageURI.size(), true);
-                        binding.seekBar.setBubbleText(String.valueOf((int)(binding.seekBar.getPosition()*imageURI.size())));
+                        binding.seekBar.setBubbleText(String.valueOf((int)(binding.seekBar.getPosition()*imageURI.size()) == 0?1:(int)(binding.seekBar.getPosition()*imageURI.size())));
                         return Unit.INSTANCE;
                     });
-
-//                    binding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//                        @Override
-//                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//                            if (binding.pageContainer.isUserInputEnabled()) {
-//                                binding.numPages.setText(progress + " / " + (imageURI.size()));
-//
-//                                if (fromUser) {
-//                                    binding.cascadeRead.scrollToPosition(progress - 1);
-//                                    binding.pageContainer.setCurrentItem(progress - 1, true);
-//                                }
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onStartTrackingTouch(SeekBar seekBar) {
-//                            seekBar.setAlpha(1f);
-//                            binding.nextChap.setAlpha(1f);
-//                            binding.prevChap.setAlpha(1f);
-//                        }
-//
-//                        @Override
-//                        public void onStopTrackingTouch(SeekBar seekBar) {
-//                            ValueAnimator valueAnimator = ValueAnimator.ofFloat(1f, 0.1f);
-//                            valueAnimator.setDuration(500);
-//
-//                            valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//                                @Override
-//                                public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-//                                    seekBar.setAlpha((float) animation.getAnimatedValue());
-//                                    binding.nextChap.setAlpha((float) animation.getAnimatedValue());
-//                                    binding.prevChap.setAlpha((float) animation.getAnimatedValue());
-//                                }
-//                            });
-//                            valueAnimator.start();
-//                        }
-//                    });
 
                 } else if (msg.what == Extensions.RESPONSE_PAGE) {
                     vm.cancel();
@@ -521,7 +467,7 @@ public class ReaderMangaFragment extends Fragment {
                     binding.errorContainer.setVisibility(View.VISIBLE);
                 } else if (msg.what == Extensions.RESPONSE_COUNT_ITENS_DECREASED_BY_ONE) {
                     adapterPagesCascade.ignorePage(adapterPages.ignorePage());
-                    binding.numPages.setText(String.format("1 / %d", 0));
+                    binding.numPages.setText(String.format("%d / %d",readDirection == 3?pageCascadeItem:binding.pageContainer.getCurrentItem()+1, imageURI.size()));
                     binding.seekBar.setEndText(String.valueOf(imageURI.size()));
                 }
 
@@ -691,9 +637,6 @@ public class ReaderMangaFragment extends Fragment {
             return;
         }
 
-
-//        binding.alphaControlContainer.setVisibility(View.GONE);
-//        binding.readConfigsContainer.setVisibility(View.GONE);
         ValueAnimator animatorShow = ValueAnimator.ofInt(-50, 0);
         animatorShow.setRepeatCount(0);
         animatorShow.setDuration(300);
@@ -754,6 +697,7 @@ public class ReaderMangaFragment extends Fragment {
 //            decoration.setSystemUiVisibility(currentDecoration);
             animatorShow.start();
             binding.seekBar.setAlpha(1f);
+            binding.seekBar.setVisibility(View.VISIBLE);
             binding.nextChap.setAlpha(1f);
             binding.prevChap.setAlpha(1f);
             windowInsetsControllerCompat.show(WindowInsetsCompat.Type.statusBars());
@@ -774,6 +718,7 @@ public class ReaderMangaFragment extends Fragment {
                 binding.seekBar.setAlpha((float) animation.getAnimatedValue());
                 binding.nextChap.setAlpha((float) animation.getAnimatedValue());
                 binding.prevChap.setAlpha((float) animation.getAnimatedValue());
+                if((float) animation.getAnimatedValue() - 0.1f < 0.05)binding.seekBar.setVisibility(View.GONE);
             }
         });
         valueAnimator.start();
@@ -961,8 +906,10 @@ public class ReaderMangaFragment extends Fragment {
 
     }
 
+    @SuppressLint("DefaultLocale")
     public void setPageCascade(int item) {
-        binding.seekBar.setPosition(item);
+        pageCascadeItem = item;
+        binding.numPages.setText(String.format("%d / %d",item+1,imageURI.size()));
     }
 
     @Override
@@ -1056,7 +1003,7 @@ public class ReaderMangaFragment extends Fragment {
 
         if (image == null) {
             isDownloading = false;
-            Toast.makeText(getActivity().getApplicationContext(), "Não foi possível salvar a imagem", Toast.LENGTH_LONG).show();
+            Toast.makeText(requireActivity().getApplicationContext(), "Não foi possível salvar a imagem", Toast.LENGTH_LONG).show();
             return;
         }
 

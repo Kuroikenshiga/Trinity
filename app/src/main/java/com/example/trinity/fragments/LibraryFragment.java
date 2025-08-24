@@ -257,7 +257,7 @@ public class LibraryFragment extends Fragment {
 
             }
         };
-        getActivity().getOnBackPressedDispatcher().addCallback(getActivity(), callback);
+        requireActivity().getOnBackPressedDispatcher().addCallback(requireActivity(), callback);
 
         binding.reciclerViewMangas.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -316,11 +316,7 @@ public class LibraryFragment extends Fragment {
             mainActivity.isInReadFragment = false;
         }
         model = Model.getInstance(requireContext());
-        new Thread(() -> {
-            if (this.model != null && model.mangaTableHasChanges()) {
-                forceLoadLibrary();
-            }
-        }).start();
+        forceLoadLibrary();
 
     }
 

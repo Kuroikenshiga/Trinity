@@ -177,7 +177,7 @@ public class ExtensionsShowFragment extends Fragment {
                 Intent i = new Intent(getActivity(), ExtensionShowContentActivity.class);
 
 //
-                i.putExtra("Logo", R.drawable.mangakakalot);
+                i.putExtra("Logo", R.drawable.mangakakalot_svg);
                 i.putExtra("Titulo", "Mangakakalot - en");
                 i.putExtra("Language", languages[2]);
                 i.putExtra("Extension",Extensions.MANGAKAKALOT);

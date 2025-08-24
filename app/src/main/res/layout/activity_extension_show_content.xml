@@ -199,21 +199,6 @@
         />
 
 
-
-
-<!--    <androidx.appcompat.widget.AppCompatImageButton-->
-<!--        android:id="@+id/showAdvancedSearch"-->
-<!--        android:layout_width="50dp"-->
-<!--        android:layout_height="50dp"-->
-<!--        android:layout_margin="10dp"-->
-<!--        android:background="@drawable/floating_action_buttom_shape"-->
-<!--        android:backgroundTint="?attr/colorSecondary"-->
-<!--        android:rotation="180"-->
-<!--        android:src="@drawable/arrow_down"-->
-<!--        android:tint="?attr/colorTertiary"-->
-<!--        app:layout_constraintBottom_toTopOf="@id/configSearch"-->
-<!--        app:layout_constraintEnd_toEndOf="parent" />-->
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
