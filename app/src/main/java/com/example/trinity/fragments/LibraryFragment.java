@@ -79,7 +79,7 @@ public class LibraryFragment extends Fragment {
     MangasFromDataBaseViewModel mangasFromDataBaseViewModel;
     private boolean isSearching = false;
     private boolean supressManyLoad = false;
-
+    private boolean isLoadingLibrary = false;
     public LibraryFragment() {
         // Required empty public constructor
     }
@@ -326,12 +326,18 @@ public class LibraryFragment extends Fragment {
             mangasFromDataBaseViewModel.getMangas().subList(0, 25).clear();
             adapter.notifyItemRangeRemoved(0,25);
         }
+        if(isLoadingLibrary)return;
+
+        isLoadingLibrary = true;
 
         new Thread(() -> {
             model = Model.getInstance(requireActivity());
             dataSet = model.selectAllMangas(false,limit,offSet);
 
-            if(dataSet.isEmpty())return;
+            if(dataSet.isEmpty()){
+                isLoadingLibrary = false;
+                return;
+            }
 
             requireActivity().runOnUiThread(() -> {
                 int indexStart = mangasFromDataBaseViewModel.getMangas().size();
@@ -339,22 +345,31 @@ public class LibraryFragment extends Fragment {
                 adapter.notifyItemRangeInserted(indexStart,dataSet.size());
                 supressManyLoad = false;
                 OFF_SET += LIMIT;
+                isLoadingLibrary = false;
             });
         }).start();
 
     }
 
     private void forceLoadLibrary() {
+        if(!Model.getInstance(requireContext()).mangaTableHasChanges())return;
 
+        if(isLoadingLibrary)return;
+        isLoadingLibrary = true;
         new Thread(() -> {
             model = Model.getInstance(requireActivity());
             dataSet = model.selectAllMangas(false,LIMIT,0);
             requireActivity().runOnUiThread(() -> {
+                if(!this.isAdded()){
+                    isLoadingLibrary = false;
+                    return;
+                }
                 mangasFromDataBaseViewModel.setMangas(dataSet);
                 adapter.setDataSet(mangasFromDataBaseViewModel.getMangas());
                 recyclerView.setAdapter(adapter);
                 OFF_SET = 21;
                 binding.backToTop.setVisibility(View.GONE);
+                isLoadingLibrary = false;
             });
         }).start();
     }

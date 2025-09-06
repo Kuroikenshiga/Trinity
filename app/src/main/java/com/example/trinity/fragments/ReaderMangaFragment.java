@@ -304,9 +304,6 @@ public class ReaderMangaFragment extends Fragment {
                 } else if (position == 0) {
                     binding.seekBar.setVisibility(View.GONE);
 
-                } else {
-                    binding.seekBar.setVisibility(View.VISIBLE);
-
                 }
 
                 if (chapterDownloaded && position > 0 && position < imageURI.size() - 1 && imageURI.get(position) == null) {
@@ -320,9 +317,6 @@ public class ReaderMangaFragment extends Fragment {
                 }
             }
         });
-//        binding.pageContainer.setUserInputEnabled(false);
-
-
         mainHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
@@ -425,6 +419,9 @@ public class ReaderMangaFragment extends Fragment {
                     binding.seekBar.setEndTrackingListener(() -> {
                         ValueAnimator valueAnimator = ValueAnimator.ofFloat(1f, 0.1f);
                         valueAnimator.setDuration(500);
+
+
+
                         binding.pageContainer.setCurrentItem((int)(binding.seekBar.getPosition()*imageURI.size()), true);
                         valueAnimator.addUpdateListener((@NonNull ValueAnimator animation)-> {
                                 binding.seekBar.setAlpha((float) animation.getAnimatedValue());
@@ -696,8 +693,12 @@ public class ReaderMangaFragment extends Fragment {
         if (!isShowedTopAndBotton) {
 //            decoration.setSystemUiVisibility(currentDecoration);
             animatorShow.start();
-            binding.seekBar.setAlpha(1f);
-            binding.seekBar.setVisibility(View.VISIBLE);
+
+            if(readDirection != 3 && binding.pageContainer.getCurrentItem() > 0 && binding.pageContainer.getCurrentItem() < imageURI.size()-1){
+                binding.seekBar.setVisibility(View.VISIBLE);
+                binding.seekBar.setAlpha(1f);
+            }
+
             binding.nextChap.setAlpha(1f);
             binding.prevChap.setAlpha(1f);
             windowInsetsControllerCompat.show(WindowInsetsCompat.Type.statusBars());
@@ -833,9 +834,6 @@ public class ReaderMangaFragment extends Fragment {
                 binding.pageContainer.setAlpha((float) progress / 100);
                 alpha = progress;
 
-//                seekBar.setThumb(getActivity().getDrawable(R.drawable.light_controll_active));
-
-//                adapterPages.notifyDataSetChanged();
             }
 
             @Override

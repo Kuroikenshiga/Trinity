@@ -10,7 +10,7 @@ public abstract class ImageValidate {
 
     public static boolean isSubImage(@NonNull Bitmap bitmap) {
 
-        return bitmap.getHeight() <  401;
+        return bitmap.getHeight() <  550;
     }
 
     public static Bitmap BitmapConcat(Bitmap originalImage, Bitmap subImage) {

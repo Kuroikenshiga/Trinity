@@ -215,7 +215,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
 
             if(fragment.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
 
-                Glide.with(fragment.getActivity().getApplicationContext())
+                Glide.with(fragment.requireActivity().getApplicationContext())
                         .asBitmap()
                         .load(resourcesImage.get(holder.getAdapterPosition()))
                         .override(context.getResources().getDisplayMetrics().widthPixels, context.getResources().getDisplayMetrics().heightPixels)
