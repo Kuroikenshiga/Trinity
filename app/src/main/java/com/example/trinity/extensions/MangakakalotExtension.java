@@ -458,7 +458,7 @@ public class MangakakalotExtension implements Extensions {
                     if(countImageControl > 1 || continueVerification){
 
 //                        assert bitAux != null;
-                        if(bitAux != null && ImageValidate.isSubImage(bitAux)){
+                        if(bitAux != null && ImageValidate.isSubImage(bit,bitAux)){
                             String urlImage = PageCacheManager.getInstance(context).insertBitmapInCache(ImageValidate.BitmapConcat(bit,bitAux), String.valueOf(index) + ".jpeg");
 
                             Message msg = Message.obtain();

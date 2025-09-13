@@ -414,10 +414,10 @@ public class InfoMangaFragment extends Fragment {
                     controlDownloadButtonVisibility(false);
                     return;
                 }
-                getActivity().finish();
+                requireActivity().finish();
             }
         };
-        getActivity().getOnBackPressedDispatcher().addCallback(getActivity(), callback);
+        requireActivity().getOnBackPressedDispatcher().addCallback(getActivity(), callback);
 
 
 

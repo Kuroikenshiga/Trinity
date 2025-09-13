@@ -8,9 +8,15 @@ import androidx.annotation.NonNull;
 
 public abstract class ImageValidate {
 
-    public static boolean isSubImage(@NonNull Bitmap bitmap) {
+    private static final float minVerticalRatioForCompute = 0.6f;
+    private static final float maxVerticalRatioForCompute = 1f;
 
-        return bitmap.getHeight() <  550;
+    private static final float minHorizontalRatioForCompute = 1.2f;
+    private static final float maxHorizontalRatioForCompute = 1.6f;
+
+    public static boolean isSubImage(@NonNull Bitmap originalImage, Bitmap subImage) {
+        float imageRatio = (float) originalImage.getWidth() /(subImage.getHeight()+originalImage.getHeight());
+        return originalImage.getWidth() < originalImage.getHeight() + subImage.getHeight()?(imageRatio > minVerticalRatioForCompute && imageRatio < maxVerticalRatioForCompute):(imageRatio > minHorizontalRatioForCompute && imageRatio < maxHorizontalRatioForCompute);
     }
 
     public static Bitmap BitmapConcat(Bitmap originalImage, Bitmap subImage) {
