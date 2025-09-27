@@ -222,7 +222,7 @@ public class MangakakalotExtension implements Extensions {
     public ArrayList<Manga> responseToValueObject(String response) {
         ArrayList<Manga> mangas = new ArrayList<>();
         Document document = Jsoup.parse(response);
-        Elements mangaElements = document.getElementsByClass("list-truyen-item-wrap");
+        Elements mangaElements = document.getElementsByClass("list-comic-item-wrap");
         for (Element element : mangaElements) {
             Manga manga = new Manga();
             manga.setCoverName(element.getElementsByTag("img").first().attr("src"));
