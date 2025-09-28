@@ -122,27 +122,27 @@ public class UpdatesFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         this.updatesViewModel = new ViewModelProvider(requireActivity()).get(UpdatesViewModel.class);
-        MainActivity mainActivity = (MainActivity) getActivity();
+        MainActivity mainActivity = (MainActivity) requireActivity();
         mainActivity.checkPermission();
-        sharedPreferences = getActivity().getSharedPreferences(ConfigClass.TAG_PREFERENCE, Context.MODE_PRIVATE);
+        sharedPreferences = requireActivity().getSharedPreferences(ConfigClass.TAG_PREFERENCE, Context.MODE_PRIVATE);
 
         editor = sharedPreferences.edit();
         this.lastUpadate = sharedPreferences.getLong(ConfigClass.ConfigUpdates.LAST_UPDATE, 0);
 
-        mangaDataViewModel = new ViewModelProvider(getActivity()).get(MangaDataViewModel.class);
+        mangaDataViewModel = new ViewModelProvider(requireActivity()).get(MangaDataViewModel.class);
         binding = FragmentUpdatesBinding.inflate(inflater, container, false);
         if (lastUpadate != 0) {
             binding.lastUpdate.setText("Última atualização feita " + this.returnLastUpdateTime(lastUpadate, Instant.now().getEpochSecond()));
             binding.lastUpdate.setVisibility(View.VISIBLE);
         }
-        workManager = WorkManager.getInstance(getActivity());
+        workManager = WorkManager.getInstance(requireContext());
 
 //        mangaDexExtension = new MangaDexExtension(imageQuality);
         chapContainer = binding.updatesConteiner;
         this.updateds = updatesViewModel.getChapterUpdatedLiveData().getValue();
-        this.adapter = new AdapterUpdates(getActivity(), updateds, this);
+        this.adapter = new AdapterUpdates(requireContext(), updateds, this);
         adapter.setMangaDataViewModel(mangaDataViewModel);
         adapter.setFragment(this);
         this.chapContainer.setAdapter(adapter);
@@ -151,15 +151,10 @@ public class UpdatesFragment extends Fragment {
         this.updatesViewModel.getItem().observe(getViewLifecycleOwner(), new Observer<ChapterUpdated>() {
             @Override
             public void onChanged(ChapterUpdated chapterUpdated) {
-//                System.out.println("changed");
-//                adapter.notifyItemInserted(updatesViewModel.getChapterUpdatedLiveData().getValue().size());
                 adapter.notifyDataSetChanged();
             }
         });
-//        this.updatesViewModel.getChapterUpdatedLiveData().observe(getViewLifecycleOwner(),(ArrayList)->{
-//            adapter.setChapterUpdateds(ArrayList);
-//            adapter.notifyDataSetChanged();
-//        });
+
 
         this.chapContainer.setLayoutManager(new LinearLayoutManager(myActivity));
         loadUpdates();
@@ -169,7 +164,7 @@ public class UpdatesFragment extends Fragment {
     }
 
     private void loadUpdates() {
-        if (updatesViewModel.getChapterUpdatedLiveData().getValue().isEmpty() || wasReloaded) {
+        if (Objects.requireNonNull(updatesViewModel.getChapterUpdatedLiveData().getValue()).isEmpty() || wasReloaded) {
             wasReloaded = false;
             if (!isUpdatingLibray) {
                 new Thread() {
@@ -254,7 +249,6 @@ public class UpdatesFragment extends Fragment {
                             if (workInfo.getState().isFinished()) {
                                 isUpdatingLibray = false;
                                 binding.swipe.setRefreshing(false);
-                                isUpdatingLibray = false;
                                 workManager.cancelAllWork();
                                 wasReloaded = true;
                                 loadUpdates();
@@ -283,6 +277,9 @@ public class UpdatesFragment extends Fragment {
             mainActivity.isInFirstDestination = false;
             mainActivity.isInReadFragment = false;
         }
+        wasReloaded = model.mangaUpdateTableHasChanges();
+        loadUpdates();
+
     }
 
     public void turnOffRefresh() {

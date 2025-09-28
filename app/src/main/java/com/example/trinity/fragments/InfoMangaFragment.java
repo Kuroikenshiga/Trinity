@@ -803,7 +803,6 @@ public class InfoMangaFragment extends Fragment {
                 if (workInfo == null) return;
                 if (workInfo.getState().isFinished()) {
                     String[] ids = workInfo.getOutputData().getStringArray("ids");
-
                     chaptersAdapter.setDownloadSucecessful(ids);
                 }
             }

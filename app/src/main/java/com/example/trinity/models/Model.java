@@ -49,6 +49,7 @@ public class Model extends SQLiteOpenHelper {
     private static Model instance;
     private Context context;
     private boolean MANGA_TABLE_HAS_CHANGES = false;
+    private boolean MANGA_UPDATES_TABLE_HAS_CHANGES = false;
     private Model(@Nullable Context context) {
         super(context, dataBaseName, null, version);
         this.context = context;
@@ -783,6 +784,7 @@ public class Model extends SQLiteOpenHelper {
         if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.setTransactionSuccessful();
 
         MANGA_TABLE_HAS_CHANGES = true;
+        MANGA_UPDATES_TABLE_HAS_CHANGES = true;
         return true;
     }
 
@@ -847,6 +849,7 @@ public class Model extends SQLiteOpenHelper {
 //            }
 //        });
         MANGA_TABLE_HAS_CHANGES = true;
+        MANGA_UPDATES_TABLE_HAS_CHANGES = true;
         return true;
     }
 
@@ -1180,17 +1183,6 @@ public class Model extends SQLiteOpenHelper {
 
         return true;
     }
-
-    //    public boolean deleteAllcap() {
-//        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("DELETE FROM chapters ")) {
-//
-//            stmt.executeUpdateDelete();
-//        } catch (SQLiteException ex) {
-//            ex.printStackTrace();
-//            return false;
-//        }
-//        return true;
-//    }
     public void saveTag(ArrayList<TagManga> tags) {
         if (tags.isEmpty()) {
             return;
@@ -1229,18 +1221,6 @@ public class Model extends SQLiteOpenHelper {
         return tags;
     }
 
-//    private boolean insertLocalStorageOfLogos(long id, String logoPath) {
-//        if (logoPath.isEmpty()) return false;
-//        if (id == -1) return false;
-//        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("UPDATE mangas set logo_path = ? WHERE id = ?")) {
-//            stmt.bindString(1, logoPath);
-//            stmt.bindLong(2, id);
-//            return stmt.executeUpdateDelete() > 0;
-//        } catch (SQLiteException ex) {
-//            ex.printStackTrace();
-//            return false;
-//        }
-//    }
     public void removeImagesFromDataBase(){
         try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("UPDATE mangas set image = ?")) {
             stmt.bindBlob(1,new byte[]{});
@@ -1334,6 +1314,14 @@ public class Model extends SQLiteOpenHelper {
     public boolean mangaTableHasChanges(){
         if(MANGA_TABLE_HAS_CHANGES){
             MANGA_TABLE_HAS_CHANGES = false;
+            return true;
+        }
+        return false;
+
+    }
+    public boolean mangaUpdateTableHasChanges(){
+        if(MANGA_UPDATES_TABLE_HAS_CHANGES){
+            MANGA_UPDATES_TABLE_HAS_CHANGES = false;
             return true;
         }
         return false;

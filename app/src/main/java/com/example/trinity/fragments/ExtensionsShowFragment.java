@@ -246,7 +246,7 @@ public class ExtensionsShowFragment extends Fragment {
             @Override
             public void onAnimationUpdate(@NonNull ValueAnimator animation) {
                 LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) binding.titleContainer.getLayoutParams();
-                lp.topMargin = (int) ((int) animation.getAnimatedValue() * getActivity().getResources().getDisplayMetrics().density);
+                lp.topMargin = (int) ((int) animation.getAnimatedValue() * requireActivity().getResources().getDisplayMetrics().density);
                 binding.titleContainer.setLayoutParams(lp);
             }
         });
@@ -256,38 +256,38 @@ public class ExtensionsShowFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        binding.recyclerPtBr.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-            @Override
-            public void onViewAttachedToWindow(@NonNull View v) {
-
-            }
-
-            @Override
-            public void onViewDetachedFromWindow(@NonNull View v) {
-                Glide.with(v.getContext()).clearOnStop();
-            }
-        });
-        binding.recyclerEn.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-            @Override
-            public void onViewAttachedToWindow(@NonNull View v) {
-
-            }
-
-            @Override
-            public void onViewDetachedFromWindow(@NonNull View v) {
-                Glide.with(v.getContext()).clearOnStop();
-            }
-        });
-        binding.recyclerEsLa.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-            @Override
-            public void onViewAttachedToWindow(@NonNull View v) {
-
-            }
-
-            @Override
-            public void onViewDetachedFromWindow(@NonNull View v) {
-                Glide.with(v.getContext()).clearOnStop();
-            }
-        });
+//        binding.recyclerPtBr.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+//            @Override
+//            public void onViewAttachedToWindow(@NonNull View v) {
+//
+//            }
+//
+//            @Override
+//            public void onViewDetachedFromWindow(@NonNull View v) {
+//                Glide.with(v.getContext()).clearOnStop();
+//            }
+//        });
+//        binding.recyclerEn.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+//            @Override
+//            public void onViewAttachedToWindow(@NonNull View v) {
+//
+//            }
+//
+//            @Override
+//            public void onViewDetachedFromWindow(@NonNull View v) {
+//                Glide.with(v.getContext()).clearOnStop();
+//            }
+//        });
+//        binding.recyclerEsLa.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+//            @Override
+//            public void onViewAttachedToWindow(@NonNull View v) {
+//
+//            }
+//
+//            @Override
+//            public void onViewDetachedFromWindow(@NonNull View v) {
+//                Glide.with(v.getContext()).clearOnStop();
+//            }
+//        });
     }
 }

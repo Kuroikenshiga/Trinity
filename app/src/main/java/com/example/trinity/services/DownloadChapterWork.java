@@ -19,8 +19,10 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.R;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.services.broadcasts.ActionsPending;
@@ -30,6 +32,7 @@ import com.example.trinity.storageAcess.ChapterStorageManager;
 import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class DownloadChapterWork extends Worker {
     private Context context;
@@ -56,6 +59,9 @@ public class DownloadChapterWork extends Worker {
         ArrayList<String> returnValue = new ArrayList<>();
         SharedPreferences sharedPreferences = context.getSharedPreferences(ConfigClass.TAG_PREFERENCE,Context.MODE_PRIVATE);
         String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY,"dataSaver");
+
+        Extensions extension = Objects.equals(getInputData().getString("extension"), Extensions.MANGADEX) ?new MangaDexExtension(language,imageQuality):new MangakakalotExtension(null);
+
         assert ids != null;
         Intent cancelDownloadIntent = new Intent(context, CancelCurrentWorkReceiver.class);
         cancelDownloadIntent.setAction(ActionsPending.CANCEL_DOWNLOADS);
@@ -73,7 +79,7 @@ public class DownloadChapterWork extends Worker {
         ChapterStorageManager storageManager = new ChapterStorageManager(context);
         File folderChaptersPath = storageManager.createIfNotExistFolderMangaChapters(folderName);
 
-        MangaDexExtension mangaDexExtension = new MangaDexExtension(language,imageQuality);
+        
         int indexChapters = 0;
         for(String s:ids){
             int index = 1;
@@ -81,14 +87,14 @@ public class DownloadChapterWork extends Worker {
             if(s == null){
                 break;
             }
-            Bundle bundle = mangaDexExtension.getChapterPages(s);
+            Bundle bundle = extension.getChapterPages(s);
 
             if(bundle==null){
                 CancelCurrentWorkReceiver.setIsWorkDownloadChaptersCanceled();
                 Data data = new Data.Builder().putStringArray("ids",new String[]{}).build();
                 return Result.failure(data);
             }
-            Bitmap[] bitmaps = mangaDexExtension.loadChapterPages(bundle.getStringArray("imgs"),bundle.getString("hash"),bundle.getString("baseUrl"));
+            Bitmap[] bitmaps = extension.loadChapterPages(bundle.getStringArray("imgs"),bundle.getString("hash"),bundle.getString("baseUrl"));
 
             if(CancelCurrentWorkReceiver.isIsWorkDownloadChaptersCanceled()){
                 Data data = new Data.Builder().putStringArray("ids",returnValue.toArray(new String[0])).build();
