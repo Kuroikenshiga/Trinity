@@ -13,6 +13,11 @@ import com.example.trinity.models.Model;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
 
@@ -52,9 +57,9 @@ public final class ChapterStorageManager {
         return folderMangaChapter;
     }
 
-    public String saveChapterPage(Bitmap image, String fileName, File parent,String folder) {
-        File imageChapter;
-        if(parent == null){
+    public String saveChapterPage(File img, File parent) {
+        String path = "";
+        if (parent == null) {
             return "";
         }
         try {
@@ -62,13 +67,11 @@ public final class ChapterStorageManager {
             if (!parent.exists()) {
                 return "";
             }
+            File targetMove = new File(parent,img.getName());
+            try {
 
-            imageChapter = new File(parent, fileName);
+                path = Files.move(Paths.get(img.getAbsolutePath()), Paths.get(targetMove.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING).toString();
 
-            try (FileOutputStream outputStream = new FileOutputStream(imageChapter)) {
-
-                image.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-                outputStream.flush();
             } catch (IOException ex) {
                 ex.printStackTrace();
                 return "";
@@ -77,58 +80,48 @@ public final class ChapterStorageManager {
             ex.printStackTrace();
             return "";
         }
-        return imageChapter.getAbsolutePath();
+        return path;
     }
 
-    public void getChapterPages(String idChapterApi, Handler h){
+    public void getChapterPages(String idChapterApi, Handler h) {
         Model model = Model.getInstance(context);
         int numPages = model.getNumberPagesDownloaded(idChapterApi);
 
         Message msg1 = Message.obtain();
         msg1.what = Extensions.RESPONSE_ITEM;
         Bundle bundle1 = new Bundle();
-        bundle1.putInt("numPages",numPages);
+        bundle1.putInt("numPages", numPages);
         msg1.setData(bundle1);
         h.sendMessage(msg1);
 
         ContentValues[] values = model.getPagesDownloaded(idChapterApi);
         Bitmap bitmap = null;
-        if(values == null)return;
-        for(ContentValues v:values){
-//            File bitmapFile = new File(v.getAsString("path"));
-//            if(!bitmapFile.exists()){
-////                System.out.println("Arquivo inexistente");
-//                bitmap = null;
-//            }
-//            try(FileInputStream fileInputStream = new FileInputStream(bitmapFile)){
-//                bitmap = BitmapFactory.decodeStream(fileInputStream);
-//            }catch (IOException ex){
-//                bitmap = null;
-//                ex.printStackTrace();
-//            }
+        if (values == null) return;
+        for (ContentValues v : values) {
             Message msg = Message.obtain();
             msg.what = Extensions.RESPONSE_PAGE;
             Bundle bundle = new Bundle();
-            bundle.putString("img",v.getAsString("path"));
-            bundle.putInt("index",v.getAsInteger("page"));
+            bundle.putString("img", v.getAsString("path"));
+            bundle.putInt("index", v.getAsInteger("page"));
             msg.setData(bundle);
             h.sendMessage(msg);
         }
     }
-    public boolean clearStorage(){
+
+    public boolean clearStorage() {
         try {
             File file = new File(this.context.getFilesDir(), FOLDER_STORAGE);
             if (!file.exists()) {
                 return false;
             }
 
-            for(File child: Objects.requireNonNull(file.listFiles())){
-                for(File childChild: Objects.requireNonNull(child.listFiles())){
-                    if(!childChild.delete()){
+            for (File child : Objects.requireNonNull(file.listFiles())) {
+                for (File childChild : Objects.requireNonNull(child.listFiles())) {
+                    if (!childChild.delete()) {
                         return false;
                     }
                 }
-                if(!child.delete()){
+                if (!child.delete()) {
                     return false;
                 }
             }

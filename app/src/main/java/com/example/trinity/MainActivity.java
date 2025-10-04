@@ -56,6 +56,7 @@ import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
 import com.example.trinity.Interfaces.Extensions;
+import com.example.trinity.Interfaces.PageStorage;
 import com.example.trinity.adapters.AdapterNavigation;
 import com.example.trinity.databinding.ActivityMainBinding;
 import com.example.trinity.extensions.MangaDexExtension;
@@ -266,8 +267,8 @@ public class MainActivity extends AppCompatActivity {
                 ChapterStorageManager chapterStorageManager = new ChapterStorageManager(MainActivity.this);
                 chapterStorageManager.createIfNotExistsFolderForChapters();
 
-                PageCacheManager pageCacheManager = PageCacheManager.getInstance(MainActivity.this);
-                pageCacheManager.createIfNotExistCacheChapterFolder();
+                PageStorage pageCacheManager = PageCacheManager.getInstance(MainActivity.this);
+                pageCacheManager.createIfNotExistPageFolder();
 
             }
         }.start();

@@ -27,11 +27,14 @@ import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.services.broadcasts.ActionsPending;
 import com.example.trinity.services.broadcasts.CancelCurrentWorkReceiver;
+import com.example.trinity.storageAcess.ChapterPageBuffer;
 import com.example.trinity.storageAcess.ChapterStorageManager;
+import com.google.gson.JsonArray;
 
 import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class DownloadChapterWork extends Worker {
@@ -61,7 +64,7 @@ public class DownloadChapterWork extends Worker {
         String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY,"dataSaver");
 
         Extensions extension = Objects.equals(getInputData().getString("extension"), Extensions.MANGADEX) ?new MangaDexExtension(language,imageQuality):new MangakakalotExtension(null);
-
+        extension.setContext(context);
         assert ids != null;
         Intent cancelDownloadIntent = new Intent(context, CancelCurrentWorkReceiver.class);
         cancelDownloadIntent.setAction(ActionsPending.CANCEL_DOWNLOADS);
@@ -82,19 +85,11 @@ public class DownloadChapterWork extends Worker {
         
         int indexChapters = 0;
         for(String s:ids){
-            int index = 1;
-//            System.out.println(s);
+
             if(s == null){
                 break;
             }
-            Bundle bundle = extension.getChapterPages(s);
-
-            if(bundle==null){
-                CancelCurrentWorkReceiver.setIsWorkDownloadChaptersCanceled();
-                Data data = new Data.Builder().putStringArray("ids",new String[]{}).build();
-                return Result.failure(data);
-            }
-            Bitmap[] bitmaps = extension.loadChapterPages(bundle.getStringArray("imgs"),bundle.getString("hash"),bundle.getString("baseUrl"));
+            extension.getChapterPages(null,s);
 
             if(CancelCurrentWorkReceiver.isIsWorkDownloadChaptersCanceled()){
                 Data data = new Data.Builder().putStringArray("ids",returnValue.toArray(new String[0])).build();
@@ -105,14 +100,15 @@ public class DownloadChapterWork extends Worker {
                 CancelCurrentWorkReceiver.setIsWorkDownloadChaptersCanceled();
                 return Result.success(data);
             }
-            for(int i = 1; i < bitmaps.length - 1;i++){
-                Bitmap bitmap = bitmaps[i];
-                String fileName = Integer.toString(index)+"-"+Long.toString(Instant.now().toEpochMilli())+".jpeg";
-                String imagePath = storageManager.saveChapterPage(bitmap,fileName,folderChaptersPath,fileName);
+            File[] bufferedPages = ChapterPageBuffer.getInstance(context).getAllPagesInBuffer();
+            for(File f: bufferedPages){
+
+                String imagePath = storageManager.saveChapterPage(f,folderChaptersPath);
+                String[] arrayPath = imagePath.split("[/]");
                 if(!imagePath.isEmpty()){
-                    model.savePage(s,imagePath,i);
+                    model.savePage(s,imagePath,Integer.parseInt(arrayPath[arrayPath.length-1].split("[-]")[0]));
                 }
-                index++;
+
             }
             notifiBuilder.setContentTitle("Baixando capítulos ("+(indexChapters+1)+" de "+ids.length+")");
             indexChapters++;

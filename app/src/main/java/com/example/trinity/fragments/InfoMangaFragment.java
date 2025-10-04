@@ -5,6 +5,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -16,7 +17,9 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.StateSet;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -110,7 +113,7 @@ public class InfoMangaFragment extends Fragment {
     Animatable2.AnimationCallback animationCallback;
     private boolean canScroll = false;
     private boolean isOrdenedReverse = false;
-
+    private boolean isFilterChaptersOn = false;
     public InfoMangaFragment() {
         // Required empty public constructor
     }
@@ -253,14 +256,9 @@ public class InfoMangaFragment extends Fragment {
         chaptersAdapter.setIdMangaApi(manga.getId());
         chaptersAdapter.setChapterLanguage(manga.getLanguage());
         if (manga.getChapters() != null && !manga.getChapters().isEmpty()) {
-
             this.stopLoading();
-//            if (!loadSubLists(manga.getChapters())) {
-//                chapterMangasListed.addAll(manga.getChapters());
-//                allChapters = chapterMangasListed;
-//            }
             allChapters = manga.getChapters();
-//            manageSubLists();
+
         }
 
 
@@ -342,8 +340,6 @@ public class InfoMangaFragment extends Fragment {
 
         recyclerView.setHasFixedSize(true);
 
-
-//        binding.chapterContainer.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
         binding.chapterContainer.setAdapter(chaptersAdapter);
         binding.chapterContainer.setLayoutManager(new LinearLayoutManager(requireActivity()) {
             @Override
@@ -419,9 +415,6 @@ public class InfoMangaFragment extends Fragment {
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(getActivity(), callback);
 
-
-
-
         binding.sortChapterIcon.setOnClickListener((v)->{
             if(allChapters != null && !allChapters.isEmpty()){
                 if(!isOrdenedReverse)allChapters.sort(Comparator.comparingDouble((ChapterManga c)->Double.parseDouble(c.getChapter())));
@@ -454,6 +447,14 @@ public class InfoMangaFragment extends Fragment {
                 }
 
             }
+        });
+
+        binding.filterChapters.setOnClickListener((v)->{
+            binding.filterChapters.setImageResource(!isFilterChaptersOn?R.drawable.cloud_download_24dp_e8eaed_fill0_wght400_grad0_opsz24:R.drawable.cloud_24dp_e8eaed_fill0_wght400_grad0_opsz24);
+            chaptersAdapter.setShowJustDownloadedChapters(!isFilterChaptersOn);
+            chaptersAdapter.notifyDataSetChanged();
+            isFilterChaptersOn = !isFilterChaptersOn;
+            binding.numChapters.setText((isFilterChaptersOn?allChapters.stream().mapToInt((c)->{return c.isDownloaded()?1:0;}).sum():allChapters.size()) + " Capítulos");
         });
 
         return v;
@@ -560,17 +561,6 @@ public class InfoMangaFragment extends Fragment {
         if (mangaDataViewModel != null && mangaDataViewModel.getManga() != null && mangaDataViewModel.getManga().getChapters() != null) {
             if (!mangaDataViewModel.getManga().getChapters().isEmpty()) {
                 mangaDataViewModel.getManga().getChapters().sort(Comparator.comparingDouble((ChapterManga c)->Double.parseDouble(c.getChapter())).reversed());
-//                try {
-//                    SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", mangaDataViewModel.getManga().getChapters(), OrderEnum.DECRESCENTE);
-//                } catch (NoSuchMethodException e) {
-//                    throw new RuntimeException(e);
-//                } catch (ClassNotFoundException e) {
-//                    throw new RuntimeException(e);
-//                } catch (IllegalAccessException e) {
-//                    throw new RuntimeException(e);
-//                } catch (InvocationTargetException e) {
-//                    throw new RuntimeException(e);
-//                }
                 chaptersAdapter = new AdapterChapters(requireActivity(), mangaDataViewModel.getManga().getChapters());
                 chaptersAdapter.setFragment(this);
                 chaptersAdapter.setMangaDataViewModel(mangaDataViewModel);
@@ -593,17 +583,6 @@ public class InfoMangaFragment extends Fragment {
                     model = Model.getInstance(getActivity());
                     allChapters = model.getAllChapterByMangaID(manga.getId(), manga.getLanguage());
                     allChapters.sort(Comparator.comparingDouble((ChapterManga ch)->Double.parseDouble(ch.getChapter())).reversed());
-//                    try {
-//                        SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
-//                    } catch (NoSuchMethodException e) {
-//                        throw new RuntimeException(e);
-//                    } catch (ClassNotFoundException e) {
-//                        throw new RuntimeException(e);
-//                    } catch (IllegalAccessException e) {
-//                        throw new RuntimeException(e);
-//                    } catch (InvocationTargetException e) {
-//                        throw new RuntimeException(e);
-//                    }
                     mangaDataViewModel.getManga().setChapters(allChapters);
                     chapterMangasListed.clear();
                     indexSubLists = 0;
@@ -655,17 +634,6 @@ public class InfoMangaFragment extends Fragment {
                 Objects.requireNonNull(mangaDataViewModel.getManga()).setChapters(allChapters);
                 if(mangaDataViewModel == null)return;
                 allChapters.sort(Comparator.comparingDouble((ChapterManga c)->Double.parseDouble(c.getChapter())).reversed());
-//                try {
-//                    SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", allChapters, OrderEnum.DECRESCENTE);
-//                } catch (NoSuchMethodException e) {
-//                    throw new RuntimeException(e);
-//                } catch (ClassNotFoundException e) {
-//                    throw new RuntimeException(e);
-//                } catch (IllegalAccessException e) {
-//                    throw new RuntimeException(e);
-//                } catch (InvocationTargetException e) {
-//                    throw new RuntimeException(e);
-//                }
                 chapterMangasListed.clear();
                 indexSubLists = 0;
 
@@ -701,17 +669,6 @@ public class InfoMangaFragment extends Fragment {
         binding.numChapters.setText(chapterMangasListed.size() + " Capítulos");
 
         chapterMangasListed.sort(Comparator.comparingDouble((ChapterManga ch)->Double.parseDouble(ch.getChapter())).reversed());
-        //        try {
-//            SortUtilities.dinamicSort("com.example.trinity.valueObject.ChapterManga", "getChapter", chapterMangasListed, OrderEnum.DECRESCENTE);
-//        } catch (NoSuchMethodException e) {
-//            throw new RuntimeException(e);
-//        } catch (ClassNotFoundException e) {
-//            throw new RuntimeException(e);
-//        } catch (IllegalAccessException e) {
-//            throw new RuntimeException(e);
-//        } catch (InvocationTargetException e) {
-//            throw new RuntimeException(e);
-//        }
 
         isdescendingOrder = true;
         chaptersAdapter.notifyDataSetChanged();
@@ -789,8 +746,9 @@ public class InfoMangaFragment extends Fragment {
 
         Data data = new Data.Builder()
                 .putStringArray("chaptersID", chaptersID)
-                .putString("language", chaptersAdapter.getChapterLanguage())
-                .putString("folderChapterName", manga.getId()).build();
+                .putString("language", manga.getLanguage())
+                .putString("folderChapterName", manga.getId())
+                .putString("extension", mangaDexExtension instanceof MangaDexExtension?Extensions.MANGADEX:Extensions.MANGAKAKALOT).build();
 
         OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(DownloadChapterWork.class)
                 .addTag(ActionsPending.DOWNLOAD_CHAPTER_TAG)

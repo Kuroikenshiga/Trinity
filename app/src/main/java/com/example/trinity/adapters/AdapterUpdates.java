@@ -135,7 +135,12 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
         else{
             if(position != chapterUpdateds.size() - 1){
-                ((DateGroupViewHolder)holder).binding.dateGroup.setText(chapterUpdateds.get(position+1).getChapterManga().returnTimeReleased());
+                ((DateGroupViewHolder)holder).
+                        binding.dateGroup.
+                        setText(chapterUpdateds.
+                                get(position+1).
+                                getChapterManga().
+                                returnTimeReleased());
             }
         }
     }

@@ -6,10 +6,11 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.example.trinity.Interfaces.PageStorage;
 import com.example.trinity.storageAcess.PageCacheManager;
 
 public class ClearPageCacheWork extends Worker {
-    PageCacheManager pageCacheManager;
+    PageStorage pageCacheManager;
     public ClearPageCacheWork(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         pageCacheManager = PageCacheManager.getInstance(context);
@@ -18,7 +19,7 @@ public class ClearPageCacheWork extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        pageCacheManager.clearCache();
+        pageCacheManager.clearFolder();
         return Result.success();
     }
 }

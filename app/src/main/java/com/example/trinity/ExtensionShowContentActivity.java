@@ -36,6 +36,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
+import com.bumptech.glide.Glide;
 import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.adapters.AdapterMangas;
 import com.example.trinity.adapters.AdapterSearchItensSimpleResult;
@@ -268,6 +269,8 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
             timer.cancel();
             isTimerCanceled = true;
         }
+        new Thread(()->{
+            Glide.get(this).clearDiskCache();}).start();
         WorkRequest workRequest = new OneTimeWorkRequest.Builder(ClearLogosTemp.class).build();
         WorkManager.getInstance(getApplicationContext()).enqueue(workRequest);
         super.onDestroy();

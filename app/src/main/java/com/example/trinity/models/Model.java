@@ -205,553 +205,62 @@ public class Model extends SQLiteOpenHelper {
         }
     }
 
-    private long returnTagId(String id) {
-        long returnValue = -1;
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM tags WHERE id_tag = ?", new String[]{id})) {
-
-            if (row.getCount() < 1) {
-
-                return returnValue;
-            }
-
-            row.moveToFirst();
-
-            returnValue = row.getInt(0);
-        }
-
-        return returnValue;
-    }
-
-    private long insertTag(TagManga t) {
-        long returnValue = 0;
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("INSERT INTO tags(id_tag,name_tag) VALUES(?,?)");) {
-            stmt.bindString(1, t.getId());
-            stmt.bindString(2, t.getNome());
-            returnValue = stmt.executeInsert();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return -1;
-        }
-
-        return returnValue;
-
-    }
-
-    private long insertRelationTagManga(String idManga, String idTag) {
-        long returnValue;
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("INSERT INTO tag_mangas(id_manga,id_tag) VALUES(?,?)")) {
-            stmt.bindString(1, idManga);
-            stmt.bindString(2, idTag);
-            returnValue = stmt.executeInsert();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return -1;
-        }
-
-        return returnValue;
-    }
-
-    private long insertManga(Manga m) {
-        long returnValue = -1;
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("INSERT INTO mangas(cover_name,id_manga,image,description,date_added,title,language,last_chapter)values(?,?,?,?,CURRENT_TIMESTAMP,?,?,?)");) {
-
-            stmt.bindString(1, m.coverName);
-            stmt.bindString(2, m.getId());
-//            ByteArrayOutputStream out = new ByteArrayOutputStream();
-//            m.getImage().compress(Bitmap.CompressFormat.PNG, 100, out);
-            stmt.bindBlob(3, new byte[]{});
-            stmt.bindString(4, m.getDescricao());
-            stmt.bindString(5, m.getTitulo());
-            stmt.bindString(6, m.getLanguage());
-            stmt.bindString(7,Double.toString(m.getLastChapter()));
-            returnValue = stmt.executeInsert();
-            stmt.close();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return -1;
-        }
-
-        return returnValue;
-    }
-
-    private long returnMangaId(String id, String language) {
-        long returnValue = -1;
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM mangas WHERE id_manga = ? AND language = ?", new String[]{id, language})) {
-
-            if (row.getCount() < 1) {
-                row.close();
-
-                return returnValue;
-            }
-            row.moveToFirst();
-            returnValue = row.getInt(0);
-            row.close();
-        }
-
-        return returnValue;
-    }
-
-    private long insertAuthor(String nameAuthor, String idManga) {
-        long returnValue;
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("INSERT INTO authors(name,manga_id) VALUES(?,?)");) {
-            stmt.bindString(1, nameAuthor);
-            stmt.bindString(2, idManga);
-            returnValue = stmt.executeInsert();
-            stmt.close();
-        } catch (SQLiteException ex) {
-
-            ex.printStackTrace();
-            return -1;
-        }
-
-        return returnValue;
-
-    }
-
-
-    private long returnChapterId(String apiId) {
-        long returnValue = -1;
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM chapters WHERE id_chapter = ?", new String[]{apiId})) {
-
-            if (row.getCount() < 1) {
-
-                return -1;
-            }
-            row.moveToNext();
-            returnValue = row.getLong(0);
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-
-            return -1;
-        }
-
-        return returnValue;
-    }
-
-    private long insertChapter(ChapterManga chapter, String idManga) {
-        long returnValue = -1;
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("INSERT INTO chapters" +
-                "(id_chapter,title,scan,date_RFC3339,manga_id,chapter,alredy_read) VALUES(?,?,?,?,?,?,?)")) {
-            stmt.bindString(1, chapter.getId());
-            stmt.bindString(2, chapter.getTitle());
-            stmt.bindString(3, chapter.getScan());
-            stmt.bindString(4, chapter.getDateRFC3339());
-            stmt.bindString(5, idManga);
-            stmt.bindString(6, chapter.getChapter());
-            stmt.bindString(7, Boolean.toString(chapter.isAlredyRead()));
-            returnValue = stmt.executeInsert();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return -1;
-        }
-
-        return returnValue;
-    }
-
     public ArrayList<Manga> selectAllMangas(boolean loadChaptersToo, int limit,int offSet) {
-        ArrayList<Manga> mangaArrayList = new ArrayList<>();
 
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM mangas ORDER BY id DESC "+(limit > 0?"LIMIT ? OFFSET ?":""), (limit > 0?new String[]{Integer.toString(limit),Integer.toString(offSet)}:new String[]{}))) {
-
-            if (row.getCount() == 0) {
-
-                return mangaArrayList;
-            }
-
-            int uuidIndex = row.getColumnIndex("id");
-            while (row.moveToNext()) {
-
-                String id = row.getString(2);
-                String cover = row.getString(1);
-                int indexLastChapter = row.getColumnIndex("last_chapter");
-                String desc = row.getString(4);
-                String title = row.getString(6);
-                String language = row.getString(7);
-                Manga m = new Manga(id, title, null, this.selectAllAuthorByIdManga(row.getString(0)), desc, selectAllTagMangasByIdManga(row.getString(0)), language, cover, (loadChaptersToo ? selectAllChaptersByIdManga(row.getString(0)) : null));
-                m.isAdded = true;
-                m.uuid = row.getLong(uuidIndex);
-                m.setLastChapter(row.getDouble(indexLastChapter));
-                mangaArrayList.add(m);
-
-            }
-        }
-
-        return mangaArrayList;
-    }
-
-    private int amountChaptersToRead(long idManga) {
-        int returnValue = 0;
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT *FROM chapters WHERE alredy_read = ? AND manga_id = ?", new String[]{"false", Long.toString(idManga)})) {
-            returnValue = row.getCount();
-
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return -1;
-        }
-
-        return returnValue;
-    }
-
-    public int getAmountChaptersToRead(String idMangaApi, String language) {
-        long id = this.returnMangaId(idMangaApi, language);
-        if (id == -1) {
-            return 0;
-        }
-        return this.amountChaptersToRead(id);
-    }
-
-    private ArrayList<ChapterManga> selectAllChaptersByIdManga(String id) {
-        ArrayList<ChapterManga> chapterMangaArrayList = new ArrayList<>();
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM chapters WHERE manga_id = ?", new String[]{id})) {
-            int mangaIdIndex = row.getColumnIndex("manga_id");
-            while (row.moveToNext()) {
-                String idChap = row.getString(1);
-                String title = row.getString(2);
-                String scan = row.getString(3);
-                String RFC3339 = row.getString(4);
-                String chapter = row.getString(6);
-
-                boolean alredyRead = Boolean.parseBoolean(row.getString(7));
-                int currentPage = row.getInt(8);
-
-                int isDownloadedIndex = row.getColumnIndex("is_downloaded");
-                boolean isDownloded = Boolean.parseBoolean(row.getString(isDownloadedIndex));
-                ChapterManga chapterManga = new ChapterManga(idChap, title, chapter, scan, RFC3339, alredyRead, currentPage, isDownloded);
-                chapterManga.mangaUUID = Long.parseLong(row.getString(mangaIdIndex));
-                chapterMangaArrayList.add(chapterManga);
-            }
-        }
-
-        return chapterMangaArrayList;
-    }
-
-    private ArrayList<String> selectAllAuthorByIdManga(String id) {
-        ArrayList<String> Authors = new ArrayList<>();
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM authors WHERE manga_id = ?", new String[]{id})) {
-            while (row.moveToNext()) {
-                Authors.add(row.getString(1));
-            }
-        }
-
-        return Authors;
-    }
-
-    private ArrayList<TagManga> selectAllTagMangasByIdManga(String id) {
-        ArrayList<TagManga> tagMangaArrayList = new ArrayList<>();
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT tags.* FROM mangas " +
-                "INNER JOIN tag_mangas ON mangas.id = tag_mangas.id_manga " +
-                "INNER JOIN tags ON tag_mangas.id_tag = tags.id WHERE mangas.id= ?", new String[]{id});) {
-
-            while (row.moveToNext()) {
-                String idTag = row.getString(1);
-                String name = row.getString(2);
-                tagMangaArrayList.add(new TagManga(idTag, name));
-            }
-        }
-
-        return tagMangaArrayList;
-    }
-
-    private Long insertUpdate(long idchap) {
-        long returnValue = -1;
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("INSERT INTO updates(chapter) VALUES(?)")) {
-            stmt.bindLong(1, idchap);
-            returnValue = stmt.executeInsert();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return (long) -1;
-        }
-
-        return returnValue;
-    }
-
-    private boolean deleteTagFromManga(long id) {
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("DELETE FROM tag_mangas WHERE id_manga = ?")) {
-            stmt.bindLong(1, id);
-            stmt.executeUpdateDelete();
-
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean deleteAuthorsFromManga(long id) {
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("DELETE FROM authors WHERE manga_id = ?")) {
-            stmt.bindLong(1, id);
-            stmt.executeUpdateDelete();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean deleteUpdates(long id) {
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("DELETE FROM updates WHERE chapter = ?")) {
-            stmt.bindLong(1, id);
-            stmt.executeUpdateDelete();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean deleteReadingHistoricFromManga(long id) {
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("DELETE FROM reading_historic WHERE manga_id = ?")) {
-            stmt.bindLong(1, id);
-            stmt.executeUpdateDelete();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean deleteChapterFromManga(long id) {
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("DELETE FROM chapters WHERE manga_id = ?")) {
-            stmt.bindLong(1, id);
-            stmt.executeUpdateDelete();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean deleteManga(long id) {
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("DELETE FROM mangas WHERE id = ?")) {
-            stmt.bindLong(1, id);
-            stmt.executeUpdateDelete();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean insertHistory(long idManga, long currentTime) {
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("INSERT INTO reading_historic(manga_id,last_acessed) values(?,?)")) {
-            stmt.bindLong(1, idManga);
-            stmt.bindLong(2, currentTime);
-            long returnID = stmt.executeInsert();
-            if (returnID == -1) {
-
-                return false;
-            }
-        } catch (SQLiteException ex) {
-
-            ex.printStackTrace();
-            return false;
-        }
-
-        return true;
-    }
-
-    private long returnHistoryId(long idManga) {
-        long returnValue = -1;
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT*FROM reading_historic WHERE manga_id = ?", new String[]{Long.toString(idManga)})) {
-            if (row.getCount() == 0) {
-
-                return -1;
-            }
-            row.moveToNext();
-            returnValue = row.getLong(0);
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return -1;
-        }
-
-        return returnValue;
-    }
-
-    private boolean updateHistory(long idHistory, long currentTime) {
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("UPDATE reading_historic SET last_acessed=? WHERE id=?")) {
-            stmt.bindLong(1, currentTime);
-            stmt.bindLong(2, idHistory);
-            stmt.executeUpdateDelete();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return false;
-        }
-
-        return true;
+        return new MangaDB(this.sqLiteDatabase).select().AllMangas(loadChaptersToo,limit,offSet);
     }
 
     public boolean addOrUpdateReadingHitory(History history) {
-        long idManga = this.returnMangaId(history.getManga().getId(), history.getManga().getLanguage());
+        MangaDB mangaDB = new MangaDB(this.sqLiteDatabase);
+        ReadingHistoricDB readingHistoricDB = new ReadingHistoricDB(this.sqLiteDatabase);
+        long idManga = mangaDB.returnMangaId(history.getManga().getId(), history.getManga().getLanguage());
         if (idManga == -1) return false;
-        long idHistory = this.returnHistoryId(idManga);
+        long idHistory = readingHistoricDB.returnHistoryId(idManga);
 
         if (idHistory == -1) {
-            return this.insertHistory(idManga, history.getLastAcess());
+            return readingHistoricDB.insertHistory(idManga, history.getLastAcess());
         } else {
 
-            return this.updateHistory(idHistory, history.getLastAcess());
+            return readingHistoricDB.updateHistory(idHistory, history.getLastAcess());
         }
 
     }
 
     public ArrayList<History> selectAllHistory() {
-        ArrayList<History> histories = new ArrayList<>();
-        /*
-        * "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "cover_name VARCHAR(50) NOT NULL," +
-                "id_manga VARCHAR(50) NOT NULL," +
-                "image BLOB NOT NULL," +
-                "description VARCHAR(500)," +
-                "date_added TEXT NOT NULL," +
-                "title VARCHAR(50) NOT NULL," +
-                "language VARCHAR(5) NOT NULL,"+
-                "last_chapter_read TEXT)");
-        * */
 
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT*FROM mangas " +
-                "INNER JOIN reading_historic on manga_id = mangas.id ORDER BY last_acessed DESC LIMIT 30", new String[]{})) {
-            while (row.moveToNext()) {
-                int coverNameColumn = row.getColumnIndex("cover_name");
-                int id_mangaColumn = row.getColumnIndex("id_manga");
-                int imageColumn = row.getColumnIndex("logo_path");
-                int descriptionColumn = row.getColumnIndex("description");
-                int titleColumn = row.getColumnIndex("title");
-                int languageColumn = row.getColumnIndex("language");
-                int time = row.getColumnIndex("last_acessed");
-                int indexLastChapter = row.getColumnIndex("last_chapter");
-
-                String cover = row.getString(coverNameColumn);
-                String idManga = row.getString(id_mangaColumn);
-//                String imageByte = row.getString(imageColumn);
-//                Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-                String description = row.getString(descriptionColumn);
-                String title = row.getString(titleColumn);
-                String language = row.getString(languageColumn);
-
-                long lastAcess = row.getLong(time);
-
-                Manga m = new Manga(idManga, title, null, this.selectAllAuthorByIdManga(row.getString(0)), description, this.selectAllTagMangasByIdManga(row.getString(0)), language, cover, null);
-                m.isAdded = true;
-                m.setLastChapter(row.getDouble(indexLastChapter));
-                History h = new History(m, lastAcess);
-
-                histories.add(h);
-            }
-
-            return histories;
-        }
-    }
-
-    private boolean setChapterAlredyRead(long idChap) {
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("UPDATE chapters SET alredy_read=? WHERE id = ?")) {
-            stmt.bindString(1, "true");
-            stmt.bindLong(2, idChap);
-            stmt.executeUpdateDelete();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return false;
-        }
-
-        return true;
+        return new ReadingHistoricDB(this.sqLiteDatabase).selectAllHistory();
     }
 
     public ArrayList<Manga> loadSearch(String mangaTitle, int limit) {
-        ArrayList<Manga> mangaArrayList = new ArrayList<>();
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM mangas WHERE title LIKE ?  LIMIT ?", new String[]{mangaTitle + "%",Integer.toString(limit)});) {
-//            System.out.println("quantidade de linhas: " + row.getCount());
-            if (row.getCount() == 0) {
-                return mangaArrayList;
-            }
-
-            while (row.moveToNext()) {
-                int indexLastChapter = row.getColumnIndex("last_chapter");
-
-                String id = row.getString(2);
-                String cover = row.getString(1);
-//                String imageByte = row.getString(9);
-//                Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-                String desc = row.getString(4);
-                String title = row.getString(6);
-                String language = row.getString(7);
-                Manga m = new Manga(id, title, null, this.selectAllAuthorByIdManga(row.getString(0)), desc, selectAllTagMangasByIdManga(row.getString(0)), language, cover, selectAllChaptersByIdManga(row.getString(0)));
-                m.isAdded = true;
-                m.setLastChapter(row.getDouble(indexLastChapter));
-                mangaArrayList.add(m);
-
-            }
-        }
-
-        return mangaArrayList;
+        MangaDB mangaDB = new MangaDB(this.sqLiteDatabase);
+        return mangaDB.select().MangaByTitle(mangaTitle,limit);
 
     }
 
     public boolean addInFavorites(Manga m) {
 
         long mangaID = -1;
-
+        MangaDB mangaDB = new MangaDB(this.sqLiteDatabase);
+        TagDB tagDB = new TagDB(this.sqLiteDatabase);
+        AuthorDB authorDB = new AuthorDB(this.sqLiteDatabase);
+        ChaptersDB chaptersDB = new ChaptersDB(this.sqLiteDatabase);
 
         for (TagManga tg : m.getTags()) {
-            if (this.returnTagId(tg.getId()) == -1) {
-                if (this.insertTag(tg) == -1) {
+            if (tagDB.returnTagId(tg.getId()) == -1) {
+                if (tagDB.insertTag(tg) == -1) {
                     if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
 
                     return false;
                 }
             }
         }
-        if (this.returnMangaId(m.getId(), m.getLanguage()) != -1) {
+        if (mangaDB.returnMangaId(m.getId(), m.getLanguage()) != -1) {
             if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.setTransactionSuccessful();
 
             return false;
         }
 
-        mangaID = this.insertManga(m);
+        mangaID = mangaDB.insertManga(m);
         String mangaIDStringFormat = Long.toString(mangaID);
         if (mangaID == -1) {
             if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
@@ -759,22 +268,22 @@ public class Model extends SQLiteOpenHelper {
             return false;
         }
         for (String s : m.getAutor()) {
-            if (this.insertAuthor(s, mangaIDStringFormat) == -1) {
+            if (authorDB.insertAuthor(s, mangaIDStringFormat) == -1) {
                 if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
 
                 return false;
             }
         }
         for (TagManga t : m.getTags()) {
-            if (insertRelationTagManga(mangaIDStringFormat, Long.toString(this.returnTagId(t.getId()))) == -1) {
+            if (tagDB.insertRelationTagManga(mangaIDStringFormat, Long.toString(tagDB.returnTagId(t.getId()))) == -1) {
                 if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
 
                 return false;
             }
         }
         for (ChapterManga chap : m.getChapters()) {
-            if (returnChapterId(chap.getId()) == -1) {
-                if (insertChapter(chap, mangaIDStringFormat) == -1) {
+            if (chaptersDB.returnChapterId(chap.getId()) == -1) {
+                if (chaptersDB.insertChapter(chap, mangaIDStringFormat) == -1) {
                     if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
 
                     return false;
@@ -791,6 +300,13 @@ public class Model extends SQLiteOpenHelper {
     public boolean removeFromFavorites(Manga manga) {
         long id = -1;
 
+        MangaDB mangaDB = new MangaDB(this.sqLiteDatabase);
+        TagDB tagDB = new TagDB(this.sqLiteDatabase);
+        AuthorDB authorDB = new AuthorDB(this.sqLiteDatabase);
+        ChaptersDB chaptersDB = new ChaptersDB(this.sqLiteDatabase);
+        UpdatesDB updatesDB = new UpdatesDB(this.sqLiteDatabase);
+        ReadingHistoricDB readingHistoricDB = new ReadingHistoricDB(this.sqLiteDatabase);
+
         try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM mangas WHERE id_manga = ? AND language = ?", new String[]{manga.getId(), manga.getLanguage()})) {
             if (row.getCount() < 1) {
 
@@ -802,33 +318,33 @@ public class Model extends SQLiteOpenHelper {
             this.sqLiteDatabase.beginTransaction();
 
             for (ChapterManga chap : manga.getChapters()) {
-                if (!deleteUpdates(returnChapterId(chap.getId()))) {
+                if (!updatesDB.deleteUpdates(chaptersDB.returnChapterId(chap.getId()))) {
                     if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
 
                     return false;
                 }
             }
-            if (!deleteReadingHistoricFromManga(id)) {
+            if (!readingHistoricDB.deleteReadingHistoricFromManga(id)) {
                 if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
 
                 return false;
             }
-            if (!deleteAuthorsFromManga(id)) {
+            if (!authorDB.deleteAuthorsFromManga(id)) {
                 if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
 
                 return false;
             }
-            if (!deleteTagFromManga(id)) {
+            if (!tagDB.deleteTagFromManga(id)) {
                 if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
 
                 return false;
             }
-            if (!deleteChapterFromManga(id)) {
+            if (!chaptersDB.deleteChapterFromManga(id)) {
                 if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
 
                 return false;
             }
-            if (!deleteManga(id)) {
+            if (!mangaDB.deleteManga(id)) {
                 if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
 
                 return false;
@@ -843,11 +359,6 @@ public class Model extends SQLiteOpenHelper {
 
             return false;
         }
-//        ((Activity)context).runOnUiThread(()->{
-//            for(OnMangaRemovedListener listener:observers){
-//                listener.onMangaRemoved(manga.getLanguage(),manga.getId());
-//            }
-//        });
         MANGA_TABLE_HAS_CHANGES = true;
         MANGA_UPDATES_TABLE_HAS_CHANGES = true;
         return true;
@@ -855,15 +366,18 @@ public class Model extends SQLiteOpenHelper {
 
     public boolean mangaAlredFavorited(Manga m) {
 
-        if (this.returnMangaId(m.getId(), m.getLanguage()) != -1) {
+        if (new MangaDB(this.sqLiteDatabase).returnMangaId(m.getId(), m.getLanguage()) != -1) {
             return true;
         }
         return false;
     }
 
     public boolean addNewChapter(ChapterUpdated chapterUpdated) {
+        MangaDB mangaDB = new MangaDB(this.sqLiteDatabase);
+        ChaptersDB chaptersDB = new ChaptersDB(this.sqLiteDatabase);
+        UpdatesDB updatesDB = new UpdatesDB(this.sqLiteDatabase);
 
-        long mangaID = this.returnMangaId(chapterUpdated.getManga().getId(), chapterUpdated.getManga().getLanguage());
+        long mangaID = mangaDB.returnMangaId(chapterUpdated.getManga().getId(), chapterUpdated.getManga().getLanguage());
         if (mangaID == -1) {
 
             return false;
@@ -872,13 +386,13 @@ public class Model extends SQLiteOpenHelper {
 
         sqLiteDatabase.beginTransaction();
 
-        long chapId = this.insertChapter(chapterUpdated.getChapterManga(), Long.toString(mangaID));
+        long chapId = chaptersDB.insertChapter(chapterUpdated.getChapterManga(), Long.toString(mangaID));
         if (chapId == -1) {
             sqLiteDatabase.endTransaction();
 
             return false;
         }
-        if (this.insertUpdate(chapId) == -1) {
+        if (updatesDB.insertUpdate(chapId) == -1) {
             sqLiteDatabase.endTransaction();
 
             return false;
@@ -888,188 +402,53 @@ public class Model extends SQLiteOpenHelper {
 
         return true;
     }
-
+    @Deprecated
     public ArrayList<ChapterManga> loadUpdates() {
-        ArrayList<ChapterManga> updateds = new ArrayList<>();
-
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM updates " +
-                "INNER JOIN chapters ON updates.chapter = chapters.id ORDER BY STRFTIME('%s',date_RFC3339) DESC LIMIT 100", new String[]{})) {
-
-            int mangaUuidIndex = row.getColumnIndex("manga_id");
-            while (row.moveToNext()) {
-                String idChap = row.getString(3);
-                String title = row.getString(4);
-                String scan = row.getString(5);
-                String RFC3339 = row.getString(6);
-                String chapter = row.getString(8);
-                boolean alredyRead = Boolean.parseBoolean(row.getString(9));
-                int currentPage = row.getInt(10);
-
-                int isDownloadedIndex = row.getColumnIndex("is_downloaded");
-                boolean isDownloded = Boolean.parseBoolean(row.getString(isDownloadedIndex));
-                ChapterManga c = new ChapterManga(idChap, title, chapter, scan, RFC3339, alredyRead, currentPage, isDownloded);
-                c.mangaUUID = row.getLong(mangaUuidIndex);
-                updateds.add(c);
-            }
-        }
-        return updateds;
+        return new UpdatesDB(this.sqLiteDatabase).selectFirst100Updates();
     }
 
     public boolean setChapterLastPage(String idApiChapter, int currentPage) {
-        long chapId = this.returnChapterId(idApiChapter);
-
-        if (chapId == -1) {
-
-            return false;
-        }
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("UPDATE chapters SET currentPage=? WHERE id = ?")) {
-            stmt.bindString(1, Integer.toString(currentPage));
-            stmt.bindLong(2, chapId);
-            stmt.executeUpdateDelete();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return false;
-        }
-
-        return true;
+        return new ChaptersDB(this.sqLiteDatabase).setChapterLastPage(idApiChapter,currentPage);
     }
 
     public boolean chapterRead(ChapterManga ch) {
-        long chapId = this.returnChapterId(ch.getId());
+        long chapId = new ChaptersDB(this.sqLiteDatabase).returnChapterId(ch.getId());
         if (chapId == -1) {
             return false;
         }
-        if (!this.setChapterAlredyRead(chapId)) {
+        if (!new ChaptersDB(this.sqLiteDatabase).setChapterAlredyRead(chapId)) {
             return false;
         }
         return true;
-    }
-
-    public boolean isChapterAlredyRead(String chap) {
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT*FROM chapters WHERE id_chapter = ?", new String[]{chap})) {
-            if (row.getCount() < 1) {
-
-                throw new RuntimeException("Capítulo não encontrado");
-            }
-            row.moveToNext();
-            if (Boolean.parseBoolean(row.getString(7))) {
-
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public ArrayList<ChapterManga> getAllChapterByMangaID(String apiID, String mangaLanguage) {
-        long id = this.returnMangaId(apiID, mangaLanguage);
+        long id = new MangaDB(this.sqLiteDatabase).returnMangaId(apiID, mangaLanguage);
         if (id == -1) {
             return new ArrayList<ChapterManga>();
         }
-        return this.selectAllChaptersByIdManga(Long.toString(id));
+        return new ChaptersDB(this.sqLiteDatabase).selectAllChaptersByIdManga(Long.toString(id));
     }
 
     public boolean setLastChapterRead(String idApiChapter, String idApiManga, String language) {
-        long idManga = this.returnMangaId(idApiManga, language);
-//        System.out.println(idApiManga);
-        if (idManga == -1) {
-            return false;
-        }
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("UPDATE mangas SET last_chapter_read = ? WHERE id = ?")) {
-            stmt.bindString(1, idApiChapter);
-            stmt.bindLong(2, idManga);
-            stmt.executeUpdateDelete();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return false;
-        }
-
-        return true;
+        return new MangaDB(this.sqLiteDatabase).setLastChapterRead(idApiChapter, idApiManga, language);
     }
 
     public String getIdApiOfLastChapterRead(String idMangaApi, String language) {
-        long idManga = this.returnMangaId(idMangaApi, language);
 
-        String lasChapterRead = "";
-        if (idManga == -1) {
-            return "";
-        }
-        try (Cursor row = sqLiteDatabase.rawQuery("SELECT * FROM mangas WHERE id = ?", new String[]{Long.toString(idManga)})) {
-
-            if (row.getCount() < 1) {
-
-                return "";
-            }
-            row.moveToNext();
-            int rowColumn = row.getColumnIndex("last_chapter_read");
-            if (rowColumn == -1) {
-
-                return "";
-            }
-            lasChapterRead = row.getString(rowColumn) == null ? "" : row.getString(rowColumn);
-//            System.out.println("row column: " + lasChapterRead);
-        } catch (SQLiteException ex) {
-
-            return "";
-        }
-
-        return lasChapterRead;
+        return new MangaDB(this.sqLiteDatabase).getIdApiOfLastChapterRead(idMangaApi, language);
     }
-
-    public long getMangaCount() {
-
-        long retunsValue = 0;
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("SELECT COUNT(*) FROM mangas")) {
-            retunsValue = stmt.simpleQueryForLong();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return 0;
-        }
-
-        return retunsValue;
-    }
-
+    @Deprecated
     private long insertChapterPage(long idChapter, String absolutePath, int numPage) {
-        long returnvalue = -1;
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("INSERT INTO chapterPage(file_name,chapter,page_number) values(?,?,?)")) {
-            stmt.bindString(1, absolutePath);
-            stmt.bindLong(2, idChapter);
-            stmt.bindString(3, Integer.toString(numPage));
-            returnvalue = stmt.executeInsert();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return -1;
-        }
-
-        return returnvalue;
+        return new ChapterPages(this.sqLiteDatabase).insertChapterPage(idChapter, absolutePath, numPage);
     }
-
+    @Deprecated
     public boolean setChapterDownloaded(long id, boolean isDownloaded) {
-        boolean returnValue = false;
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("UPDATE chapters set is_downloaded = ? WHERE id = ?")) {
-            stmt.bindString(1, Boolean.toString(isDownloaded));
-            stmt.bindLong(2, id);
-            returnValue = stmt.executeUpdateDelete() > 0;
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return false;
-        }
-
-        return returnValue;
+        return new ChaptersDB(this.sqLiteDatabase).setChapterDownloaded(id, isDownloaded);
     }
 
     public boolean savePage(String idChapterApi, String path, int pageNumber) {
-        long chapter = returnChapterId(idChapterApi);
+        long chapter = new ChaptersDB(this.sqLiteDatabase).returnChapterId(idChapterApi);
 
         if (chapter == -1) {
 
@@ -1077,13 +456,13 @@ public class Model extends SQLiteOpenHelper {
         }
         this.sqLiteDatabase.beginTransaction();
 
-        if (insertChapterPage(chapter, path, pageNumber) == -1) {
+        if (new ChapterPages(this.sqLiteDatabase).insertChapterPage(chapter, path, pageNumber) == -1) {
             this.sqLiteDatabase.endTransaction();
 
 
             return false;
         }
-        if (!setChapterDownloaded(chapter, true)) {
+        if (!new ChaptersDB(this.sqLiteDatabase).setChapterDownloaded(chapter, true)) {
             this.sqLiteDatabase.endTransaction();
 
             return false;
@@ -1095,85 +474,30 @@ public class Model extends SQLiteOpenHelper {
     }
 
     public ContentValues[] getPagesDownloaded(String chapApiID) {
-        long id = this.returnChapterId(chapApiID);
-
-        ContentValues[] values = null;
-        if (id == -1) {
-
-            return null;
-        }
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM chapterPage WHERE chapter = ?", new String[]{Long.toString(id)})) {
-            if (row.getCount() < 1) return null;
-            values = new ContentValues[row.getCount()];
-            int index = 0;
-            while (row.moveToNext()) {
-                int fileNameIndex = row.getColumnIndex("file_name");
-                int pageIndex = row.getColumnIndex("page_number");
-
-                ContentValues value = new ContentValues();
-                value.put("path", row.getString(fileNameIndex));
-                value.put("page", row.getInt(pageIndex));
-
-                values[index] = value;
-                index++;
-            }
-
-        }
-
-        return values;
+        return new ChapterPages(this.sqLiteDatabase).getPagesDownloaded(chapApiID);
     }
 
     public int getNumberPagesDownloaded(String chapApiID) {
-        long id = this.returnChapterId(chapApiID);
-        int returnValue = 0;
-
-        if (id == -1) return 0;
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM chapterPage WHERE chapter = ?", new String[]{Long.toString(id)})) {
-            if (row.getCount() < 1) {
-
-                return 0;
-            }
-            returnValue = row.getCount();
-        }
-
-        return returnValue;
+        return new ChapterPages(this.sqLiteDatabase).getNumberPagesDownloaded(chapApiID);
     }
-
+    @Deprecated
     private boolean deleteChapterPages() {
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("DELETE FROM chapterPage")) {
-            stmt.executeUpdateDelete();
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return false;
-        }
-
-        return true;
+        return new ChapterPages(this.sqLiteDatabase).deleteChapterPages();
     }
-
+    @Deprecated
     private boolean setIsdownloadedAsFalse() {
-
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("UPDATE chapters set is_downloaded = false")) {
-            stmt.executeUpdateDelete();
-        } catch (SQLiteException ex) {
-
-            ex.printStackTrace();
-            return false;
-        }
-
-        return true;
+        return new ChaptersDB(this.sqLiteDatabase).setIsdownloadedAsFalseForAll();
     }
 
     public boolean deleteAllpagesDownloaded() {
 
         this.sqLiteDatabase.beginTransaction();
-        if (!setIsdownloadedAsFalse()) {
+        if (!new ChaptersDB(this.sqLiteDatabase).setIsdownloadedAsFalseForAll()) {
             this.sqLiteDatabase.endTransaction();
 
             return false;
         }
-        if (!deleteChapterPages()) {
+        if (!new ChapterPages(this.sqLiteDatabase).deleteChapterPages()) {
             this.sqLiteDatabase.endTransaction();
 
             return false;
@@ -1188,8 +512,8 @@ public class Model extends SQLiteOpenHelper {
             return;
         }
         for (TagManga tag : tags) {
-            if (returnTagId(tag.getId()) == -1) {
-                insertTag(tag);
+            if (new TagDB(this.sqLiteDatabase).returnTagId(tag.getId()) == -1) {
+                new TagDB(this.sqLiteDatabase).insertTag(tag);
             }
         }
         SharedPreferences sharedPreferences = context.getSharedPreferences(ConfigClass.TAG_PREFERENCE, Context.MODE_PRIVATE);
@@ -1199,116 +523,15 @@ public class Model extends SQLiteOpenHelper {
     }
 
     public ArrayList<TagManga> selectAllTags() {
-        ArrayList<TagManga> tags = new ArrayList<>();
-
-
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT*FROM tags  name_tag WHERE id_tag NOT LIKE \"%genre%\" ORDER BY name_tag", new String[]{})) {
-            if (row.getCount() == 0) {
-
-                return tags;
-            }
-            while (row.moveToNext()) {
-                int idIndex = row.getColumnIndex("id_tag");
-                int nameIndex = row.getColumnIndex("name_tag");
-                tags.add(new TagManga(row.getString(idIndex), row.getString(nameIndex)));
-            }
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-            return tags;
-        }
-
-        return tags;
+        return new TagDB(this.sqLiteDatabase).selectAllTags();
     }
 
-    public void removeImagesFromDataBase(){
-        try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("UPDATE mangas set image = ?")) {
-            stmt.bindBlob(1,new byte[]{});
-            long numRows = stmt.executeUpdateDelete();
-            if(context instanceof MainActivity){
-                ((MainActivity)(context)).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(context,numRows+" imagens migradas com sucesso",Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-        } catch (SQLiteException ex) {
-            ex.printStackTrace();
-
-        }
-    }
-    public void doUpdateLogos() {
-        try (Cursor row = sqLiteDatabase.rawQuery("SELECT * FROM mangas", new String[]{})) {
-            if (row.getCount() == 0) return;
-            int id = row.getColumnIndex("id");
-            int image = row.getColumnIndex("image");
-            int idApi = row.getColumnIndex("id_manga");
-            int language = row.getColumnIndex("language");
-            LogoMangaStorage storage = new LogoMangaStorage(context);
-            storage.createIfNotExistsFolderForLogos();
-            while (row.moveToNext()) {
-                byte[] imageByte = row.getBlob(image);
-                Bitmap imageLogo = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-                if(imageLogo != null && imageByte.length != 0){
-                    storage.insertLogoManga(imageLogo, row.getString(idApi));
-                }
-
-            }
-            this.removeImagesFromDataBase();
-            SharedPreferences sharedPreferences = context.getSharedPreferences(ConfigClass.TAG_PREFERENCE, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(ConfigClass.ConfigLogoMigration.ALREDY_MIGRATED, true);
-            editor.apply();
-        }
-    }
     public void setLastChapterManga(String idApiManga,String language,double chapter){
-        long id = this.returnMangaId(idApiManga,language);
-        if(id == -1)return;
-        try(SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("UPDATE mangas set last_chapter = ? WHERE id = ?")){
-            stmt.bindString(1,Double.toString(chapter));
-            stmt.bindLong(2,id);
-            stmt.executeUpdateDelete();
-        }catch (SQLiteException ex){
-            ex.printStackTrace();
-        }
-    }
-    public ArrayList<Boolean> verifyReadStatus(String idApiManga,String language){
-        long id = returnMangaId(idApiManga,language);
-        if(id == -1){
-            return new ArrayList<Boolean>();
-        }
-        ArrayList <Boolean>response = new ArrayList<>();
-
-        try(Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM chapters Where id = ?",new String[]{Long.toString(id)})){
-            int index = 0;
-            while(row.moveToNext()){
-                int column = row.getColumnIndex("alredy_read");
-//                int ex = row.getColumnIndex("chapter");
-//                System.out.println(row.getString(0));
-                response.add(Boolean.parseBoolean(row.getString(column)));
-                index++;
-            }
-        }
-        return response;
-    }
-
-    public static interface OnMangaRemovedListener{
-        public static final int LIBRARY_OWNER = 0;
-        int getOwner();
-        void onMangaRemoved(String language,String idAPI);
-    }
-    public static interface OnMangaAddedNotifier{
-        public static final int LIBRARY_OWNER = 0;
-        int getOwner();
-        void someMangaAdded();
+        new MangaDB(this.sqLiteDatabase).setLastChapterManga(idApiManga,language,chapter);
     }
 
     public int getAmountMangasSalved(){
-        try(Cursor row = this.sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM mangas ",new String[]{})){
-            row.moveToNext();
-            return  row.getInt(0);
-        }
+        return new MangaDB(this.sqLiteDatabase).getAmountMangasSalved();
     }
 
     public boolean mangaTableHasChanges(){

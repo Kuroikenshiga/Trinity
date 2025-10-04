@@ -196,12 +196,12 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
             holder.page = holder.getAdapterPosition();
 
             SubsamplingScaleImageView img = holder.binding.img;
-
+//            img.setAlpha(this.alpha);
             GestureDetector gestureDetector = new GestureDetector(context,new GestureDetector.SimpleOnGestureListener(){
                @Override
                public boolean onSingleTapConfirmed(MotionEvent e){
                    ReaderMangaFragment f = (ReaderMangaFragment) fragment;
-                    f.controllShowBottomTopBar();
+                   f.controllShowBottomTopBar();
                    return true;
                }
             });
