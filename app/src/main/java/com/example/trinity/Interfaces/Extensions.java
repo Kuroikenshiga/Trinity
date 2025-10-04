@@ -44,7 +44,7 @@ public interface Extensions {
     Bundle getChapterPages(String idChapter);
 
     void loadUniquePage(String chapterIdApi, int chapterPage, Handler h);
-
+    @Deprecated
     Bitmap[] loadChapterPages(String[] array, String hash, String urlBase);
 
     void addTags(ArrayList<String> tags);

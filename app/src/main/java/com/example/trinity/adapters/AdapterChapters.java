@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.ChapterViewHolder> {
 
@@ -46,12 +47,12 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
     private String idMangaApi;
     private String chapterLanguage;
     private MangaDataViewModel mangaDataViewModel;
-    private NavController nav;
     private Fragment fragment;
     private boolean isLongPressed = false;
     private ArrayList<ChapterManga> chapterToDownload;
-
+    private boolean showJustDownloadedChapters = false;
     private int limiter;
+
     //Altere o valor dessa constante, caso queira aumentar a quantidade de itens que podem ser inseridos em cada novo "load" de dados
     private static final int LIMITE_PER_LOAD = 100;
     //Altere o valor dessa constante, caso queira aumentar a quantidade mínima de itens a cada "load"
@@ -61,6 +62,7 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
         this.context = context;
         this.chapters = chapters;
         chapterToDownload = new ArrayList<>();
+
         limiter = chapters.size() < LIMITE_PER_LOAD?0:chapters.size()/LIMITE_PER_LOAD*LIMITE_PER_LOAD;
         limiter -= chapters.size() - limiter < MIN_ITENS_PER_LOAD && limiter > MIN_ITENS_PER_LOAD?MIN_ITENS_PER_LOAD:0;
     }
@@ -74,6 +76,8 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull ChapterViewHolder holder, @SuppressLint("RecyclerView") int position) {
+
+        if(showJustDownloadedChapters)if(!chapters.get(holder.getAdapterPosition()).isDownloaded())return;
         Calendar mangaDate = Calendar.getInstance();
         Instant instant = OffsetDateTime.parse(this.chapters.get(position).getDateRFC3339(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant();
         Date dateDate = new Date(instant.toEpochMilli());
@@ -85,19 +89,11 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
         holder.binding.downloaded.setVisibility(chapters.get(position).isDownloaded()?View.VISIBLE:View.GONE);
 
         TypedValue typedValuePrimary = new TypedValue();
-
-
         context.getTheme().resolveAttribute(this.chapters.get(position).isAlredyRead() ?androidx.appcompat.R.attr.colorPrimary:com.google.android.material.R.attr.colorTertiary,typedValuePrimary,true);
-//        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorTertiary,typedValueSecondary,true);
-
         holder.binding.chapNumber.setTextColor(typedValuePrimary.data);
 
         TypedValue typedValuePrimaryBc = new TypedValue();
-
-
         context.getTheme().resolveAttribute(chapters.get(position).isSelected?com.google.android.material.R.attr.colorSecondary:com.google.android.material.R.attr.colorSurface,typedValuePrimaryBc,true);
-//        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurface,typedValueSecondaryBc,true);
-//        holder.binding.chapter.setBackground(chapters.get(position).isSelected?ResourcesCompat.getDrawable(context.getResources(),R.color.FullBlack,context.getTheme()):ResourcesCompat.getDrawable(context.getResources(),R.color.BackGroundScreen,context.getTheme()));
         holder.binding.chapter.setBackgroundColor(typedValuePrimaryBc.data);
         boolean value = chapters.get(position).isSelected;
         if (chapters.get(position).getCurrentPage() > 0) {
@@ -105,10 +101,8 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
         }
 
         GestureDetector gestureDetector = new GestureDetector(context,new GestureDetector.SimpleOnGestureListener(){
-
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e){
-
                 if(isLongPressed){
                     TypedValue typedValue = new TypedValue();
                     if(!chapters.get(position).isSelected){
@@ -157,14 +151,11 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
                 holder.isSelected = true;
                 InfoMangaFragment f = (InfoMangaFragment) fragment;
                 f.controlDownloadButtonVisibility(true);
-//                Drawable drawable = ResourcesCompat.getDrawable(context.getResources(),R.color.FullBlack,context.getTheme());
                 TypedValue typedValue = new TypedValue();
                 context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSecondary,typedValue,false);
                 holder.binding.chapter.setBackgroundColor(typedValue.data);
-//                holder.binding.chapter.post(()->{holder.binding.getRoot().setBackground(drawable);});
                 chapterToDownload.add(chapters.get(position));
             }
-
         });
 
         holder.binding.getRoot().setOnTouchListener(new View.OnTouchListener() {
@@ -173,30 +164,6 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
                 return gestureDetector.onTouchEvent(event);
             }
         });
-//        holder.binding.getRoot().setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                new Thread() {
-//                    @Override
-//                    public void run() {
-//                        holder.binding.chapNumber.setTextColor(context.getColor(R.color.Blue));
-//                        Model model = new Model(context);
-//                        model.chapterRead(chapters.get(position));
-//
-//                    }
-//                }.start();
-//                if (mangaDataViewModel != null) {
-//                    mangaDataViewModel.setIdChap(chapters.get(position).getId());
-//                }
-//                InfoMangaFragment f = (InfoMangaFragment) fragment;
-//                Bundle bundle = new Bundle();
-//                bundle.putInt("currentPage", chapters.get(position).getCurrentPage());
-//                f.navigateToRead(bundle);
-//
-//
-//            }
-//        });
-
     }
     @Override
     public void onViewAttachedToWindow(@NonNull ChapterViewHolder holder) {
@@ -206,7 +173,7 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
     }
     @Override
     public int getItemCount() {
-        return this.chapters.size();
+        return showJustDownloadedChapters?chapters.stream().mapToInt((i)->{return i.isDownloaded()?1:0;}).sum():this.chapters.size();
     }
 
     public class ChapterViewHolder extends RecyclerView.ViewHolder {
@@ -245,6 +212,10 @@ public class AdapterChapters extends RecyclerView.Adapter<AdapterChapters.Chapte
 
     public void setMangaDataViewModel(MangaDataViewModel mangaDataViewModel) {
         this.mangaDataViewModel = mangaDataViewModel;
+    }
+
+    public void setShowJustDownloadedChapters(boolean showJustDownloadedChapters) {
+        this.showJustDownloadedChapters = showJustDownloadedChapters;
     }
 
     public Fragment getFragment() {

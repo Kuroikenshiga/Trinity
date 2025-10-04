@@ -273,7 +273,8 @@ public class LibraryFragment extends Fragment {
         });
 
         binding.backToTop.setOnClickListener((v)->{
-            forceLoadLibrary();
+            forceLoadLibrary(true);
+            OFF_SET = 21;
         });
 
         return view;
@@ -316,7 +317,7 @@ public class LibraryFragment extends Fragment {
             mainActivity.isInReadFragment = false;
         }
         model = Model.getInstance(requireContext());
-        forceLoadLibrary();
+        forceLoadLibrary(false);
 
     }
 
@@ -351,8 +352,8 @@ public class LibraryFragment extends Fragment {
 
     }
 
-    private void forceLoadLibrary() {
-        if(!Model.getInstance(requireContext()).mangaTableHasChanges())return;
+    private void forceLoadLibrary(boolean ignoreTableMangaChangesContraint) {
+        if(!ignoreTableMangaChangesContraint && !Model.getInstance(requireContext()).mangaTableHasChanges())return;
 
         if(isLoadingLibrary)return;
         isLoadingLibrary = true;

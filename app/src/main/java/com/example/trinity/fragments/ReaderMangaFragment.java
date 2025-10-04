@@ -202,14 +202,14 @@ public class ReaderMangaFragment extends Fragment {
 
         View v = binding.getRoot();
         v.setFitsSystemWindows(true);
-        mangaDataViewModel = new ViewModelProvider(getActivity()).get(MangaDataViewModel.class);
-        preferences = getActivity().getSharedPreferences(ConfigClass.TAG_PREFERENCE, MODE_PRIVATE);
+        mangaDataViewModel = new ViewModelProvider(requireActivity()).get(MangaDataViewModel.class);
+        preferences = requireActivity().getSharedPreferences(ConfigClass.TAG_PREFERENCE, MODE_PRIVATE);
         preferencesEditor = preferences.edit();
         String imageQuality = preferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY, "dataSaver");
 
         this.alpha = preferences.getInt(ConfigClass.ConfigReader.ALPHA_CONFIG, 100);
 //        this.binding.alphaController.setProgress(this.alpha);
-
+        this.binding.alphaDealer.setAlpha((float) this.alpha /100);
 
         this.readDirection = preferences.getInt(ConfigClass.ConfigReader.READ_DIRECTION, 1);
 
@@ -241,7 +241,7 @@ public class ReaderMangaFragment extends Fragment {
                 alphaControllerSetup();
                 alphaDialog.setView(alphaDialogLayoutBinding.getRoot());
                 alphaDialog.setTitle("Configurar a luminosidade da leitura");
-
+                alphaDialogLayoutBinding.alphaController.setProgress(alpha);
                 AlertDialog alertDialog = alphaDialog.create();
                 Objects.requireNonNull(alertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.dialog_shape);
                 alertDialog.show();
@@ -294,6 +294,7 @@ public class ReaderMangaFragment extends Fragment {
                 binding.seekBar.setPosition((float) (((position) * 100) / imageURI.size()) / 100);
                 binding.seekBar.setBubbleText(String.valueOf(position + 1));
                 if (position == imageURI.size() - 1) {
+                    binding.numPages.setVisibility(View.INVISIBLE);
                     Instant now = Instant.now();
                     endTime = now.getEpochSecond();
                     adapterPages.setTimeWasteOnRead(endTime - initialTime);
@@ -303,7 +304,10 @@ public class ReaderMangaFragment extends Fragment {
 
                 } else if (position == 0) {
                     binding.seekBar.setVisibility(View.GONE);
-
+                    binding.numPages.setVisibility(View.INVISIBLE);
+                }
+                else{
+                    binding.numPages.setVisibility(View.VISIBLE);
                 }
 
                 if (chapterDownloaded && position > 0 && position < imageURI.size() - 1 && imageURI.get(position) == null) {
@@ -342,7 +346,7 @@ public class ReaderMangaFragment extends Fragment {
 
                     imageURI = new ArrayList<>();
                     for (int i = 0; i < numPages + 2; i++) imageURI.add(null);
-                    binding.numPages.setText(String.format("%d / %d",1,imageURI.size()));
+                    binding.numPages.setText(String.format("%d / %d",1,imageURI.size()-2));
 
                     adapterPages = new AdapterPages(getActivity(), imageURI);
                     adapterPages.setLogoManga(mangaDataViewModel.getManga().getId());
@@ -393,7 +397,7 @@ public class ReaderMangaFragment extends Fragment {
                                     binding.cascadeRead.scrollToPosition(startPage != 0 ? startPage : 0);
                                     binding.seekBar.setPosition(startPage == 0 ? 1 : startPage + 1);
                                     if (startPage != 0) {
-                                        binding.numPages.setText((startPage + 1) + " / " + imageURI.size());
+                                        binding.numPages.setText((startPage + 1) + " / " + (imageURI.size()-2));
                                     }
                                     startPage = 0;
                                 }
@@ -407,7 +411,7 @@ public class ReaderMangaFragment extends Fragment {
                     binding.pageContainer.setLayoutDirection(readDirection == 1 ? View.LAYOUT_DIRECTION_LTR : View.LAYOUT_DIRECTION_RTL);
                     binding.numPages.bringToFront();
                     binding.errorContainer.setVisibility(View.GONE);
-                    binding.numPages.setText("1 / " + (imageURI.size()));
+                    binding.numPages.setText("1 / " + (imageURI.size()-2));
 
                     binding.seekBar.setBeginTrackingListener(() -> {
                         binding.seekBar.setAlpha(1f);
@@ -436,7 +440,7 @@ public class ReaderMangaFragment extends Fragment {
                         return Unit.INSTANCE;
                     });
                     binding.seekBar.setPositionListener((aFloat) -> {
-                        binding.numPages.setText(String.format("%d / %d", binding.pageContainer.getCurrentItem() + 1, imageURI.size()));
+                        binding.numPages.setText(String.format("%d / %d", binding.pageContainer.getCurrentItem(), imageURI.size()-2));
                         binding.seekBar.setBubbleText(String.valueOf((int)(binding.seekBar.getPosition()*imageURI.size()) == 0?1:(int)(binding.seekBar.getPosition()*imageURI.size())));
                         return Unit.INSTANCE;
                     });
@@ -464,7 +468,7 @@ public class ReaderMangaFragment extends Fragment {
                     binding.errorContainer.setVisibility(View.VISIBLE);
                 } else if (msg.what == Extensions.RESPONSE_COUNT_ITENS_DECREASED_BY_ONE) {
                     adapterPagesCascade.ignorePage(adapterPages.ignorePage());
-                    binding.numPages.setText(String.format("%d / %d",readDirection == 3?pageCascadeItem:binding.pageContainer.getCurrentItem()+1, imageURI.size()));
+                    binding.numPages.setText(String.format("%d / %d",readDirection == 3?pageCascadeItem:binding.pageContainer.getCurrentItem()+1, imageURI.size()-2));
                     binding.seekBar.setEndText(String.valueOf(imageURI.size()));
                 }
 
@@ -829,7 +833,7 @@ public class ReaderMangaFragment extends Fragment {
         alphaDialogLayoutBinding.alphaController.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                adapterPages.setAlpha(progress);
+                adapterPages.setAlpha((float) progress / 100);
                 binding.cascadeRead.setAlpha((float) progress / 100);
                 binding.pageContainer.setAlpha((float) progress / 100);
                 alpha = progress;
@@ -907,7 +911,7 @@ public class ReaderMangaFragment extends Fragment {
     @SuppressLint("DefaultLocale")
     public void setPageCascade(int item) {
         pageCascadeItem = item;
-        binding.numPages.setText(String.format("%d / %d",item+1,imageURI.size()));
+        binding.numPages.setText(String.format("%d / %d",item+1,imageURI.size()-2));
     }
 
     @Override

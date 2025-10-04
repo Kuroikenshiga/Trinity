@@ -16,7 +16,9 @@ import android.os.Message;
 import androidx.fragment.app.Fragment;
 
 import com.example.trinity.Interfaces.Extensions;
+import com.example.trinity.Interfaces.PageStorage;
 import com.example.trinity.R;
+import com.example.trinity.storageAcess.ChapterPageBuffer;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 import com.example.trinity.storageAcess.PageCacheManager;
 import com.example.trinity.utilities.ImageValidate;
@@ -408,13 +410,13 @@ public class MangakakalotExtension implements Extensions {
             Bundle bundle = new Bundle();
             bundle.putInt("numPages", imgs.size());
             msg.setData(bundle);
-            h.sendMessage(msg);
+            if(h != null)h.sendMessage(msg);
             loadChapterPages(h, imgs);
         } catch (IOException e) {
             e.printStackTrace();
             Message msg = Message.obtain();
             msg.what = RESPONSE_ERROR;
-            h.sendMessage(msg);
+            if(h != null)h.sendMessage(msg);
         }
 
 
@@ -426,7 +428,7 @@ public class MangakakalotExtension implements Extensions {
         boolean continueVerification = false,canVerify = false;
 
         Bitmap bit = null, bitAux = null;
-
+        PageStorage pageStorage = h != null?PageCacheManager.getInstance(context): ChapterPageBuffer.getInstance(context);
         for (int i = 0;i < imgs.size();i++) {
             Element img = imgs.get(i);
             URL url = null;
@@ -444,7 +446,7 @@ public class MangakakalotExtension implements Extensions {
                 if (Objects.requireNonNull(response.body().contentType()).toString().contains("image/")) {
                     InputStream imageInput = response.body().byteStream();
                     if (i == 0) {
-                        PageCacheManager.getInstance(context).clearCache();
+                        pageStorage.clearFolder();
                     }
                     BitmapFactory.Options op = new BitmapFactory.Options();
                     op.inJustDecodeBounds = false;
@@ -459,7 +461,7 @@ public class MangakakalotExtension implements Extensions {
 
 //                        assert bitAux != null;
                         if(bitAux != null && ImageValidate.isSubImage(bit,bitAux)){
-                            String urlImage = PageCacheManager.getInstance(context).insertBitmapInCache(ImageValidate.BitmapConcat(bit,bitAux), String.valueOf(index) + ".jpeg");
+                            String urlImage = pageStorage.insertBitmapInFolder(ImageValidate.BitmapConcat(bit,bitAux), String.valueOf(index) + ".jpeg");
 
                             Message msg = Message.obtain();
                             msg.what = RESPONSE_PAGE;
@@ -467,12 +469,12 @@ public class MangakakalotExtension implements Extensions {
                             bundle.putString("img", urlImage);
                             bundle.putInt("index", index);
                             msg.setData(bundle);
-                            h.sendMessage(msg);
+                            if(h != null)h.sendMessage(msg);
                             index++;
 
                             msg = Message.obtain();
                             msg.what = RESPONSE_COUNT_ITENS_DECREASED_BY_ONE;
-                            h.sendMessage(msg);
+                            if(h != null)h.sendMessage(msg);
 
                             continueVerification = false;
                             bit = null;
@@ -481,7 +483,7 @@ public class MangakakalotExtension implements Extensions {
 
                         }
                         else {
-                            String urlImage = PageCacheManager.getInstance(context).insertBitmapInCache(bit, String.valueOf(index) + ".jpeg");
+                            String urlImage = pageStorage.insertBitmapInFolder(bit, String.valueOf(index) + ".jpeg");
 
                             Message msg = Message.obtain();
                             msg.what = RESPONSE_PAGE;
@@ -489,7 +491,7 @@ public class MangakakalotExtension implements Extensions {
                             bundle.putString("img", urlImage);
                             bundle.putInt("index", index);
                             msg.setData(bundle);
-                            h.sendMessage(msg);
+                            if(h != null)h.sendMessage(msg);
                             index++;
 
                             bit = bitAux;

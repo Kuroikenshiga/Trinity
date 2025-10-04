@@ -11,8 +11,10 @@ import android.os.Message;
 import android.widget.Toast;
 
 import com.example.trinity.Interfaces.Extensions;
+import com.example.trinity.Interfaces.PageStorage;
 import com.example.trinity.R;
 import com.example.trinity.services.broadcasts.CancelCurrentWorkReceiver;
+import com.example.trinity.storageAcess.ChapterPageBuffer;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 import com.example.trinity.storageAcess.PageCacheManager;
 import com.example.trinity.valueObject.ChapterManga;
@@ -33,6 +35,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -439,13 +442,6 @@ public class MangaDexExtension implements Extensions {
 
             Gson gson = new Gson();
             JsonElement json = gson.fromJson(response.body().string(), JsonElement.class);
-//            int total = json.getAsJsonObject().get("total").getAsInt();
-//            if(total == 0){
-//                if(context != null){
-//                    Toast.makeText(context,"Ocorreu um erro ao carregar as páginas do capítuo", Toast.LENGTH_LONG).show();
-//                }
-//                return;
-//            }
 
             JsonArray imgs;
             try {
@@ -460,19 +456,20 @@ public class MangaDexExtension implements Extensions {
             Bundle bundle = new Bundle();
             bundle.putInt("numPages", imgs.size());
             msg.setData(bundle);
-            h.sendMessage(msg);
+            if(h != null )h.sendMessage(msg);
             loadChapterPages(h, imgs, json.getAsJsonObject().get("chapter").getAsJsonObject().get("hash").getAsString(), json.getAsJsonObject().get("baseUrl").getAsString());
         } catch (IOException ex) {
             ex.printStackTrace();
             Message msg = Message.obtain();
             msg.what = Extensions.RESPONSE_ERROR;
-            h.sendMessage(msg);
+            if(h != null )h.sendMessage(msg);
         }
 
     }
 
     public void loadChapterPages(Handler h, JsonArray array, String hash, String urlBase) {
         int index = 1;
+        PageStorage pageStorage = h != null?PageCacheManager.getInstance(context):ChapterPageBuffer.getInstance(context);
         for (JsonElement s : array) {
             URL urlImage = null;
             try {
@@ -480,9 +477,7 @@ public class MangaDexExtension implements Extensions {
                 for (int i = 1; i < s.toString().length() - 1; i++) {
                     sFinal += s.toString().charAt(i);
                 }
-//                System.out.println(imageQuality);
                 urlImage = new URL(urlBase + (imageQuality.equals(HIGH_QUALITY) ? "/data/" : "/data-saver/") + hash + "/" + sFinal);
-//                System.out.println(urlBase + (imageQuality.equals(HIGH_QUALITY) ? "/data/" : "/data-saver/") + hash + "/" + sFinal);
             } catch (MalformedURLException ex) {
                 ex.printStackTrace();
             }
@@ -493,11 +488,12 @@ public class MangaDexExtension implements Extensions {
 
             try (Response response = http.newCall(req).execute();) {
 //                System.out.println("tipo do arquivo"+response.body().contentType().toString());
-                if (response.body().contentType().toString().contains("image/")) {
+                assert response.body() != null;
+                if (Objects.requireNonNull(response.body().contentType()).toString().contains("image/")) {
                     InputStream ImageInput = response.body().byteStream();
 
                     if (index == 1) {
-                        PageCacheManager.getInstance(context).clearCache();
+                        pageStorage.clearFolder();
                     }
 
                     BitmapFactory.Options op = new BitmapFactory.Options();
@@ -505,10 +501,11 @@ public class MangaDexExtension implements Extensions {
                     Bitmap bit = BitmapFactory.decodeStream(ImageInput, null, op);
 
 
-                    String url = PageCacheManager.getInstance(context).insertBitmapInCache(bit, Integer.toString(index) + ".jpeg");
+                    String url = pageStorage.insertBitmapInFolder(bit, Integer.toString(index) + ".jpeg");
                     if (bit != null) {
                         bit.recycle();
                     }
+
 
                     Message msg = Message.obtain();
                     msg.what = Extensions.RESPONSE_PAGE;
@@ -516,7 +513,7 @@ public class MangaDexExtension implements Extensions {
                     bundle.putString("img", url);
                     bundle.putInt("index", index);
                     msg.setData(bundle);
-                    h.sendMessage(msg);
+                    if(h != null)h.sendMessage(msg);
                 }
             } catch (ConnectException ex) {
                 Message msg = Message.obtain();
@@ -526,7 +523,7 @@ public class MangaDexExtension implements Extensions {
                 bundle.putParcelable("img", bit);
                 bundle.putInt("index", index);
                 msg.setData(bundle);
-                h.sendMessage(msg);
+                if(h != null)h.sendMessage(msg);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -646,7 +643,7 @@ public class MangaDexExtension implements Extensions {
         h.sendMessage(msg);
 
     }
-
+    @Deprecated
     public Bitmap[] loadChapterPages(String[] array, String hash, String urlBase) {
         int index = 1;
         Bitmap[] bitmaps = new Bitmap[array.length + 2];

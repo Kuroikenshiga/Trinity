@@ -56,9 +56,17 @@
                         android:src="@drawable/back"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-
+                        android:tint="?attr/colorTertiary"
                         />
-
+                    <ImageView
+                        android:id="@+id/filterChapters"
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:src="@drawable/cloud_24dp_e8eaed_fill0_wght400_grad0_opsz24"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:tint="?attr/colorTertiary"
+                        />
                     <ImageView
                         android:id="@+id/logo"
                         android:layout_width="100dp"
