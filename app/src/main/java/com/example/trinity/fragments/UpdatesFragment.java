@@ -277,7 +277,7 @@ public class UpdatesFragment extends Fragment {
             mainActivity.isInFirstDestination = false;
             mainActivity.isInReadFragment = false;
         }
-        wasReloaded = model.mangaUpdateTableHasChanges();
+        wasReloaded = Model.getInstance(requireContext()).mangaUpdateTableHasChanges();
         loadUpdates();
 
     }
