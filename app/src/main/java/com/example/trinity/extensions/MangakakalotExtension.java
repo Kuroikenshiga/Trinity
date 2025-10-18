@@ -194,10 +194,16 @@ public class MangakakalotExtension implements Extensions {
             e.printStackTrace();
         }
 
-        OkHttpClient client = new OkHttpClient.Builder().build();
+        OkHttpClient client = new OkHttpClient.Builder().callTimeout(8,TimeUnit.SECONDS).build();
         Request request = new Request.Builder().header("Referer", "https://www.mangakakalot.gg/").url(urlApi).build();
         try (Response response = client.newCall(request).execute()) {
-            html = response.body().string();
+            if(response.isSuccessful()){
+                html = response.body().string();
+            }
+            else{
+                return "";
+            }
+
             if(html.contains("ddg-l10n-title")){
                 if(h == null)return "";
                 Message msg = Message.obtain();
@@ -386,7 +392,7 @@ public class MangakakalotExtension implements Extensions {
         mangaId = mangaId.replace("@", "/");
         String urlApi = mangaId.contains(BASE_URL) ? mangaId : (BASE_URL + mangaId);
         String html = loadMangaInfo(mangaId,h);
-
+        if(html.isEmpty())return new ArrayList<>();
         return mangaId.contains(MANGAKAKALOT) ? viewChaptersMangakakalot(html) : viewChaptersChapmanganato(html);
     }
 

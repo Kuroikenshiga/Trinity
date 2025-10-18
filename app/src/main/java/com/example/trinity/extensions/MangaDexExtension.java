@@ -345,15 +345,22 @@ public class MangaDexExtension implements Extensions {
             } catch (MalformedURLException ex) {
                 ex.printStackTrace();
             }
-            OkHttpClient http = new OkHttpClient.Builder().build();
+            OkHttpClient http = new OkHttpClient.Builder().callTimeout(8,TimeUnit.SECONDS).build();
 
             Request req = new Request.Builder().url(url).build();
+
 
             try (Response response = http.newCall(req).execute();) {
 
                 Gson gson = new Gson();
 
-                String s = response.body().string();
+                String s = "";
+                if(response.isSuccessful()){
+                    s = response.body().string();
+                }
+                else{
+                    return new ArrayList<>();
+                }
                 JsonElement json = gson.fromJson(s, JsonElement.class);
                 total = json.getAsJsonObject().get("total").getAsInt();
                 if(total == 0){
@@ -408,6 +415,7 @@ public class MangaDexExtension implements Extensions {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
+
 //            System.out.println(chapterMangas);
             offSet += 300;
 
