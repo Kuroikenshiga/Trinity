@@ -45,69 +45,9 @@
 
                     />
 
-                <ImageView
-                    android:id="@+id/searchIcon"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:src="@drawable/search_icon"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <LinearLayout
-                android:id="@+id/searchToolContainer"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-
-                android:gravity="center_horizontal|center_vertical"
-                android:visibility="visible"
-                app:layout_constraintTop_toBottomOf="@+id/titleContainer">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/search_field_shape"
-
-                    >
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/search_field_shape"
-
-                        >
-                        <LinearLayout
-                            android:layout_width="370dp"
-                            android:layout_height="40dp"
-                            android:orientation="horizontal"
-                            android:gravity="center">
-                            <ImageView
-                                android:layout_width="22dp"
-                                android:layout_height="22dp"
-                                android:layout_marginEnd="3dp"
-                                android:src="@drawable/search_icon"
-                                android:id="@id/searchAction"/>
-                            <androidx.appcompat.widget.AppCompatEditText
-                                android:id="@+id/searchField"
-                                android:layout_width="290dp"
-                                android:layout_height="40dp"
-                                android:fontFamily="@font/open_sans"
-                                android:inputType="text"
-                                android:padding="10dp"
-                                android:textColor="?attr/colorTertiary"
-
-                                />
-                            <ImageView
-                                android:layout_width="22dp"
-                                android:layout_height="22dp"
-                                android:layout_marginStart="3dp"
-                                android:id="@+id/close"
-                                android:src="@drawable/close_24dp_e8eaed_fill0_wght400_grad0_opsz24"/>
-                        </LinearLayout>
-                    </LinearLayout>
-                </LinearLayout>
-
-            </LinearLayout>
         </LinearLayout>
 
 
@@ -248,7 +188,7 @@
                 android:id="@+id/img4"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:src="@drawable/mangakakalot"
+                android:src="@drawable/mangakakalot_svg"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

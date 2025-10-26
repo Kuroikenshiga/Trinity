@@ -28,6 +28,7 @@ import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.ViewCompat;
@@ -64,7 +65,7 @@ import java.util.Objects;
 
 public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHolder> {
     private Context context;
-    private String[] resourcesImage;
+    private ArrayList<String> resourcesImage;
     private String timeWasteString = "";
     private boolean isLastChapter = false;
     private boolean isFirstChapter = false;
@@ -78,7 +79,8 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
     private boolean isFavorited = false;
     private LogoMangaStorage logoMangaStorage;
     private LogoMangaStorageTemp logoMangaStorageTemp;
-    public AdapterPages(Context c, String[] array) {
+    private int numPagesIgnored = 0;
+    public AdapterPages(Context c, @NonNull ArrayList<String> array) {
         this.context = c;
         this.resourcesImage = array;
         alpha = 1f;
@@ -106,7 +108,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
         
         
         
-        if (holder.getAdapterPosition() == this.resourcesImage.length - 1) {
+        if (holder.getAdapterPosition() == this.resourcesImage.size() - 1 - numPagesIgnored) {
 
             holder.binding.timeWaste.setText(timeWasteString);
             holder.binding.imgContainer.setVisibility(View.GONE);
@@ -189,17 +191,17 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
         holder.binding.nextChapterContainer.setVisibility(View.GONE);
         holder.binding.imgContainer.setVisibility(View.VISIBLE);
 
-        if (resourcesImage[holder.getAdapterPosition()] != null) {
+        if (resourcesImage.get(holder.getAdapterPosition()) != null) {
 
             holder.page = holder.getAdapterPosition();
 
             SubsamplingScaleImageView img = holder.binding.img;
-
+//            img.setAlpha(this.alpha);
             GestureDetector gestureDetector = new GestureDetector(context,new GestureDetector.SimpleOnGestureListener(){
                @Override
                public boolean onSingleTapConfirmed(MotionEvent e){
                    ReaderMangaFragment f = (ReaderMangaFragment) fragment;
-                    f.controllShowBottomTopBar();
+                   f.controllShowBottomTopBar();
                    return true;
                }
             });
@@ -213,9 +215,9 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
 
             if(fragment.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
 
-                Glide.with(fragment.getActivity().getApplicationContext())
+                Glide.with(fragment.requireActivity().getApplicationContext())
                         .asBitmap()
-                        .load(resourcesImage[holder.getAdapterPosition()])
+                        .load(resourcesImage.get(holder.getAdapterPosition()))
                         .override(context.getResources().getDisplayMetrics().widthPixels, context.getResources().getDisplayMetrics().heightPixels)
                         .apply(RequestOptions.skipMemoryCacheOf(true))
                         .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -225,16 +227,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
                             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                 float zoomScale = 1f;
                                 img.setImage(ImageSource.bitmap(resource));
-//                                if(resource.getWidth() < resource.getHeight() && resource.getHeight() > screenHeight && ((float) resource.getHeight() /resource.getWidth())>1.5f){
-//
-////                                    img.post(new Runnable() {
-////                                        @Override
-////                                        public void run() {
-////                                            img.setScaleAndCenter(1,new PointF((float)screenWidth/2,0));
-////                                        }
-////                                    });
-//
-//                                }
+
                                 img.setDoubleTapZoomScale(2f);
                                 img.setMinScale(1f);
                             }
@@ -257,10 +250,8 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
     
     @Override
     public int getItemCount() {
-        return this.resourcesImage.length;
+        return this.resourcesImage.size();
     }
-
-
 
     public static class ImageViewHolder extends RecyclerView.ViewHolder {
 
@@ -327,6 +318,17 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
         this.fragment = f;
     }
 
+    @UiThread
+    public int ignorePage(){
+        int toRemove = this.resourcesImage.size() - 1;
+        this.resourcesImage.remove(toRemove);
+        this.notifyItemRemoved(toRemove);
+        return toRemove;
+    }
+    @Deprecated
+    public int getAmountPagesIgnored(){
+        return this.numPagesIgnored;
+    }
 //    public void setFavorited(boolean favorited) {
 //        isFavorited = favorited;
 ////        System.out.println(isFavorited);

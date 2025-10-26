@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,10 +34,12 @@ import com.example.trinity.fragments.ReaderMangaFragment;
 import com.example.trinity.storageAcess.LogoMangaStorage;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 
+import java.util.ArrayList;
+
 public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
-    private String[] imagesResource;
+    private ArrayList<String> imagesResource;
     private Fragment fragment;
     private float currentXTouch;
     private float currentYTouch;
@@ -53,15 +56,16 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private LogoMangaStorage logoMangaStorage;
     private LogoMangaStorageTemp logoMangaStorageTemp;
+    private int numPagesIgnored = 0;
 
-    public AdapterPagesCascade(Context context, String[] dataSet) {
+    public AdapterPagesCascade(Context context, ArrayList<String> dataSet) {
         this.context = context;
         this.imagesResource = dataSet;
         screenHeight = context.getResources().getDisplayMetrics().heightPixels;
         screenWidth = context.getResources().getDisplayMetrics().widthPixels;
     }
 
-    public AdapterPagesCascade(Context context, String[] dataSet, Fragment fragment) {
+    public AdapterPagesCascade(Context context, ArrayList<String> dataSet, Fragment fragment) {
         this.context = context;
         this.imagesResource = dataSet;
         this.fragment = fragment;
@@ -90,12 +94,15 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
     }
     @Override
     public int getItemViewType(int position){
-        return position == 0?VIEW_TYPE_HEADER:position == imagesResource.length-1?VIEW_TYPE_FOOTER:VIEW_TYPE_ITEM;
+
+        return position == 0?VIEW_TYPE_HEADER:position == imagesResource.size()-1?VIEW_TYPE_FOOTER:VIEW_TYPE_ITEM;
     }
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 //        holder.position = position;
+
+        if(position >= this.imagesResource.size())return;
 
         if(position == 0){
             ((StartReadViewHolder)(holder)).position = holder.getAdapterPosition();
@@ -129,7 +136,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
             });
             return;
         }
-        if(position == imagesResource.length-1){
+        if(holder.getAdapterPosition() == imagesResource.size()-1){
             ((EndReadViewHolder)(holder)).binding.timeWaste.setText(timeWasteString);
             ((EndReadViewHolder)(holder)).binding.nextChapterContainer.setVisibility(View.VISIBLE);
             ((EndReadViewHolder)(holder)).binding.actionEnd.setOnClickListener(new View.OnClickListener() {
@@ -155,7 +162,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
             return;
         }
 
-        if(imagesResource[holder.getAdapterPosition()] == null)return;
+        if(imagesResource.get(holder.getAdapterPosition()) == null)return;
 //        System.out.println(position);
         ((ViewHolderItem)(holder)).position = holder.getAdapterPosition();
         SubsamplingScaleImageView img = ((ViewHolderItem)(holder)).binding.img;
@@ -167,7 +174,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
         });
         Glide.with(fragment.getActivity().getApplicationContext())
                 .asBitmap()
-                .load(imagesResource[holder.getAdapterPosition()])
+                .load(imagesResource.get(holder.getAdapterPosition()))
                 .override((int)screenWidth, (int)screenHeight)
                 .apply(RequestOptions.skipMemoryCacheOf(true))
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -211,9 +218,15 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
     }
     @Override
     public int getItemCount() {
-        return this.imagesResource.length;
+        return this.imagesResource.size();
     }
-
+    @UiThread
+    public void ignorePage(int toRemove){
+        this.notifyItemRemoved(toRemove);
+    }
+    public int getAmountPagesIgnored(){
+        return this.numPagesIgnored;
+    }
     public static class ViewHolderItem extends RecyclerView.ViewHolder {
         public PageCascadeItemBinding binding;
 

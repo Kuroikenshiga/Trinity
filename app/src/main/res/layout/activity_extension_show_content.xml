@@ -12,11 +12,11 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-
         android:gravity="center_vertical"
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
 
         <LinearLayout
             android:id="@+id/headerContainer1"
@@ -55,6 +55,7 @@
                             android:id="@+id/searchField"
                             android:layout_width="290dp"
                             android:layout_height="40dp"
+                            android:layout_marginTop="-5dp"
                             android:fontFamily="@font/open_sans"
                             android:inputType="text"
                             android:padding="10dp"
@@ -123,6 +124,41 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/releases_mangas"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        android:text="Lançamentos"
+        android:textSize="11sp"
+        android:background="@drawable/genres_shape_fill"
+        android:layout_marginStart="5dp"
+
+        />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/completed_mangas"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        app:layout_constraintStart_toEndOf="@id/releases_mangas"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        android:text="Completos"
+        android:textSize="11sp"
+        android:background="@drawable/genres_shape"
+        android:layout_marginStart="5dp"
+        />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/genres"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        app:layout_constraintStart_toEndOf="@id/completed_mangas"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        android:text="generos"
+        android:textSize="11sp"
+        android:background="@drawable/genres_shape"
+        android:layout_marginStart="5dp"
+        />
 
     <com.example.trinity.custom_components.LoadingView
         android:id="@+id/progressTop"
@@ -132,7 +168,7 @@
         android:indeterminateTint="?attr/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/header" />
+        app:layout_constraintTop_toBottomOf="@id/releases_mangas" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -143,7 +179,8 @@
             android:id="@+id/reciclerViewMangas"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="60dp"
+            android:paddingTop="40dp"
+            android:paddingBottom="60dp"
             app:layout_constraintTop_toBottomOf="@id/header" />
 
     </LinearLayout>
@@ -162,52 +199,36 @@
         android:gravity="center"
         />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/configSearch"
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:layout_marginBottom="-400dp"
-        android:background="?attr/colorSecondary"
-        app:layout_constraintBottom_toBottomOf="parent">
-        <TextView
-            android:id="@+id/titleTags"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_black"
-            android:text="Filtrar por tag"
-            android:textColor="?attr/colorTertiary"
-            android:textSize="18sp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-        <ScrollView
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="vertical"
+        >
+        <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_constraintTop_toBottomOf="@id/titleTags">
-
-            <LinearLayout
-                android:id="@+id/tagsContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:orientation="vertical">
-
-            </LinearLayout>
-        </ScrollView>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/showAdvancedSearch"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_margin="10dp"
-        android:background="@drawable/floating_action_buttom_shape"
-        android:backgroundTint="?attr/colorSecondary"
-        android:rotation="180"
-        android:src="@drawable/arrow_down"
-        android:tint="?attr/colorTertiary"
-        app:layout_constraintBottom_toTopOf="@id/configSearch"
-        app:layout_constraintEnd_toEndOf="parent" />
+            android:layout_height="wrap_content"
+            android:id="@+id/search_itens"
+            android:background="@drawable/search_itens_shape"
+            android:padding="10dp"
+            android:visibility="gone"
+            />
+        <com.example.trinity.custom_components.LoadingView
+            android:id="@+id/loading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
+            android:indeterminateTint="?attr/colorPrimary"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:gravity="center"
+            />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

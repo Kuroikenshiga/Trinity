@@ -2,9 +2,12 @@ package com.example.trinity.storageAcess;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Objects;
 
 public class LogoMangaStorageTemp {
@@ -57,6 +60,29 @@ public class LogoMangaStorageTemp {
         }
     }
 
+    public boolean receiveFile(String path) {
+        LogoMangaStorage storage = new LogoMangaStorage(context);
+        File file = new File(storage.getLogoFromStorage(path));
+        path += ".jpeg";
+        File dest = new File(absolutePath,path);
+        if(!file.exists())return false;
+        if(dest.exists())return true;
+
+        try(FileInputStream fileInputStream = new FileInputStream(file)){
+            Bitmap logo = BitmapFactory.decodeStream(fileInputStream);
+            try(FileOutputStream outputStream = new FileOutputStream(dest)){
+                if(logo != null){
+                    logo.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
+                }
+                outputStream.flush();
+            }
+        }catch (IOException ex){
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     public String insertLogoManga(Bitmap logo, String idApiManga,String format){
         File dir = new File(absolutePath);
 
@@ -85,6 +111,7 @@ public class LogoMangaStorageTemp {
 
     public String getLogoFromTempStorage(String idApiManga){
         idApiManga += ".jpeg";
+
         File dir = new File(absolutePath);
         if(!dir.exists())return "";
         try{

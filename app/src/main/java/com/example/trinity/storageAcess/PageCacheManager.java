@@ -16,8 +16,9 @@ import java.util.Objects;
 
 //import okhttp3.internal.cache.DiskLruCache;
 import com.bumptech.glide.disklrucache.DiskLruCache;
+import com.example.trinity.Interfaces.PageStorage;
 
-public final class PageCacheManager {
+public final class PageCacheManager implements PageStorage {
 
     public final String CACHE_DIR = "pageCache";
     public final int DISK_CACHE_SIZE = 1024*1024*300;
@@ -26,7 +27,8 @@ public final class PageCacheManager {
     private Context context;
     private static String absolutePath;
     private static PageCacheManager instance;
-    public static PageCacheManager getInstance(Context context){
+
+    public static PageStorage getInstance(Context context){
         if(instance == null){
             instance = new PageCacheManager(context);
             return instance;
@@ -38,7 +40,7 @@ public final class PageCacheManager {
         this.context = context;
     }
 
-    public void createIfNotExistCacheChapterFolder(){
+    public void createIfNotExistPageFolder(){
         File dir = new File(context.getFilesDir(),CACHE_DIR);
         if(!dir.exists()){
             dir.mkdir();
@@ -46,7 +48,7 @@ public final class PageCacheManager {
         absolutePath = dir.getAbsolutePath();
     }
 
-    public String insertBitmapInCache(Bitmap bitmap,String key) {
+    public String insertBitmapInFolder(Bitmap bitmap,String key) {
         dirCache = new File(absolutePath);
         File image = null;
         if(!dirCache.exists())return "";
@@ -65,22 +67,7 @@ public final class PageCacheManager {
         }
         return image.getAbsolutePath();
     }
-//    public Bitmap getBitmapFromCache(String key){
-//        Bitmap bitmap = null;
-//        dirCache = new File(absolutePath);
-//        if(!dirCache.exists())return null;
-//
-//        File image = new File(dirCache,key);
-//        if(!image.exists())return null;
-//
-//        try(FileInputStream inputStream = new FileInputStream(image)){
-//            bitmap = BitmapFactory.decodeStream(inputStream);
-//        }catch (IOException ex){
-//            ex.printStackTrace();
-//            return null;
-//        }
-//        return bitmap;
-//    }
+    @Deprecated
     public String getBitmapFromCache(String key){
         dirCache = new File(absolutePath);
         if(!dirCache.exists())return "";
@@ -89,7 +76,8 @@ public final class PageCacheManager {
         if(!image.exists())return "";
         return image.getAbsolutePath();
     }
-    public void clearCache(){
+    public void clearFolder(){
+        if(absolutePath == null)createIfNotExistPageFolder();
         dirCache = new File(absolutePath);
         for(File file: Objects.requireNonNull(dirCache.listFiles())){
             file.delete();

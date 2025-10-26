@@ -1,11 +1,9 @@
-package com.example.trinity.Interfeces;
+package com.example.trinity.Interfaces;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
-
-import androidx.fragment.app.Fragment;
 
 import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.Manga;
@@ -26,6 +24,9 @@ public interface Extensions {
     public final int RESPONSE_ERROR = 3;
     public final int RESPONSE_FINAL = 4;
     public final int RESPONSE_EMPTY = 5;
+    public final int RESPONSE_REQUEST_NEW_CONTENT_CALL = 6;
+    public final int RESPONSE_REQUEST_BYPASS = 7;
+    public final int RESPONSE_COUNT_ITENS_DECREASED_BY_ONE = 8;
 
     void updates( Handler h);
     void loadMangaLogo(Handler h, ArrayList<Manga> mangaArrayList);
@@ -34,8 +35,8 @@ public interface Extensions {
 
     ArrayList<Manga> responseToValueObject(String response);
     void setLanguage(String language);
-    ArrayList<ChapterManga> viewChapters(String mangaId);
 
+    ArrayList<ChapterManga> viewChapters(String mangaId);
     void getChapterPages(Handler h, String idChapter);
 
     void loadChapterPages(Handler h, JsonArray array, String hash, String urlBase);
@@ -43,7 +44,7 @@ public interface Extensions {
     Bundle getChapterPages(String idChapter);
 
     void loadUniquePage(String chapterIdApi, int chapterPage, Handler h);
-
+    @Deprecated
     Bitmap[] loadChapterPages(String[] array, String hash, String urlBase);
 
     void addTags(ArrayList<String> tags);
@@ -55,5 +56,5 @@ public interface Extensions {
     void setContext(Context context);
 
     double getMangaStatus(String idApiManga);
-
+    public ArrayList<ChapterManga> viewChapters(String mangaId,Handler h);
 }

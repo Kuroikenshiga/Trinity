@@ -2,18 +2,11 @@ package com.example.trinity.fragments;
 
 import android.animation.ValueAnimator;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,7 +14,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.transition.TransitionInflater;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,7 +23,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.trinity.ExtensionShowContentActivity;
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.MainActivity;
 import com.example.trinity.R;
 import com.example.trinity.adapters.AdapterMangas;
@@ -40,6 +32,7 @@ import com.example.trinity.extensions.MangaDexExtension;
 import com.example.trinity.valueObject.Manga;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -183,9 +176,7 @@ public class ExtensionsShowFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getActivity(), ExtensionShowContentActivity.class);
-
-//
-                i.putExtra("Logo", R.drawable.mangakakalot);
+                i.putExtra("Logo", R.drawable.mangakakalot_svg);
                 i.putExtra("Titulo", "Mangakakalot - en");
                 i.putExtra("Language", languages[2]);
                 i.putExtra("Extension",Extensions.MANGAKAKALOT);
@@ -195,146 +186,27 @@ public class ExtensionsShowFragment extends Fragment {
             }
         });
 
-        mainHandler = new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(Message msg) {
-                if (msg.what == 1) {
-                    binding.progress.setVisibility(View.GONE);
-                    Manga manga = msg.getData().getParcelable("dados");
-                    assert manga != null;
-                    if (manga.getLanguage().equals(languages[0])) {
-                        mangasPtBr.add(manga);
-                        adapterMangasPtBr.notifyItemInserted(mangasPtBr.size());
-                        binding.ptBr.setVisibility(View.VISIBLE);
-                        return;
-                    }
-                    if (manga.getLanguage().equals(languages[1])) {
-                        mangasEn.add(manga);
-                        adapterMangasEn.notifyItemInserted(mangasEn.size());
-                        binding.en.setVisibility(View.VISIBLE);
-                        return;
-                    }
-                    mangasEsLa.add(manga);
-                    adapterMangasEsLa.notifyItemInserted(mangasEsLa.size());
-                    binding.esLa.setVisibility(View.VISIBLE);
-                }
-                if (msg.what == 3) {
-                    Toast.makeText(getActivity(), "Nenhum resultado encontrado", Toast.LENGTH_LONG).show();
-                    binding.progress.setVisibility(View.GONE);
-                }
-            }
-        };
-
 
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (isSearchFieldShow) {
-                    isSearchFieldShow = false;
-                    hideSearch();
-                    binding.searchField.setText("");
-                    int itemCount = 0;
 
-                    itemCount = mangasPtBr.size();
-                    mangasPtBr.clear();
-                    adapterMangasPtBr.notifyItemRangeRemoved(0, itemCount);
-
-                    itemCount = mangasEn.size();
-                    mangasEn.clear();
-                    adapterMangasEn.notifyItemRangeRemoved(0, itemCount);
-
-                    itemCount = mangasEsLa.size();
-                    mangasEsLa.clear();
-                    adapterMangasEsLa.notifyItemRangeRemoved(0, itemCount);
-
-                    binding.ptBr.setVisibility(View.GONE);
-                    binding.en.setVisibility(View.GONE);
-                    binding.esLa.setVisibility(View.GONE);
-
+                if (((MainActivity) requireActivity()).isInReadFragment) {
+                    ((MainActivity) requireActivity()).navigateToUpdates();
                     return;
                 }
-                if (((MainActivity) getActivity()).isInReadFragment) {
-                    ((MainActivity) getActivity()).navigateToUpdates();
-                    return;
-                }
-                if (!((MainActivity) getActivity()).isInFirstDestination) {
-                    ((MainActivity) getActivity()).navigateToLibrary();
+                if (!((MainActivity) requireActivity()).isInFirstDestination) {
+                    ((MainActivity) requireActivity()).navigateToLibrary();
                     return;
                 }
 
-                getActivity().finish();
+                requireActivity().finish();
             }
         };
-        getActivity().getOnBackPressedDispatcher().addCallback(getActivity(), callback);
-        binding.searchIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!isSearchFieldShow) {
-                    isSearchFieldShow = true;
-                    showSearch();
-                }
-            }
-        });
+        requireActivity().getOnBackPressedDispatcher().addCallback(requireActivity(), callback);
 
-        binding.searchAction.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                search();
-            }
-        });
-        binding.close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                binding.searchField.setText("");
-            }
-        });
-        binding.searchField.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
 
-                if (keyCode == KeyEvent.KEYCODE_ENTER && !isSearching) {
 
-                    int itemCount = 0;
-
-                    itemCount = mangasPtBr.size();
-                    mangasPtBr.clear();
-                    adapterMangasPtBr.notifyItemRangeRemoved(0, itemCount);
-
-                    itemCount = mangasEn.size();
-                    mangasEn.clear();
-                    adapterMangasEn.notifyItemRangeRemoved(0, itemCount);
-
-                    itemCount = mangasEsLa.size();
-                    mangasEsLa.clear();
-                    adapterMangasEsLa.notifyItemRangeRemoved(0, itemCount);
-
-                    binding.ptBr.setVisibility(View.GONE);
-                    binding.en.setVisibility(View.GONE);
-                    binding.esLa.setVisibility(View.GONE);
-
-                    String search = binding.searchField.getText().toString();
-                    if (search.isEmpty()) {
-                        return false;
-                    }
-                    binding.progress.setVisibility(View.VISIBLE);
-                    isSearching = true;
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            for (String s : languages) {
-                                mangaDexExtension = new MangaDexExtension(s, "");
-                                mangaDexExtension.search(search, mainHandler);
-                            }
-                            isSearching = false;
-                        }
-                    }.start();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        search();
 
 
         return binding.getRoot();
@@ -374,91 +246,48 @@ public class ExtensionsShowFragment extends Fragment {
             @Override
             public void onAnimationUpdate(@NonNull ValueAnimator animation) {
                 LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) binding.titleContainer.getLayoutParams();
-                lp.topMargin = (int) ((int) animation.getAnimatedValue() * getActivity().getResources().getDisplayMetrics().density);
+                lp.topMargin = (int) ((int) animation.getAnimatedValue() * requireActivity().getResources().getDisplayMetrics().density);
                 binding.titleContainer.setLayoutParams(lp);
             }
         });
         animator.start();
     }
 
-    private void search() {
-
-
-        String search = binding.searchField.getText().toString();
-        if (search.isEmpty()) {
-            return;
-        }
-        if (isSearching) {
-            return;
-        }
-        int itemCount = 0;
-
-        itemCount = mangasPtBr.size();
-        mangasPtBr.clear();
-        adapterMangasPtBr.notifyItemRangeRemoved(0, itemCount);
-
-        itemCount = mangasEn.size();
-        mangasEn.clear();
-        adapterMangasEn.notifyItemRangeRemoved(0, itemCount);
-
-        itemCount = mangasEsLa.size();
-        mangasEsLa.clear();
-        adapterMangasEsLa.notifyItemRangeRemoved(0, itemCount);
-
-        binding.ptBr.setVisibility(View.GONE);
-        binding.en.setVisibility(View.GONE);
-        binding.esLa.setVisibility(View.GONE);
-
-        binding.progress.setVisibility(View.VISIBLE);
-        isSearching = true;
-        new Thread() {
-            @Override
-            public void run() {
-                for (String s : languages) {
-                    mangaDexExtension = new MangaDexExtension(s, "");
-                    mangaDexExtension.search(search, mainHandler);
-                }
-                isSearching = false;
-            }
-        }.start();
-
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
-        binding.recyclerPtBr.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-            @Override
-            public void onViewAttachedToWindow(@NonNull View v) {
-
-            }
-
-            @Override
-            public void onViewDetachedFromWindow(@NonNull View v) {
-                Glide.with(v.getContext()).clearOnStop();
-            }
-        });
-        binding.recyclerEn.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-            @Override
-            public void onViewAttachedToWindow(@NonNull View v) {
-
-            }
-
-            @Override
-            public void onViewDetachedFromWindow(@NonNull View v) {
-                Glide.with(v.getContext()).clearOnStop();
-            }
-        });
-        binding.recyclerEsLa.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-            @Override
-            public void onViewAttachedToWindow(@NonNull View v) {
-
-            }
-
-            @Override
-            public void onViewDetachedFromWindow(@NonNull View v) {
-                Glide.with(v.getContext()).clearOnStop();
-            }
-        });
+//        binding.recyclerPtBr.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+//            @Override
+//            public void onViewAttachedToWindow(@NonNull View v) {
+//
+//            }
+//
+//            @Override
+//            public void onViewDetachedFromWindow(@NonNull View v) {
+//                Glide.with(v.getContext()).clearOnStop();
+//            }
+//        });
+//        binding.recyclerEn.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+//            @Override
+//            public void onViewAttachedToWindow(@NonNull View v) {
+//
+//            }
+//
+//            @Override
+//            public void onViewDetachedFromWindow(@NonNull View v) {
+//                Glide.with(v.getContext()).clearOnStop();
+//            }
+//        });
+//        binding.recyclerEsLa.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+//            @Override
+//            public void onViewAttachedToWindow(@NonNull View v) {
+//
+//            }
+//
+//            @Override
+//            public void onViewDetachedFromWindow(@NonNull View v) {
+//                Glide.with(v.getContext()).clearOnStop();
+//            }
+//        });
     }
 }

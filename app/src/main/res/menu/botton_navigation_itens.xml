@@ -22,8 +22,9 @@
     <item android:title="@string/hist_rico"
         android:id="@+id/historyManga"
         android:icon="@drawable/history"
-        android:iconTint="?attr/primaryColor"
-        />
+        android:iconTint="?attr/primaryColor">
+
+        </item>
 
     <item android:title="@string/configura_es"
         android:id="@+id/settings"

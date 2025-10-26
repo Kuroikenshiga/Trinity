@@ -7,6 +7,8 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -180,9 +182,11 @@ public class ChapterManga implements Parcelable {
     }
 
     public String returnTimeReleased(){
-        long dateReleased = Instant.parse(this.dateRFC3339).getEpochSecond();
+        long dateReleased = OffsetDateTime.parse(this.dateRFC3339, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toEpochSecond();
         long currentDate = Instant.now().getEpochSecond();
         long time = currentDate - dateReleased;
+
+        time *= time < 0?-1:1;
 
         long year = time / 31556926;
         time = year > 0?time % 31556926:time;

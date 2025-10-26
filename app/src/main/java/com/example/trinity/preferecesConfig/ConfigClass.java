@@ -92,5 +92,10 @@ public final class ConfigClass {
                     break;
             }
         }
+
+    }
+    public static class ConfigTagMangakakalot{
+        private ConfigTagMangakakalot(){}
+        public final static String KEY_NAME_EXTENSION_TAG = "MANGAKAKALOT_TAGS_ID";
     }
 }

@@ -55,16 +55,21 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
+import com.example.trinity.Interfaces.Extensions;
+import com.example.trinity.Interfaces.PageStorage;
 import com.example.trinity.adapters.AdapterNavigation;
 import com.example.trinity.databinding.ActivityMainBinding;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.fragments.LibraryFragment;
 import com.example.trinity.fragments.ReaderMangaFragment;
 import com.example.trinity.fragments.UpdatesFragment;
 import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
+import com.example.trinity.services.AniListApiRequester;
 import com.example.trinity.services.ClearLogosTemp;
 import com.example.trinity.services.ClearPageCacheWork;
+import com.example.trinity.services.MangakakalotTagsSaver;
 import com.example.trinity.storageAcess.ChapterStorageManager;
 import com.example.trinity.storageAcess.LogoMangaStorage;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
@@ -75,6 +80,8 @@ import com.example.trinity.viewModel.MangaDataViewModel;
 import com.example.trinity.viewModel.MangasFromDataBaseViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 
@@ -116,11 +123,9 @@ public class MainActivity extends AppCompatActivity {
             new Thread() {
                 @Override
                 public void run() {
-
                     MangaDexExtension mangaDexExtension = new MangaDexExtension("", "");
                     ArrayList<TagManga> tags = mangaDexExtension.getTags();
                     model.saveTag(tags);
-//                    System.out.println("Fazendo requisição das tags");
                 }
             }.start();
         }
@@ -136,20 +141,11 @@ public class MainActivity extends AppCompatActivity {
                 LogoMangaStorageTemp storageTemp = new LogoMangaStorageTemp(MainActivity.this);
                 storageTemp.createIfNotExistsFolderTempForLogos();
 
-                boolean migrated = sharedPreferences.getBoolean(ConfigClass.ConfigLogoMigration.ALREDY_MIGRATED, false);
-//                model.removeImagesFromDataBase();
-                //Retirar a migração após a atualização
-                if (!migrated) {
-                    System.out.println("Entrou");
-                    model.doUpdateLogos();
-                }
+                MangakakalotTagsSaver mangakakalotTagsSaver = new MangakakalotTagsSaver(MainActivity.this);
+                mangakakalotTagsSaver.saveIfNotExistsTags();
 
-                dataSet = model.selectAllMangas(false);
+                dataSet = model.selectAllMangas(false,21,0);
 
-
-//                for(Manga manga:dataSet){
-////                    model.updateLocalStorageOfLogos(manga.getId(),manga.getLanguage(),storage.insertLogoManga(manga.getImage(), manga.getId()));
-//                }
                 MainActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -158,15 +154,6 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         }.start();
-
-
-//        binding.menuNavi.post(()->{
-//            animatorHide = ValueAnimator.ofInt(0,binding.menuNavi.getMeasuredHeight()*-1);
-//            animatorHide.setDuration(500);
-//
-//            animatorShow = ValueAnimator.ofInt(binding.menuNavi.getMeasuredHeight()*-1,0);
-//            animatorShow.setDuration(500);
-//        });
 
         MangaDataViewModel mangaDataViewModel = new ViewModelProvider(this).get(MangaDataViewModel.class);
         initNavigation();
@@ -280,8 +267,8 @@ public class MainActivity extends AppCompatActivity {
                 ChapterStorageManager chapterStorageManager = new ChapterStorageManager(MainActivity.this);
                 chapterStorageManager.createIfNotExistsFolderForChapters();
 
-                PageCacheManager pageCacheManager = PageCacheManager.getInstance(MainActivity.this);
-                pageCacheManager.createIfNotExistCacheChapterFolder();
+                PageStorage pageCacheManager = PageCacheManager.getInstance(MainActivity.this);
+                pageCacheManager.createIfNotExistPageFolder();
 
             }
         }.start();

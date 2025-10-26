@@ -24,6 +24,7 @@ import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.trinity.MainActivity;
@@ -45,7 +46,9 @@ import com.example.trinity.viewModel.MangasFromDataBaseViewModel;
 import com.example.trinity.viewModel.UpdatesViewModel;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -76,11 +79,9 @@ public class UpdatesFragment extends Fragment {
     private OneTimeWorkRequest workRequest;
     private WorkManager workManager;
     private boolean isUpdatingLibray = false;
-    private View v;
     private MangaDataViewModel mangaDataViewModel;
     private NotificationManager notificationManager;
     private final static String CHANNEL_NOTIFICATION_ID = "CHANNEL1";
-    private int librarySize = 0;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private long lastUpadate;
@@ -121,27 +122,27 @@ public class UpdatesFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         this.updatesViewModel = new ViewModelProvider(requireActivity()).get(UpdatesViewModel.class);
-        MainActivity mainActivity = (MainActivity) getActivity();
+        MainActivity mainActivity = (MainActivity) requireActivity();
         mainActivity.checkPermission();
-        sharedPreferences = getActivity().getSharedPreferences(ConfigClass.TAG_PREFERENCE, Context.MODE_PRIVATE);
+        sharedPreferences = requireActivity().getSharedPreferences(ConfigClass.TAG_PREFERENCE, Context.MODE_PRIVATE);
 
         editor = sharedPreferences.edit();
         this.lastUpadate = sharedPreferences.getLong(ConfigClass.ConfigUpdates.LAST_UPDATE, 0);
 
-        mangaDataViewModel = new ViewModelProvider(getActivity()).get(MangaDataViewModel.class);
+        mangaDataViewModel = new ViewModelProvider(requireActivity()).get(MangaDataViewModel.class);
         binding = FragmentUpdatesBinding.inflate(inflater, container, false);
         if (lastUpadate != 0) {
             binding.lastUpdate.setText("Última atualização feita " + this.returnLastUpdateTime(lastUpadate, Instant.now().getEpochSecond()));
             binding.lastUpdate.setVisibility(View.VISIBLE);
         }
-        workManager = WorkManager.getInstance(getActivity());
+        workManager = WorkManager.getInstance(requireContext());
 
 //        mangaDexExtension = new MangaDexExtension(imageQuality);
         chapContainer = binding.updatesConteiner;
         this.updateds = updatesViewModel.getChapterUpdatedLiveData().getValue();
-        this.adapter = new AdapterUpdates(getActivity(), updateds, this);
+        this.adapter = new AdapterUpdates(requireContext(), updateds, this);
         adapter.setMangaDataViewModel(mangaDataViewModel);
         adapter.setFragment(this);
         this.chapContainer.setAdapter(adapter);
@@ -150,48 +151,30 @@ public class UpdatesFragment extends Fragment {
         this.updatesViewModel.getItem().observe(getViewLifecycleOwner(), new Observer<ChapterUpdated>() {
             @Override
             public void onChanged(ChapterUpdated chapterUpdated) {
-//                System.out.println("changed");
-//                adapter.notifyItemInserted(updatesViewModel.getChapterUpdatedLiveData().getValue().size());
                 adapter.notifyDataSetChanged();
             }
         });
+
 
         this.chapContainer.setLayoutManager(new LinearLayoutManager(myActivity));
         loadUpdates();
         realodUpdates();
 
-//        binding.updatesConteiner.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//                System.out.println(dy);
-//                if (dy > 0) {
-//                    ((MainActivity) requireActivity()).hideBottomNavigation();
-//                }
-//                if (dy < 0) {
-//                    ((MainActivity)requireActivity()).showBottomNavigation();
-//                }
-//            }
-//
-//        });
-
         return binding.getRoot();
     }
 
     private void loadUpdates() {
-        if (updatesViewModel.getChapterUpdatedLiveData().getValue().isEmpty() || wasReloaded) {
+        if (Objects.requireNonNull(updatesViewModel.getChapterUpdatedLiveData().getValue()).isEmpty() || wasReloaded) {
             wasReloaded = false;
             if (!isUpdatingLibray) {
                 new Thread() {
                     @Override
                     public void run() {
                         model = Model.getInstance(myActivity);
-//                        System.out.println("Load chamado");
+
                         ArrayList<ChapterManga> chapterUpdatedArrayList = model.loadUpdates();
                         if (getActivity() == null) return;
-                        MangasFromDataBaseViewModel mangasFromDataBaseViewModel = new ViewModelProvider(requireActivity()).get(MangasFromDataBaseViewModel.class);
-                        ArrayList<Manga> mangas = mangasFromDataBaseViewModel.getMangas().isEmpty() ? model.selectAllMangas(false) : mangasFromDataBaseViewModel.getMangas();
-                        librarySize = mangas.size();
+
                         updatesViewModel.getChapterUpdatedLiveData().getValue().clear();
 
                         if (getActivity() != null) {
@@ -202,22 +185,32 @@ public class UpdatesFragment extends Fragment {
                                 }
                             });
                         }
-
-                        for (ChapterManga chapU : chapterUpdatedArrayList) {
-                            for (Manga m : mangas) {
-                                if (m.uuid == chapU.mangaUUID) {
-                                    ChapterUpdated capU = new ChapterUpdated(m, chapU);
-                                    if (getActivity() != null) {
-                                        getActivity().runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                updatesViewModel.addChapterInLiveData(capU);
-                                            }
-                                        });
+                        ArrayList<ChapterUpdated> chapterUpdateds = new ArrayList<>();
+                        int offSet = 0;
+                        ArrayList<Manga> mangas = model.selectAllMangas(false, 10, offSet);
+                        while (!mangas.isEmpty()) {
+                            for (ChapterManga chapU : chapterUpdatedArrayList) {
+                                for (Manga m : mangas) {
+                                    if (m.uuid == chapU.mangaUUID) {
+                                        ChapterUpdated capU = new ChapterUpdated(m, chapU);
+                                        if (getActivity() != null) {
+                                            chapterUpdateds.add(capU);
+                                        }
                                     }
                                 }
                             }
+                            offSet += 10;
+                            mangas = model.selectAllMangas(false, 10, offSet);
                         }
+                        chapterUpdateds.sort(Comparator.comparingLong((ChapterUpdated c) -> OffsetDateTime.parse(c.getChapterManga().getDateRFC3339()).toEpochSecond()).reversed());
+                        requireActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                for (ChapterUpdated c : chapterUpdateds) {
+                                    updatesViewModel.addChapterInLiveData(c);
+                                }
+                            }
+                        });
                         isUpdatingLibray = false;
                     }
                 }.start();
@@ -230,6 +223,11 @@ public class UpdatesFragment extends Fragment {
             @Override
             public void onRefresh() {
 
+                if (workRequest != null){
+                    binding.swipe.setRefreshing(false);
+                    return;
+                }
+
                 lastUpadate = Instant.now().getEpochSecond();
                 editor.putLong(ConfigClass.ConfigUpdates.LAST_UPDATE, lastUpadate);
                 editor.apply();
@@ -241,21 +239,22 @@ public class UpdatesFragment extends Fragment {
 
                     workManager.enqueueUniqueWork(UpdateWork.WORK_NAME, ExistingWorkPolicy.KEEP, workRequest);
 //                    workManager.enqueue(workRequest);
-                    workManager.getWorkInfoByIdLiveData(workRequest.getId()).observe(UpdatesFragment.this.getActivity(), new Observer<WorkInfo>() {
+
+                    workManager.getWorkInfoByIdLiveData(workRequest.getId()).observe(UpdatesFragment.this.requireActivity(), new Observer<WorkInfo>() {
                         @Override
                         public void onChanged(WorkInfo workInfo) {
 
-                            if(workInfo == null)return;
+                            if (workInfo == null) return;
 
                             if (workInfo.getState().isFinished()) {
                                 isUpdatingLibray = false;
                                 binding.swipe.setRefreshing(false);
-                                isUpdatingLibray = false;
                                 workManager.cancelAllWork();
                                 wasReloaded = true;
                                 loadUpdates();
                                 binding.lastUpdate.setText("Última atualização feita " + returnLastUpdateTime(lastUpadate, Instant.now().getEpochSecond()));
 
+                                workRequest = null;
                             }
 
                         }
@@ -278,6 +277,9 @@ public class UpdatesFragment extends Fragment {
             mainActivity.isInFirstDestination = false;
             mainActivity.isInReadFragment = false;
         }
+        wasReloaded = Model.getInstance(requireContext()).mangaUpdateTableHasChanges();
+        loadUpdates();
+
     }
 
     public void turnOffRefresh() {

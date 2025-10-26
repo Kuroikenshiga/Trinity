@@ -1,29 +1,22 @@
 package com.example.trinity.extensions;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ColorSpace;
-import android.graphics.ImageDecoder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-
-import com.example.trinity.Interfeces.Extensions;
-import com.example.trinity.MangaShowContentActivity;
+import com.example.trinity.Interfaces.Extensions;
+import com.example.trinity.Interfaces.PageStorage;
 import com.example.trinity.R;
-import com.example.trinity.fragments.InfoMangaFragment;
 import com.example.trinity.services.broadcasts.CancelCurrentWorkReceiver;
+import com.example.trinity.storageAcess.ChapterPageBuffer;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 import com.example.trinity.storageAcess.PageCacheManager;
-import com.example.trinity.utilities.ImageEditor;
 import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.Manga;
 import com.example.trinity.valueObject.TagManga;
@@ -32,12 +25,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -46,6 +35,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -69,11 +59,13 @@ public class MangaDexExtension implements Extensions {
     public static final String LOW_QUALITY = "dataSaver";
     private String imageQuality;
     private Context context;
-
+    private String status = "ongoing";
+    public static final String KEY_NAME_EXTENSION_TAG = "MANGADEX_TAGS_ID";
 
     public MangaDexExtension(String language, String imageQuality) {
         this.language = language;
         this.imageQuality = LOW_QUALITY;
+
     }
 
 //    public MangaDexExtension(String imageQuality) {
@@ -159,7 +151,8 @@ public class MangaDexExtension implements Extensions {
     }
 
     public void updates(Handler h) {
-        String url = "https://api.mangadex.org/manga?availableTranslatedLanguage[]=" + this.language + "&includes[]=cover_art&includes[]=author&limit=" + this.limit + "&offset=" + this.updateOffSet + tags;
+        String url = "https://api.mangadex.org/manga?availableTranslatedLanguage[]=" + this.language + "&includes[]=cover_art&status[]="+status+"&includes[]=author&limit=" + this.limit + "&offset=" + this.updateOffSet + tags;
+        System.out.println(url);
         URL urlApi = null;
 //        System.out.println("Url = " + url);
         if (this.UpdateTotalItens > 0 && this.updateOffSet > this.UpdateTotalItens) {
@@ -352,15 +345,22 @@ public class MangaDexExtension implements Extensions {
             } catch (MalformedURLException ex) {
                 ex.printStackTrace();
             }
-            OkHttpClient http = new OkHttpClient.Builder().build();
+            OkHttpClient http = new OkHttpClient.Builder().callTimeout(8,TimeUnit.SECONDS).build();
 
             Request req = new Request.Builder().url(url).build();
+
 
             try (Response response = http.newCall(req).execute();) {
 
                 Gson gson = new Gson();
 
-                String s = response.body().string();
+                String s = "";
+                if(response.isSuccessful()){
+                    s = response.body().string();
+                }
+                else{
+                    return new ArrayList<>();
+                }
                 JsonElement json = gson.fromJson(s, JsonElement.class);
                 total = json.getAsJsonObject().get("total").getAsInt();
                 if(total == 0){
@@ -415,6 +415,7 @@ public class MangaDexExtension implements Extensions {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
+
 //            System.out.println(chapterMangas);
             offSet += 300;
 
@@ -449,13 +450,6 @@ public class MangaDexExtension implements Extensions {
 
             Gson gson = new Gson();
             JsonElement json = gson.fromJson(response.body().string(), JsonElement.class);
-//            int total = json.getAsJsonObject().get("total").getAsInt();
-//            if(total == 0){
-//                if(context != null){
-//                    Toast.makeText(context,"Ocorreu um erro ao carregar as páginas do capítuo", Toast.LENGTH_LONG).show();
-//                }
-//                return;
-//            }
 
             JsonArray imgs;
             try {
@@ -470,19 +464,20 @@ public class MangaDexExtension implements Extensions {
             Bundle bundle = new Bundle();
             bundle.putInt("numPages", imgs.size());
             msg.setData(bundle);
-            h.sendMessage(msg);
+            if(h != null )h.sendMessage(msg);
             loadChapterPages(h, imgs, json.getAsJsonObject().get("chapter").getAsJsonObject().get("hash").getAsString(), json.getAsJsonObject().get("baseUrl").getAsString());
         } catch (IOException ex) {
             ex.printStackTrace();
             Message msg = Message.obtain();
             msg.what = Extensions.RESPONSE_ERROR;
-            h.sendMessage(msg);
+            if(h != null )h.sendMessage(msg);
         }
 
     }
 
     public void loadChapterPages(Handler h, JsonArray array, String hash, String urlBase) {
         int index = 1;
+        PageStorage pageStorage = h != null?PageCacheManager.getInstance(context):ChapterPageBuffer.getInstance(context);
         for (JsonElement s : array) {
             URL urlImage = null;
             try {
@@ -490,9 +485,7 @@ public class MangaDexExtension implements Extensions {
                 for (int i = 1; i < s.toString().length() - 1; i++) {
                     sFinal += s.toString().charAt(i);
                 }
-//                System.out.println(imageQuality);
                 urlImage = new URL(urlBase + (imageQuality.equals(HIGH_QUALITY) ? "/data/" : "/data-saver/") + hash + "/" + sFinal);
-//                System.out.println(urlBase + (imageQuality.equals(HIGH_QUALITY) ? "/data/" : "/data-saver/") + hash + "/" + sFinal);
             } catch (MalformedURLException ex) {
                 ex.printStackTrace();
             }
@@ -503,11 +496,12 @@ public class MangaDexExtension implements Extensions {
 
             try (Response response = http.newCall(req).execute();) {
 //                System.out.println("tipo do arquivo"+response.body().contentType().toString());
-                if (response.body().contentType().toString().contains("image/")) {
+                assert response.body() != null;
+                if (Objects.requireNonNull(response.body().contentType()).toString().contains("image/")) {
                     InputStream ImageInput = response.body().byteStream();
 
                     if (index == 1) {
-                        PageCacheManager.getInstance(context).clearCache();
+                        pageStorage.clearFolder();
                     }
 
                     BitmapFactory.Options op = new BitmapFactory.Options();
@@ -515,10 +509,11 @@ public class MangaDexExtension implements Extensions {
                     Bitmap bit = BitmapFactory.decodeStream(ImageInput, null, op);
 
 
-                    String url = PageCacheManager.getInstance(context).insertBitmapInCache(bit, Integer.toString(index) + ".jpeg");
+                    String url = pageStorage.insertBitmapInFolder(bit, Integer.toString(index) + ".jpeg");
                     if (bit != null) {
                         bit.recycle();
                     }
+
 
                     Message msg = Message.obtain();
                     msg.what = Extensions.RESPONSE_PAGE;
@@ -526,7 +521,7 @@ public class MangaDexExtension implements Extensions {
                     bundle.putString("img", url);
                     bundle.putInt("index", index);
                     msg.setData(bundle);
-                    h.sendMessage(msg);
+                    if(h != null)h.sendMessage(msg);
                 }
             } catch (ConnectException ex) {
                 Message msg = Message.obtain();
@@ -536,7 +531,7 @@ public class MangaDexExtension implements Extensions {
                 bundle.putParcelable("img", bit);
                 bundle.putInt("index", index);
                 msg.setData(bundle);
-                h.sendMessage(msg);
+                if(h != null)h.sendMessage(msg);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -656,7 +651,7 @@ public class MangaDexExtension implements Extensions {
         h.sendMessage(msg);
 
     }
-
+    @Deprecated
     public Bitmap[] loadChapterPages(String[] array, String hash, String urlBase) {
         int index = 1;
         Bitmap[] bitmaps = new Bitmap[array.length + 2];
@@ -708,10 +703,8 @@ public class MangaDexExtension implements Extensions {
 
     public void addTags(ArrayList<String> tags) {
         this.tags = "";
-        if (tags.isEmpty()) {
-            this.updateOffSet = 0;
-            return;
-        }
+        this.updateOffSet = 0;
+
         StringBuilder stringBuilder = new StringBuilder();
         for (String s : tags) {
             stringBuilder.append("&").append("includedTags[]=").append(s);
@@ -788,6 +781,14 @@ public class MangaDexExtension implements Extensions {
             exception.printStackTrace();
             return 0;
         }
+    }
+    public void switchStatus(String status){
+        this.status = status;
+        this.updateOffSet = 0;
+    }
+    @Override
+    public ArrayList<ChapterManga> viewChapters(String mangaId, Handler h) {
+        return null;
     }
 }
 

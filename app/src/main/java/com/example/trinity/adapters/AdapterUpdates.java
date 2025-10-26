@@ -10,30 +10,25 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.MainActivity;
 
 import com.example.trinity.MangaShowContentActivity;
-import com.example.trinity.R;
 import com.example.trinity.databinding.DateGroupItemLayoutBinding;
 import com.example.trinity.databinding.UpdatesItemLayoutBinding;
-import com.example.trinity.extensions.MangaDexExtension;
-import com.example.trinity.extensions.MangakakalotExtension;
-import com.example.trinity.fragments.UpdatesFragment;
 import com.example.trinity.models.Model;
 import com.example.trinity.storageAcess.LogoMangaStorage;
-import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.ChapterUpdated;
 import com.example.trinity.viewModel.MangaDataViewModel;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -68,6 +63,7 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return chapterUpdateds.get(position) == null ? VIEW_TYPE_DATE_GROUP : VIEW_TYPE_UPDATE_ITEM;
     }
 
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 //        System.out.println(chapterUpdateds.get(holder.getAdapterPosition()));
@@ -80,15 +76,12 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         .into(((UpdatesViewHolder)holder).binding.mangaCover);
 
                 ((UpdatesViewHolder)holder).binding.chapterTitle.setText(new StringBuilder().append(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getChapter()).append(" CH. ").append(this.chapterUpdateds.get(holder.getAdapterPosition()).getManga().getTitulo()).toString());
-                
+
                 Calendar mangaDate = Calendar.getInstance();
-                Instant instant = Instant.parse(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getDateRFC3339());
+                Instant instant = OffsetDateTime.parse(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().getDateRFC3339(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant();
                 Date dateDate = new Date(instant.toEpochMilli());
                 mangaDate.setTime(dateDate);
                 this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().setData(mangaDate);
-
-
-                ((UpdatesViewHolder)holder).binding.chapDate.setText(new StringBuilder().append("Há ").append(chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().returnTimeReleased()).toString());
 
                 TypedValue typedValue = new TypedValue();
                 context.getTheme().resolveAttribute(this.chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().isAlredyRead()?com.google.android.material.R.attr.colorPrimary:com.google.android.material.R.attr.colorTertiary,typedValue,true);
@@ -103,7 +96,9 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     @Override
                     public void onClick(View v) {
                         Model model = Model.getInstance(context);
-
+                        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary,typedValue,true);
+                        chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().setAlredyRead(true);
+                        ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(typedValue.data);
                         new Thread() {
                             @Override
                             public void run() {
@@ -125,16 +120,10 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                 });
 
                                 if (model.chapterRead(chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga())) {
+
                                     MainActivity mangaShowContentActivity = (MainActivity) context;
                                     chapterUpdateds.get(holder.getAdapterPosition()).getChapterManga().setAlredyRead(true);
-                                    mangaShowContentActivity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            TypedValue value = new TypedValue();
-                                            context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary,value,false);
-                                            ((UpdatesViewHolder)holder).binding.chapterTitle.setTextColor(value.data);
-                                        }
-                                    });
+
                                 }
                             }
                         }.start();
@@ -146,7 +135,12 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
         else{
             if(position != chapterUpdateds.size() - 1){
-                ((DateGroupViewHolder)holder).binding.dateGroup.setText(chapterUpdateds.get(position+1).getChapterManga().returnTimeReleased());
+                ((DateGroupViewHolder)holder).
+                        binding.dateGroup.
+                        setText(chapterUpdateds.
+                                get(position+1).
+                                getChapterManga().
+                                returnTimeReleased());
             }
         }
     }
@@ -190,6 +184,9 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.fragment = fragment;
     }
 
+    public void setChapterUpdateds(ArrayList<ChapterUpdated> chapterUpdateds) {
+        this.chapterUpdateds = chapterUpdateds;
+    }
 //    public static void bubbleSortDataSet(ArrayList<ChapterUpdated>chapterUpdateds){
 //
 //        boolean dataSetChanged = true;

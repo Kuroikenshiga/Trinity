@@ -1,6 +1,7 @@
 package com.example.trinity.extensions;
 
 import static java.util.Calendar.HOUR_OF_DAY;
+import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
 
@@ -14,10 +15,13 @@ import android.os.Message;
 
 import androidx.fragment.app.Fragment;
 
-import com.example.trinity.Interfeces.Extensions;
+import com.example.trinity.Interfaces.Extensions;
+import com.example.trinity.Interfaces.PageStorage;
 import com.example.trinity.R;
+import com.example.trinity.storageAcess.ChapterPageBuffer;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 import com.example.trinity.storageAcess.PageCacheManager;
+import com.example.trinity.utilities.ImageValidate;
 import com.example.trinity.valueObject.ChapterManga;
 import com.example.trinity.valueObject.Manga;
 import com.example.trinity.valueObject.TagManga;
@@ -38,9 +42,9 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -60,14 +64,21 @@ public class MangakakalotExtension implements Extensions {
     private OnMangaLoaded onMangaLoaded;
     public static String CHAPMANGANATO = "chapmanganato";
     public static String MANGAKAKALOT = "mangakakalot";
-
+    private String status = "latest-manga";
+    private enum EndPointType {
+        defaultContent,
+        genresContent
+    }
+    private EndPointType endPointType = EndPointType.defaultContent;
+    private String genre = "";
     public MangakakalotExtension(OnMangaLoaded onMangaLoaded) {
         this.onMangaLoaded = onMangaLoaded;
     }
 
     @Override
     public void updates(Handler h) {
-        String url = "https://mangakakalot.com/manga_list?type=latest&category=all&state=all&page=" + currentPage;
+        String url = endPointType == EndPointType.defaultContent?"https://www.mangakakalot.gg/manga-list/"+status+"?page=" + currentPage:"https://www.mangakakalot.gg/genre/"+genre+"?page="+currentPage;
+        System.out.println(url);
         URL urlApi;
         try {
             urlApi = new URL(url);
@@ -103,7 +114,7 @@ public class MangakakalotExtension implements Extensions {
                         e.printStackTrace();
                     }
 
-                    Request request = new Request.Builder().url(urlApiImage).build();
+                    Request request = new Request.Builder().url(urlApiImage).header("Referer","https://www.mangakakalot.gg/").build();
                     try (Response response = httpClient.newCall(request).execute()) {
                         if (response.isSuccessful() && response.body().contentType().toString().contains("image/")) {
                             InputStream inputStream = response.body().byteStream();
@@ -134,25 +145,37 @@ public class MangakakalotExtension implements Extensions {
 
     @Override
     public void search(String title, Handler h) {
-        String baseUrlSearch = "https://mangakakalot.com/search/story/";
-        System.out.println(baseUrlSearch+title.replace(" ","_"));
+        String baseUrlSearch = "https://www.mangakakalot.gg/manga/";
+        title = title.replace("~","");
+        title = title.replace(",","");
+        title = title.replace(".","");
+        title = title.replace("?","");
+        title = title.replace("!","");
+//        System.out.println(baseUrlSearch+title.replace(" ","-"));
         URL urlApi;
         try {
-            urlApi = new URL(baseUrlSearch+title.replace(" ","_"));
+            urlApi = new URL(baseUrlSearch+title.replace(" ","-").toLowerCase());
+//            System.out.println("URL: "+baseUrlSearch+title.replace(" ","-"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return;
         }
         OkHttpClient httpClient = new OkHttpClient.Builder().build();
-        Request request = new Request.Builder().url(urlApi).build();
+        Request request = new Request.Builder().header("Referer", "https://www.mangakakalot.gg/").url(urlApi).build();
         try (Response response = httpClient.newCall(request).execute()) {
 //            System.out.println(response.body().string());
             ArrayList<Manga> mangas = this.responseSearchToValueObject(response.body().string());
+
             if(mangas.isEmpty()){
                 Message msg = Message.obtain();
                 msg.what = RESPONSE_EMPTY;
                 h.sendMessage(msg);
+                return;
             }
+            mangas.get(0).setId(baseUrlSearch+title.replace(" ","-"));
+            mangas.get(0).setId(mangas.get(0).getId().split("//")[1]);
+            mangas.get(0).setId(mangas.get(0).getId().replace("/", "@"));
+
             loadMangaLogo(h, mangas);
             currentPage++;
         } catch (IOException e) {
@@ -160,8 +183,9 @@ public class MangakakalotExtension implements Extensions {
         }
     }
 
-    public String loadMangaInfo(String idManga) {
+    public String loadMangaInfo(String idManga,Handler h) {
         String url = idManga.contains(BASE_URL) ? idManga : (BASE_URL + idManga);
+        url = url.toLowerCase();
         URL urlApi = null;
         String html = "";
         try {
@@ -169,10 +193,28 @@ public class MangakakalotExtension implements Extensions {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        OkHttpClient client = new OkHttpClient.Builder().build();
-        Request request = new Request.Builder().url(urlApi).build();
+
+        OkHttpClient client = new OkHttpClient.Builder().callTimeout(8,TimeUnit.SECONDS).build();
+        Request request = new Request.Builder().header("Referer", "https://www.mangakakalot.gg/").url(urlApi).build();
         try (Response response = client.newCall(request).execute()) {
-            html = response.body().string();
+            if(response.isSuccessful()){
+                html = response.body().string();
+            }
+            else{
+                return "";
+            }
+
+            if(html.contains("ddg-l10n-title")){
+                if(h == null)return "";
+                Message msg = Message.obtain();
+                Bundle bundle = new Bundle();
+                bundle.putString("url",url);
+                msg.setData(bundle);
+                msg.what = RESPONSE_REQUEST_BYPASS;
+                h.sendMessage(msg);
+                return "";
+            }
+
 
             Manga manga = idManga.contains(CHAPMANGANATO) ? responseToFullValueObjectChapManganato(html) : responseToFullValueObjectMangakakalot(html);
 
@@ -189,7 +231,7 @@ public class MangakakalotExtension implements Extensions {
     public ArrayList<Manga> responseToValueObject(String response) {
         ArrayList<Manga> mangas = new ArrayList<>();
         Document document = Jsoup.parse(response);
-        Elements mangaElements = document.getElementsByClass("list-truyen-item-wrap");
+        Elements mangaElements = document.getElementsByClass("list-comic-item-wrap");
         for (Element element : mangaElements) {
             Manga manga = new Manga();
             manga.setCoverName(element.getElementsByTag("img").first().attr("src"));
@@ -208,16 +250,14 @@ public class MangakakalotExtension implements Extensions {
     public ArrayList<Manga> responseSearchToValueObject(String response) {
         ArrayList<Manga> mangas = new ArrayList<>();
         Document document = Jsoup.parse(response);
-        Elements mangaElements = document.getElementsByClass("story_item");
+        Elements mangaElements = document.getElementsByClass("manga-info-top");
         if(mangaElements == null) return new ArrayList<>();
         for (Element element : mangaElements) {
             Manga manga = new Manga();
-            manga.setCoverName(element.getElementsByTag("img").first().attr("src"));
-            manga.setTitulo(element.getElementsByTag("h3").first().getElementsByTag("a").first().text());
-            manga.setId(element.getElementsByTag("a").first().attr("href"));
+            manga.setCoverName(Objects.requireNonNull(element.getElementsByTag("img").first()).attr("src"));
+            manga.setTitulo(Objects.requireNonNull(element.getElementsByTag("h1").first()).text());
+//            manga.setId(Objects.requireNonNull(element.getElementsByTag("a").first()).attr("href"));
 
-            manga.setId(manga.getId().split("//")[1]);
-            manga.setId(manga.getId().replace("/", "@"));
             manga.setLanguage(language);
             mangas.add(manga);
 
@@ -227,6 +267,7 @@ public class MangakakalotExtension implements Extensions {
     private Manga responseToFullValueObjectChapManganato(String html) {
         Document document = Jsoup.parse(html);
         Element table = document.getElementsByClass("variations-tableInfo").first();
+        if(table == null)return new Manga();
         Elements values = table.getElementsByClass("table-value");
         ArrayList<String> authors = new ArrayList<>();
         String status = "";
@@ -278,7 +319,7 @@ public class MangakakalotExtension implements Extensions {
                     }
                     break;
                 case 2:
-                    status = values.get(i).text().split(" : ")[1];
+                    status = values.get(i).text().split(" : ").length > 1?values.get(i).text().split(" : ")[1]:"";
                     break;
                 case 6:
                     Elements tags = values.get(i).getElementsByTag("a");
@@ -289,7 +330,7 @@ public class MangakakalotExtension implements Extensions {
             }
         }
 
-        description = document.getElementById("noidungm").text();
+        description = document.getElementById("contentBox").text();
 
         manga.setAutor(authors);
         if (!status.equals("Ongoing")) {
@@ -301,9 +342,10 @@ public class MangakakalotExtension implements Extensions {
     }
 
     public ArrayList<ChapterManga> viewChaptersChapmanganato(String html) {
-        if (html == null) {
-            return new ArrayList<>();
-        }
+
+        if(html == null)return new ArrayList<>();
+        if(html.isEmpty())return new ArrayList<>();
+
         Document document = Jsoup.parse(html);
         if(document.getElementsByClass("panel-story-chapter-list").isEmpty())return new ArrayList<>();
         if(document.getElementsByClass("panel-story-chapter-list").first().getElementsByClass("row-content-chapter").isEmpty())return new ArrayList<>();
@@ -323,11 +365,14 @@ public class MangakakalotExtension implements Extensions {
     }
 
     public ArrayList<ChapterManga> viewChaptersMangakakalot(String html) {
+        if(html == null)return new ArrayList<>();
+        if(html.isEmpty())return new ArrayList<>();
+
         Document document = Jsoup.parse(html);
         if(document.getElementsByClass("chapter-list").isEmpty())return new ArrayList<>();
         if(document.getElementsByClass("chapter-list").first().getElementsByClass("row").isEmpty())return new ArrayList<>();
         Element div = document.getElementsByClass("chapter-list").first();
-        Elements divsChap = div.getElementsByTag("div");
+        Elements divsChap = div.getElementsByClass("row");
         ArrayList<ChapterManga> chapterMangas = new ArrayList<>();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
@@ -335,7 +380,7 @@ public class MangakakalotExtension implements Extensions {
             String id = item.getElementsByTag("span").first().getElementsByTag("a").first().attr("href").split("//")[1];
             String title = item.getElementsByTag("span").first().getElementsByTag("a").first().attr("title");
 
-            double chapter = Double.parseDouble(item.getElementsByTag("a").attr("href").split("chapter_")[1]);
+            double chapter = Double.parseDouble(item.getElementsByTag("a").text().split(" ")[1]);
 //            String RFC3339 = simpleDateFormat.format(dateFormaterMangakakalot(item.getElementsByTag("span").last().text()).getTime());
 //            System.out.println(dateFormaterMangakakalot(item.getElementsByTag("span").last().text()).getTime());
             String RFC3339 = dateTimeFormatter.format(dateFormaterMangakakalot(item.getElementsByTag("span").last().attr("title")).getTime().toInstant().atZone(ZoneId.systemDefault()));
@@ -344,12 +389,11 @@ public class MangakakalotExtension implements Extensions {
         return chapterMangas;
     }
 
-    @Override
-    public ArrayList<ChapterManga> viewChapters(String mangaId) {
+    public ArrayList<ChapterManga> viewChapters(String mangaId,Handler h) {
         mangaId = mangaId.replace("@", "/");
         String urlApi = mangaId.contains(BASE_URL) ? mangaId : (BASE_URL + mangaId);
-        String html = loadMangaInfo(mangaId);
-
+        String html = loadMangaInfo(mangaId,h);
+        if(html.isEmpty())return new ArrayList<>();
         return mangaId.contains(MANGAKAKALOT) ? viewChaptersMangakakalot(html) : viewChaptersChapmanganato(html);
     }
 
@@ -373,21 +417,27 @@ public class MangakakalotExtension implements Extensions {
             Bundle bundle = new Bundle();
             bundle.putInt("numPages", imgs.size());
             msg.setData(bundle);
-            h.sendMessage(msg);
+            if(h != null)h.sendMessage(msg);
             loadChapterPages(h, imgs);
         } catch (IOException e) {
             e.printStackTrace();
             Message msg = Message.obtain();
             msg.what = RESPONSE_ERROR;
-            h.sendMessage(msg);
+            if(h != null)h.sendMessage(msg);
         }
 
 
     }
 
     private void loadChapterPages(Handler h, Elements imgs) {
-        int index = 1;
-        for (Element img : imgs) {
+        int index = 1,countImageControl = 1;
+
+        boolean continueVerification = false,canVerify = false;
+
+        Bitmap bit = null, bitAux = null;
+        PageStorage pageStorage = h != null?PageCacheManager.getInstance(context): ChapterPageBuffer.getInstance(context);
+        for (int i = 0;i < imgs.size();i++) {
+            Element img = imgs.get(i);
             URL url = null;
             try {
                 url = new URL(img.attr("src"));
@@ -396,44 +446,86 @@ public class MangakakalotExtension implements Extensions {
                 e.printStackTrace();
             }
             OkHttpClient client = new OkHttpClient.Builder().build();
-            Request request = new Request.Builder().url(url).header("Referer", img.attr("src").contains("manganato") ? "https://chapmanganato.to" : "https://mangakakalot.com").build();
+            Request request = new Request.Builder().url(url).header("Referer", "https://www.mangakakalot.gg/").build();
             try (Response response = client.newCall(request).execute()) {
 
-                if (response.body().contentType().toString().contains("image/")) {
+                assert response.body() != null;
+                if (Objects.requireNonNull(response.body().contentType()).toString().contains("image/")) {
                     InputStream imageInput = response.body().byteStream();
-                    if (index == 1) {
-                        PageCacheManager.getInstance(context).clearCache();
+                    if (i == 0) {
+                        pageStorage.clearFolder();
                     }
                     BitmapFactory.Options op = new BitmapFactory.Options();
                     op.inJustDecodeBounds = false;
-                    Bitmap bit = BitmapFactory.decodeStream(imageInput, null, op);
-
-                    String urlImage = PageCacheManager.getInstance(context).insertBitmapInCache(bit, String.valueOf(index) + ".jpeg");
-
-                    if (bit != null) {
-                        bit.recycle();
+                    if(bit == null){
+                        bit = BitmapFactory.decodeStream(imageInput, null, op);
                     }
-                    Message msg = Message.obtain();
-                    msg.what = RESPONSE_PAGE;
-                    Bundle bundle = new Bundle();
-                    bundle.putString("img", urlImage);
-                    bundle.putInt("index", index);
-                    msg.setData(bundle);
-                    h.sendMessage(msg);
+                    else{
+                        bitAux = BitmapFactory.decodeStream(imageInput, null, op);
+                    }
+
+                    if(countImageControl > 1 || continueVerification){
+
+//                        assert bitAux != null;
+                        if(bitAux != null && ImageValidate.isSubImage(bit,bitAux)){
+                            String urlImage = pageStorage.insertBitmapInFolder(ImageValidate.BitmapConcat(bit,bitAux), String.valueOf(index) + ".jpeg");
+
+                            Message msg = Message.obtain();
+                            msg.what = RESPONSE_PAGE;
+                            Bundle bundle = new Bundle();
+                            bundle.putString("img", urlImage);
+                            bundle.putInt("index", index);
+                            msg.setData(bundle);
+                            if(h != null)h.sendMessage(msg);
+                            index++;
+
+                            msg = Message.obtain();
+                            msg.what = RESPONSE_COUNT_ITENS_DECREASED_BY_ONE;
+                            if(h != null)h.sendMessage(msg);
+
+                            continueVerification = false;
+                            bit = null;
+                            bitAux = null;
+                            countImageControl = 0;
+
+                        }
+                        else {
+                            String urlImage = pageStorage.insertBitmapInFolder(bit, String.valueOf(index) + ".jpeg");
+
+                            Message msg = Message.obtain();
+                            msg.what = RESPONSE_PAGE;
+                            Bundle bundle = new Bundle();
+                            bundle.putString("img", urlImage);
+                            bundle.putInt("index", index);
+                            msg.setData(bundle);
+                            if(h != null)h.sendMessage(msg);
+                            index++;
+
+                            bit = bitAux;
+                            bitAux = null;
+                            continueVerification = true;
+
+                        }
+
+
+                    }
                 }
             } catch (ConnectException ex) {
                 Message msg = Message.obtain();
                 msg.what = RESPONSE_PAGE;
                 Bundle bundle = new Bundle();
-                Bitmap bit = BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.time_out);
-                bundle.putParcelable("img", bit);
+                Bitmap bitError = BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.time_out);
+                bundle.putParcelable("img", bitError);
                 bundle.putInt("index", index);
                 msg.setData(bundle);
                 h.sendMessage(msg);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            index++;
+            if(countImageControl > 1){
+                countImageControl = 0;
+            }
+            countImageControl++;
         }
     }
 
@@ -595,6 +687,9 @@ public class MangakakalotExtension implements Extensions {
                 }
             }
         }
+
+        calendar.set(HOUR_OF_DAY,calendar.get(HOUR_OF_DAY)+9);
+        calendar.set(MINUTE,calendar.get(MINUTE));
         return calendar;
     }
 
@@ -606,5 +701,29 @@ public class MangakakalotExtension implements Extensions {
     }
     public void setLanguage(String language){
 
+    }
+    public void switchStatus(String status){
+        this.status = status;
+        this.currentPage = 1;
+        this.endPointType = EndPointType.defaultContent;
+    }
+    public void switchToGenresEndPoint(String genre){
+        this.endPointType = EndPointType.genresContent;
+        this.genre = genre;
+        currentPage = 1;
+    }
+    public void switchToDefaultContentEndPoint(){
+        this.endPointType = EndPointType.defaultContent;
+        this.genre = "";
+        currentPage = 1;
+    }
+
+    @Override
+    public ArrayList<ChapterManga> viewChapters(String mangaId) {
+        mangaId = mangaId.replace("@", "/");
+        String urlApi = mangaId.contains(BASE_URL) ? mangaId : (BASE_URL + mangaId);
+        String html = loadMangaInfo(mangaId,null);
+
+        return mangaId.contains(MANGAKAKALOT) ? viewChaptersMangakakalot(html) : viewChaptersChapmanganato(html);
     }
 }

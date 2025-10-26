@@ -11,7 +11,7 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = 1
-        versionName = "2.4.1"
+        versionName = "2.5.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -42,12 +42,13 @@ android {
 
 dependencies {
 
-    implementation(files("C:\\Users\\TeresaShySmile\\Downloads\\subsampling-scale-image-view-3.10.0.aar"))
-    implementation(files("C:/Users/TeresaShySmile/Downloads/jsoup-1.18.1.jar"))
+    implementation(files("C:\\Users\\TeresaShySmile\\AndroidStudioProjects\\Trinity\\dependences\\subsampling-scale-image-view-3.10.0.aar"))
+    implementation(files("C:\\Users\\TeresaShySmile\\AndroidStudioProjects\\Trinity\\dependences\\jsoup-1.20.1.jar"))
     val work_version = "2.9.0"
     // (Java only)
     implementation("androidx.work:work-runtime:$work_version")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.ramotion.fluidslider:fluid-slider:0.3.1")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -60,5 +61,6 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
+    implementation ("androidx.webkit:webkit:1.9.0")
 //    implementation ("com.github.chrisbanes:PhotoView:2.3.0")
 }
