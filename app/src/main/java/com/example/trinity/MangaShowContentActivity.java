@@ -42,7 +42,7 @@ public class MangaShowContentActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         extension = getIntent().getStringExtra("Extension");
-
+        System.out.println(extension);
         this.manga = getIntent().getParcelableExtra("Item");
 
         mangaDataViewModel = new ViewModelProvider(this).get(MangaDataViewModel.class);

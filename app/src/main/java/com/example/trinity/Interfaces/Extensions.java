@@ -18,7 +18,7 @@ public interface Extensions {
     //Lista de extensões suportadas
     public final String MANGADEX = "MangaDex";
     public final String MANGAKAKALOT = "MangakaKalot";
-
+    public final String MANGALIVRE = "Mangalivre";
     public final int RESPONSE_ITEM = 1;
     public final int RESPONSE_PAGE = 2;
     public final int RESPONSE_ERROR = 3;

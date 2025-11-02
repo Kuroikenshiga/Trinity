@@ -275,15 +275,17 @@ public class Model extends SQLiteOpenHelper {
             }
         }
         for (TagManga t : m.getTags()) {
+            if(t.getId() == null || t.getId().isEmpty())continue;
             if (tagDB.insertRelationTagManga(mangaIDStringFormat, Long.toString(tagDB.returnTagId(t.getId()))) == -1) {
                 if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
 
                 return false;
             }
         }
-        for (ChapterManga chap : m.getChapters()) {
-            if (chaptersDB.returnChapterId(chap.getId()) == -1) {
-                if (chaptersDB.insertChapter(chap, mangaIDStringFormat) == -1) {
+
+        for (int i = 0; i < m.getChapters().size();i++) {
+            if (chaptersDB.returnChapterId(m.getChapters().get(i).getId()) == -1) {
+                if (chaptersDB.insertChapter(m.getChapters().get(i), mangaIDStringFormat) == -1) {
                     if (this.sqLiteDatabase.inTransaction()) this.sqLiteDatabase.endTransaction();
 
                     return false;

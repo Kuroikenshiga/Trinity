@@ -117,7 +117,7 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
                         else{
                             intent.putExtra("Item", (Serializable) mangaArrayList.get(holder.getAdapterPosition()));
                         }
-                        intent.putExtra("Extension",mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangakakalot")||mangaArrayList.get(holder.getAdapterPosition()).getId().contains("chapmanganato")? Extensions.MANGAKAKALOT:Extensions.MANGADEX);
+                        intent.putExtra("Extension",mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangakakalot")?Extensions.MANGAKAKALOT:mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangalivre")?Extensions.MANGALIVRE:Extensions.MANGADEX);
                         intent.putExtra("Language", language == null ? mangaArrayList.get(holder.getAdapterPosition()).getLanguage() : language);
                         intent.putExtra("FromMain", c instanceof MainActivity);
                         c.startActivity(intent);
@@ -169,7 +169,7 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
                     }else{
                         intent.putExtra("Item", (Serializable) mangaArrayList.get(holder.getAdapterPosition()));
                     }
-                    intent.putExtra("Extension",mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangakakalot")||mangaArrayList.get(holder.getAdapterPosition()).getId().contains("chapmanganato")? Extensions.MANGAKAKALOT:Extensions.MANGADEX);
+                    intent.putExtra("Extension",mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangakakalot")?Extensions.MANGAKAKALOT:mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangalivre")?Extensions.MANGALIVRE:Extensions.MANGADEX);
                     intent.putExtra("Language", language == null ? mangaArrayList.get(holder.getAdapterPosition()).getLanguage() : language);
                     intent.putExtra("FromMain", c instanceof MainActivity);
                     c.startActivity(intent);

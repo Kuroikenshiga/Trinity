@@ -2,6 +2,9 @@ package com.example.trinity.fragments;
 
 import android.animation.ValueAnimator;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Shader;
 import android.os.Bundle;
 
 import androidx.activity.OnBackPressedCallback;
@@ -205,8 +208,27 @@ public class ExtensionsShowFragment extends Fragment {
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(requireActivity(), callback);
 
+        binding.img5.post(()->{
+            Shader shader = new LinearGradient(
+                    0,
+                    0,
+                    binding.img5.getPaint().measureText(binding.img5.getText().toString()),
+                    binding.img5.getTextSize(),
+                    Color.parseColor("#0cff8a"),
+                    Color.parseColor("#00b8ff"),
+                    Shader.TileMode.CLAMP);
+            binding.img5.getPaint().setShader(shader);
+            binding.img5.invalidate();
+        });
+        binding.mangaLivreClickable.setOnClickListener((v)->{
+            Intent i = new Intent(getActivity(), ExtensionShowContentActivity.class);
+//            i.putExtra("Logo", R.drawable.mangakakalot_svg);
 
-
+            i.putExtra("Titulo", "MANGALIVRE - pt br");
+            i.putExtra("Language", languages[0]);
+            i.putExtra("Extension",Extensions.MANGALIVRE);
+            startActivity(i);
+        });
 
 
         return binding.getRoot();
@@ -223,71 +245,9 @@ public class ExtensionsShowFragment extends Fragment {
         }
     }
 
-    private void showSearch() {
-        ValueAnimator animator = ValueAnimator.ofInt(0, -60);
-        animator.setDuration(500);
-
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) binding.titleContainer.getLayoutParams();
-                lp.topMargin = (int) ((int) animation.getAnimatedValue() * getActivity().getResources().getDisplayMetrics().density);
-                binding.titleContainer.setLayoutParams(lp);
-            }
-        });
-        animator.start();
-    }
-
-    private void hideSearch() {
-        ValueAnimator animator = ValueAnimator.ofInt(-60, 0);
-        animator.setDuration(500);
-
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) binding.titleContainer.getLayoutParams();
-                lp.topMargin = (int) ((int) animation.getAnimatedValue() * requireActivity().getResources().getDisplayMetrics().density);
-                binding.titleContainer.setLayoutParams(lp);
-            }
-        });
-        animator.start();
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        binding.recyclerPtBr.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-//            @Override
-//            public void onViewAttachedToWindow(@NonNull View v) {
-//
-//            }
-//
-//            @Override
-//            public void onViewDetachedFromWindow(@NonNull View v) {
-//                Glide.with(v.getContext()).clearOnStop();
-//            }
-//        });
-//        binding.recyclerEn.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-//            @Override
-//            public void onViewAttachedToWindow(@NonNull View v) {
-//
-//            }
-//
-//            @Override
-//            public void onViewDetachedFromWindow(@NonNull View v) {
-//                Glide.with(v.getContext()).clearOnStop();
-//            }
-//        });
-//        binding.recyclerEsLa.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-//            @Override
-//            public void onViewAttachedToWindow(@NonNull View v) {
-//
-//            }
-//
-//            @Override
-//            public void onViewDetachedFromWindow(@NonNull View v) {
-//                Glide.with(v.getContext()).clearOnStop();
-//            }
-//        });
+
     }
 }
