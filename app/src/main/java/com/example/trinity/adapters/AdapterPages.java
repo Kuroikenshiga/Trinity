@@ -106,7 +106,10 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
         
-        
+        holder.binding.getRoot().setOnClickListener((v)->{
+            ReaderMangaFragment f = (ReaderMangaFragment) fragment;
+            f.controllShowBottomTopBar();
+        });
         
         if (holder.getAdapterPosition() == this.resourcesImage.size() - 1 - numPagesIgnored) {
 

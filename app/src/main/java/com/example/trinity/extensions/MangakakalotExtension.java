@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
+@Deprecated
 public class MangakakalotExtension implements Extensions {
     private Context context;
     private Fragment fragment;
@@ -215,6 +215,7 @@ public class MangakakalotExtension implements Extensions {
                 return "";
             }
 
+
             Manga manga = idManga.contains(CHAPMANGANATO) ? responseToFullValueObjectChapManganato(html) : responseToFullValueObjectMangakakalot(html);
 
             if (this.onMangaLoaded != null) {
@@ -337,6 +338,7 @@ public class MangakakalotExtension implements Extensions {
         }
         manga.setDescricao(description);
         manga.setTags(tagMangas);
+
         return manga;
     }
 

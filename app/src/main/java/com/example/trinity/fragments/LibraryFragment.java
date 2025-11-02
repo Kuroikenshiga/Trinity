@@ -340,6 +340,7 @@ public class LibraryFragment extends Fragment {
                 return;
             }
 
+
             requireActivity().runOnUiThread(() -> {
                 int indexStart = mangasFromDataBaseViewModel.getMangas().size();
                 mangasFromDataBaseViewModel.getMangas().addAll(dataSet);
@@ -347,6 +348,7 @@ public class LibraryFragment extends Fragment {
                 supressManyLoad = false;
                 OFF_SET += LIMIT;
                 isLoadingLibrary = false;
+
             });
         }).start();
 
@@ -371,6 +373,7 @@ public class LibraryFragment extends Fragment {
                 OFF_SET = 21;
                 binding.backToTop.setVisibility(View.GONE);
                 isLoadingLibrary = false;
+
             });
         }).start();
     }

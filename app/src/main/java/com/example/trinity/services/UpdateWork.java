@@ -20,6 +20,7 @@ import androidx.work.WorkerParameters;
 import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.R;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangaLivreExtension;
 import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.models.Model;
 
@@ -99,7 +100,7 @@ public class UpdateWork extends Worker {
                     this.notify(notification);
                     return Result.failure();
                 }
-                Extensions mangaDexExtension = m.getId().contains("mangakakalot")||m.getId().contains("manganato")?new MangakakalotExtension(null):new MangaDexExtension("",imageQuality);
+                Extensions mangaDexExtension = m.getId().contains("mangakakalot")||m.getId().contains("manganato")?new MangakakalotExtension(null):m.getId().contains("mangalivre")?new MangaLivreExtension(null) :new MangaDexExtension("",imageQuality);
                 mangaDexExtension.setLanguage(m.getLanguage());
                 ArrayList<ChapterManga> chaptersFromApi = mangaDexExtension.viewChapters(m.getId());
                 double lastChapter = mangaDexExtension.getMangaStatus(m.getId());

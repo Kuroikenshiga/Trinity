@@ -51,6 +51,7 @@ import com.example.trinity.adapters.AdapterChapters;
 import com.example.trinity.adapters.AdapterGenres;
 import com.example.trinity.databinding.FragmentInfoMangaBinding;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangaLivreExtension;
 import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
@@ -365,6 +366,7 @@ public class InfoMangaFragment extends Fragment {
         MangakakalotExtension.OnMangaLoaded onMangaLoaded = new MangakakalotExtension.OnMangaLoaded() {
             @Override
             public void onMangaLoaded(Manga manga) {
+                System.out.println("asasdadsadasdadsa");
                 InfoMangaFragment.this.manga.setDescricao(manga.getDescricao());
                 InfoMangaFragment.this.manga.setAutor(manga.getAutor());
                 InfoMangaFragment.this.manga.setTags(manga.getTags());
@@ -389,7 +391,7 @@ public class InfoMangaFragment extends Fragment {
                 });
             }
         };
-        mangaDexExtension = requireActivity() instanceof MangaShowContentActivity ? (((MangaShowContentActivity) requireActivity()).getExtension().equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) : new MangakakalotExtension(onMangaLoaded)) : new MangaDexExtension(this.language, imageQuality);
+        mangaDexExtension = requireActivity() instanceof MangaShowContentActivity ? (((MangaShowContentActivity) requireActivity()).getExtension().equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) :((MangaShowContentActivity) requireActivity()).getExtension().equals(Extensions.MANGALIVRE)? new MangaLivreExtension(onMangaLoaded) : new MangakakalotExtension(onMangaLoaded)) : new MangaDexExtension(this.language, imageQuality);
 
         favorite();
         loadChapters();

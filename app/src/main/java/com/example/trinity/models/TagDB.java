@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.example.trinity.valueObject.TagManga;
 
+import java.time.Instant;
 import java.util.ArrayList;
 
 public class TagDB extends DBAcess{
@@ -19,7 +20,7 @@ public class TagDB extends DBAcess{
     public long returnTagId(String id) {
         long returnValue = -1;
 
-        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM tags WHERE id_tag = ?", new String[]{id})) {
+        try (Cursor row = this.sqLiteDatabase.rawQuery("SELECT * FROM tags WHERE id_tag = ?", new String[]{id == null?"":id})) {
 
             if (row.getCount() < 1) {
 
@@ -37,7 +38,7 @@ public class TagDB extends DBAcess{
         long returnValue = 0;
 
         try (SQLiteStatement stmt = this.sqLiteDatabase.compileStatement("INSERT INTO tags(id_tag,name_tag) VALUES(?,?)");) {
-            stmt.bindString(1, t.getId());
+            stmt.bindString(1, t.getId() == null?Long.toString(Instant.now().toEpochMilli()):t.getId());
             stmt.bindString(2, t.getNome());
             returnValue = stmt.executeInsert();
         } catch (SQLiteException ex) {

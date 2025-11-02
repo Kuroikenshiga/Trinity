@@ -225,8 +225,13 @@ public class MangaDexExtension implements Extensions {
                     } catch (NullPointerException expt) {
                         try {
                             mangaTitulo = jsonItem.getAsJsonObject().get("attributes").getAsJsonObject().get("title").getAsJsonObject().get("ja").getAsString();
-                        } catch (NullPointerException exception) {
-                            exception.printStackTrace();
+                        } catch (NullPointerException except) {
+                            try{
+                                mangaTitulo = jsonItem.getAsJsonObject().get("attributes").getAsJsonObject().get("title").getAsJsonObject().get("ko-ro").getAsString();
+                            }
+                            catch (NullPointerException exception){
+                                exception.printStackTrace();
+                            }
                         }
                     }
                 }

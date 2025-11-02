@@ -27,6 +27,8 @@ public class ChapterManga implements Parcelable {
     private int currentPage;
     private boolean isDownloaded;
     public boolean isSelected = false;
+
+    public ChapterManga(){}
     public ChapterManga(String id, String title, String chapter, String scan, Calendar data) {
         this.id = id;
         this.title = title;

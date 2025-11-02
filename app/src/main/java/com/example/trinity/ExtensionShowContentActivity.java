@@ -6,6 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -44,6 +47,7 @@ import com.example.trinity.databinding.ActivityExtensionShowContentBinding;
 import com.example.trinity.dialogs.TagShowMangaDexDialog;
 import com.example.trinity.dialogs.TagShowMangakakalotDialog;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangaLivreExtension;
 import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
@@ -163,8 +167,27 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
         String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY, "dataSaver");
         setContentView(binding.getRoot());
 
-        binding.logoHeader.setImageDrawable(AppCompatResources.getDrawable(this,getIntent().getIntExtra("Logo", 0)));
-        binding.textHeader.setText(getIntent().getStringExtra("Titulo"));
+        if(getIntent().getIntExtra("Logo", 0) == 0){
+            binding.logoHeader.setVisibility(View.GONE);
+            binding.textHeader.setText("MANGALIVRE");
+            binding.textHeader.post(()->{
+                Shader shader = new LinearGradient(
+                        0,
+                        0,
+                        binding.textHeader.getPaint().measureText(binding.textHeader.getText().toString()),
+                        binding.textHeader.getTextSize(),
+                        Color.parseColor("#0cff8a"),
+                        Color.parseColor("#00b8ff"),
+                        Shader.TileMode.CLAMP);
+                binding.textHeader.getPaint().setShader(shader);
+                binding.textHeader.invalidate();
+            });
+        }
+        else{
+            binding.logoHeader.setImageDrawable(AppCompatResources.getDrawable(this,getIntent().getIntExtra("Logo", 0)));
+            binding.textHeader.setText(getIntent().getStringExtra("Titulo"));
+        }
+
         this.language = getIntent().getStringExtra("Language");
 
         binding.backIcon.setOnClickListener(new View.OnClickListener() {
@@ -200,7 +223,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new GridLayoutManager(ExtensionShowContentActivity.this, 3));
         recyclerView.setHasFixedSize(false);
 
-        extension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) : new MangakakalotExtension(null);
+        extension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) :getIntent().getStringExtra("Extension").equals(Extensions.MANGALIVRE)? new MangaLivreExtension() : new MangakakalotExtension(null);
         new Thread() {
             @Override
             public void run() {

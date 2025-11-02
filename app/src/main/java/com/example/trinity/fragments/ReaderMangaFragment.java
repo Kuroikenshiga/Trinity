@@ -62,6 +62,7 @@ import com.example.trinity.databinding.FragmentReaderMangaBinding;
 import com.example.trinity.databinding.ReaderAlphaDialogLayoutBinding;
 import com.example.trinity.databinding.ReaderConfigDialogLoyoutBinding;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangaLivreExtension;
 import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.models.Model;
 import com.example.trinity.preferecesConfig.ConfigClass;
@@ -490,7 +491,7 @@ public class ReaderMangaFragment extends Fragment {
 
             }
         });
-        mangaDexExtension = mangaDataViewModel.getManga().getId().contains(MangakakalotExtension.MANGAKAKALOT) || mangaDataViewModel.getManga().getId().contains(MangakakalotExtension.CHAPMANGANATO) ? new MangakakalotExtension(null) : new MangaDexExtension(mangaLanguage, imageQuality);
+        mangaDexExtension = mangaDataViewModel.getManga().getId().contains(MangakakalotExtension.MANGAKAKALOT) ? new MangakakalotExtension(null) : mangaDataViewModel.getManga().getId().contains("mangalivre")?new MangaLivreExtension(null) : new MangaDexExtension(mangaLanguage, imageQuality);
         mangaDexExtension.setContext(getActivity());
         workThread = new Thread() {
             @Override
