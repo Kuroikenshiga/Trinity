@@ -18,6 +18,7 @@ import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.adapters.AdapterMangas;
 import com.example.trinity.databinding.ActivitySearchResultBinding;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangaLivreExtension;
 import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.preferecesConfig.ConfigClass;
 import com.example.trinity.valueObject.Manga;
@@ -47,8 +48,8 @@ public class SearchResultActivity extends AppCompatActivity {
         this.binding.searchField.setText(getIntent().getStringExtra("SearchField"));
         SharedPreferences sharedPreferences = getSharedPreferences(ConfigClass.TAG_PREFERENCE,MODE_PRIVATE);
         String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY,"dataSaver");
-
-        mangaDexExtension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX)?new MangaDexExtension(language,imageQuality):new MangakakalotExtension(null);
+        System.out.println("-------------"+getIntent().getStringExtra("Extension"));
+        mangaDexExtension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX)?new MangaDexExtension(language,imageQuality):getIntent().getStringExtra("Extension").equals(Extensions.MANGALIVRE)?new MangaLivreExtension(null) :new MangakakalotExtension(null);
         final ArrayList<Manga>[] mangaListedModelsAll = new ArrayList[]{new ArrayList()};
         AdapterMangas adapter = new AdapterMangas(SearchResultActivity.this, mangaListedModelsAll[0],this.language);
         adapter.setShowLanguageIcon(true);
@@ -97,28 +98,6 @@ public class SearchResultActivity extends AppCompatActivity {
             }
         };
         workerThread.start();
-//        binding.search.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if(workerThread != null && workerThread.isAlive()){
-//                    workerThread.interrupt();
-//                }
-//                mangaDexExtension = new MangaDexExtension(language,imageQuality);
-//                mangaListedModelsAll[0].clear();
-//                adapter.notifyDataSetChanged();
-//                binding.progressTop.setVisibility(View.VISIBLE);
-//                workerThread = new Thread(){
-//                    @Override
-//                    public void run(){
-//                        mangaDexExtension.search(binding.searchField.getText().toString(),mainHandler);
-//                    }
-//                };
-//                workerThread.start();
-//                binding.progressTop.setVisibility(View.VISIBLE);
-//            }
-//        });
-
-
         binding.reciclerViewMangas.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -143,11 +122,7 @@ public class SearchResultActivity extends AppCompatActivity {
                 }
             }
         });
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//            return insets;
-//        });
+
         binding.searchAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -202,17 +177,7 @@ public class SearchResultActivity extends AppCompatActivity {
     @Override
     public void onDestroy(){
         super.onDestroy();
-//        binding.reciclerViewMangas.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-//            @Override
-//            public void onViewAttachedToWindow(@NonNull View v) {
-//
-//            }
-//
-//            @Override
-//            public void onViewDetachedFromWindow(@NonNull View v) {
-//                Glide.with(v.getContext()).clearOnStop();
-//            }
-//        });
+
         if(workerThread != null && workerThread.isAlive()){
             workerThread.interrupt();
             workerThread = null;

@@ -129,6 +129,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
         }).start();
 
         binding.releasesMangas.setOnClickListener((v)->{
+            if(extension instanceof MangaLivreExtension)return;
             if(supressManyLoad){
                 Toast.makeText(this,"Carregando obras",Toast.LENGTH_SHORT).show();
                 return;
@@ -137,6 +138,8 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                 ((MangaDexExtension)extension).switchStatus("ongoing");
                 ((MangaDexExtension)extension).addTags(new ArrayList<>());
             }
+
+
             else((MangakakalotExtension)extension).switchStatus("latest-manga");
 
             if (workerThread != null && workerThread.isAlive()) {
@@ -200,14 +203,14 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
         adapter = new AdapterMangas(ExtensionShowContentActivity.this, mangasFromDataBaseViewModel.getMangas(), this.language);
         adapter.setFromUpdates(true);
         startUphandler();
-
+        extension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) :getIntent().getStringExtra("Extension").equals(Extensions.MANGALIVRE)? new MangaLivreExtension() : new MangakakalotExtension(null);
         binding.searchAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ExtensionShowContentActivity.this, SearchResultActivity.class);
                 intent.putExtra("language", language);
                 intent.putExtra("SearchField", binding.searchField.getText().toString());
-                intent.putExtra("Extension", extension instanceof MangaDexExtension ? Extensions.MANGADEX : Extensions.MANGAKAKALOT);
+                intent.putExtra("Extension", extension instanceof MangaDexExtension ? Extensions.MANGADEX : extension instanceof MangaLivreExtension?Extensions.MANGALIVRE:Extensions.MANGAKAKALOT);
                 ExtensionShowContentActivity.this.startActivity(intent);
             }
         });
@@ -223,7 +226,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new GridLayoutManager(ExtensionShowContentActivity.this, 3));
         recyclerView.setHasFixedSize(false);
 
-        extension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) :getIntent().getStringExtra("Extension").equals(Extensions.MANGALIVRE)? new MangaLivreExtension() : new MangakakalotExtension(null);
+
         new Thread() {
             @Override
             public void run() {
@@ -371,6 +374,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                 ((MangaDexExtension)extension).switchStatus("completed");
                 ((MangaDexExtension)extension).addTags(new ArrayList<>());
             }
+            else if(extension instanceof MangaLivreExtension)((MangaLivreExtension)extension).switchStatus();
             else((MangakakalotExtension)extension).switchStatus("completed-manga");
 
             if (workerThread != null && workerThread.isAlive()) {
@@ -490,7 +494,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                     Intent intent = new Intent(ExtensionShowContentActivity.this, SearchResultActivity.class);
                     intent.putExtra("language", language);
                     intent.putExtra("SearchField", binding.searchField.getText().toString());
-                    intent.putExtra("Extension", extension instanceof MangaDexExtension ? Extensions.MANGADEX : Extensions.MANGAKAKALOT);
+                    intent.putExtra("Extension", extension instanceof MangaDexExtension ? Extensions.MANGADEX : extension instanceof MangaLivreExtension?Extensions.MANGALIVRE:Extensions.MANGAKAKALOT);
                     ExtensionShowContentActivity.this.startActivity(intent);
                 }
                 return true;

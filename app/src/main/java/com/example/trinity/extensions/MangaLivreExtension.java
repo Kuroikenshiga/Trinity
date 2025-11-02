@@ -50,6 +50,8 @@ public class MangaLivreExtension implements Extensions {
     private Context context;
     private MangakakalotExtension.OnMangaLoaded onMangaLoaded;
     private String BASE_URL = "https://";
+    private String BASE_URL_SEARCH = "https://mangalivre.blog/?s=";
+    private boolean switchStatus = false;
     public MangaLivreExtension(MangakakalotExtension.OnMangaLoaded onMangaLoaded) {
         this.onMangaLoaded = onMangaLoaded;
     }
@@ -58,7 +60,8 @@ public class MangaLivreExtension implements Extensions {
     }
     @Override
     public void updates(Handler h) {
-        String url = String.format("https://mangalivre.blog/manga/page/%d/",currentPage);
+        String url = String.format(!switchStatus?"https://mangalivre.blog/manga/page/%d/":"https://mangalivre.blog/manga/page/%d/?manga_status=completo&orderby=title",currentPage);
+//        System.out.println(url);
         URL urlApi;
         try {
             urlApi = new URL(url);
@@ -128,7 +131,34 @@ public class MangaLivreExtension implements Extensions {
 
     @Override
     public void search(String title, Handler h) {
+        title = title.replace(" ","+");
+        String url = BASE_URL_SEARCH+title;
+        System.out.println(url);
+        URL urlApi;
+        try {
+            urlApi = new URL(url);
+//            System.out.println("URL: "+baseUrlSearch+title.replace(" ","-"));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return;
+        }
+        OkHttpClient httpClient = new OkHttpClient.Builder().build();
+        Request request = new Request.Builder().header("Referer", "https://mangalivre.blog/").url(urlApi).build();
+        try (Response response = httpClient.newCall(request).execute()) {
+//            System.out.println(response.body().string());
+            ArrayList<Manga> mangas = this.responseToValueObject(response.body().string());
 
+            if(mangas.isEmpty()){
+                Message msg = Message.obtain();
+                msg.what = RESPONSE_EMPTY;
+                h.sendMessage(msg);
+                return;
+            }
+            loadMangaLogo(h, mangas);
+            currentPage++;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -143,8 +173,17 @@ public class MangaLivreExtension implements Extensions {
             manga.setId(manga.getId().split("//")[1]);
             manga.setId(manga.getId().replace("/", "@"));
 
-            manga.setCoverName(card.getElementsByClass("attachment-manga-cover").first().attr("src"));
-            System.out.println(manga.getCoverName());
+            try{
+                manga.setCoverName(card.getElementsByClass("attachment-manga-cover").first().attr("src"));
+            }catch (NullPointerException e){
+                try{
+                    manga.setCoverName(card.getElementsByClass("manga-cover-img").first().attr("src"));
+                }catch (NullPointerException ex){
+                    manga.setCoverName("");
+                }
+
+            }
+//            System.out.println(manga.getCoverName());
             manga.setTitulo(card.getElementsByClass("manga-card-title").text());
             mangas.add(manga);
         }
@@ -443,5 +482,10 @@ public class MangaLivreExtension implements Extensions {
             today.add(Calendar.SECOND,toDecrement);
         }
         return today;
+    }
+
+    public void switchStatus(){
+        this.switchStatus = !switchStatus;
+        this.currentPage = 1;
     }
 }
