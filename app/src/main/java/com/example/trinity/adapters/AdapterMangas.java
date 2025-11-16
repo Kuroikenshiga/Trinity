@@ -135,6 +135,7 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
 //                System.out.println("Fragment");
                 Glide.with(this.fragment).load(!isFromUpdates ? storage.getLogoFromStorage(mangaArrayList.get(holder.getAdapterPosition()).getId()) : storageTemp.getLogoFromTempStorage(mangaArrayList.get(holder.getAdapterPosition()).getId()))
 //                    .override((int) c.getResources().getDisplayMetrics().density * 120, (int) c.getResources().getDisplayMetrics().density * 170)
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                         .into(holder.binding.mangaLogo);
             }
 

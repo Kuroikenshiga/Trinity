@@ -129,7 +129,11 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
         }).start();
 
         binding.releasesMangas.setOnClickListener((v)->{
-            if(extension instanceof MangaLivreExtension)return;
+            if(extension instanceof MangaLivreExtension){
+                if(!((MangaLivreExtension) extension).getStatus())return;
+                ((MangaLivreExtension) extension).switchStatus();
+            }
+
             if(supressManyLoad){
                 Toast.makeText(this,"Carregando obras",Toast.LENGTH_SHORT).show();
                 return;
@@ -140,7 +144,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
             }
 
 
-            else((MangakakalotExtension)extension).switchStatus("latest-manga");
+            //else((MangakakalotExtension)extension).switchStatus("latest-manga");
 
             if (workerThread != null && workerThread.isAlive()) {
                 workerThread.interrupt();
