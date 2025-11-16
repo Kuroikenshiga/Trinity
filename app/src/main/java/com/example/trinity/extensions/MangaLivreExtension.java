@@ -60,7 +60,7 @@ public class MangaLivreExtension implements Extensions {
     }
     @Override
     public void updates(Handler h) {
-        String url = String.format(!switchStatus?"https://mangalivre.blog/manga/page/%d/":"https://mangalivre.blog/manga/page/%d/?manga_status=completo&orderby=title",currentPage);
+        String url = String.format(!switchStatus?"https://mangalivre.blog/page/%d/":"https://mangalivre.blog/manga/page/%d/?manga_status=completo&orderby=title",currentPage);
 //        System.out.println(url);
         URL urlApi;
         try {
@@ -166,6 +166,7 @@ public class MangaLivreExtension implements Extensions {
         ArrayList<Manga> mangas = new ArrayList<>();
         Document document = Jsoup.parse(response);
         Elements cards = document.getElementsByClass("manga-card");
+        if(cards.isEmpty())cards = document.getElementsByClass("manga-card-modern");
 
         for(Element card : cards){
             Manga manga = new Manga();
@@ -185,7 +186,10 @@ public class MangaLivreExtension implements Extensions {
             }
 //            System.out.println(manga.getCoverName());
             manga.setTitulo(card.getElementsByClass("manga-card-title").text());
+            if(manga.getTitulo().isEmpty())manga.setTitulo(card.getElementsByClass("manga-title-modern").text());
+            manga.setLanguage("pt-br");
             mangas.add(manga);
+
         }
 
         return mangas;
@@ -246,6 +250,7 @@ public class MangaLivreExtension implements Extensions {
         for(Element p:paragaphs){
             manga.setDescricao(manga.getDescricao()+p.text());
         }
+
         return manga;
     }
     @Override
@@ -488,4 +493,6 @@ public class MangaLivreExtension implements Extensions {
         this.switchStatus = !switchStatus;
         this.currentPage = 1;
     }
+    public boolean getStatus(){return this.switchStatus;}
+
 }
