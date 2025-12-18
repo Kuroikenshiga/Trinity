@@ -7,7 +7,43 @@
     android:background="?attr/colorSurface"
     android:backgroundTint="?attr/colorSurface"
     tools:context=".fragments.LibraryFragment">
+    <LinearLayout
+        android:id="@+id/emptyLibrary"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        >
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/newsstand_24dp_e8eaed_fill0_wght400_grad0_opsz24"
+            />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="15sp"
+                android:text="Parece que você ainda não adicionou nenhuma obra.\n Que tal começar agora?"/>
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/toExtensionsList"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/next_chapter_buttom_shape"
+            android:fontFamily="@font/roboto_black"
+            android:padding="10dp"
+            android:text="Adicionar obras"
+            android:layout_marginTop="15dp"
+            android:textColor="?attr/colorTertiary" />
 
+    </LinearLayout>
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"

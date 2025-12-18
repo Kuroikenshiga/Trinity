@@ -271,7 +271,7 @@ public class ReaderMangaFragment extends Fragment {
         binding.getRoot().bringChildToFront(binding.footer);
 
         idChap = mangaDataViewModel.getIdChap();
-        String mangaName = mangaDataViewModel.getManga().getTitulo();
+//        String mangaName = mangaDataViewModel.getManga().getTitulo();
         chapters = mangaDataViewModel.getManga().getChapters();
 
         chapters.sort(Comparator.comparingDouble(c -> Double.parseDouble(c.getChapter())));
@@ -322,159 +322,7 @@ public class ReaderMangaFragment extends Fragment {
                 }
             }
         });
-        mainHandler = new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(Message msg) {
-
-                if (msg.what == Extensions.RESPONSE_ITEM) {
-
-                    Glide.get(requireActivity()).clearMemory();
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            Glide.get(requireActivity()).clearDiskCache();
-                            Instant i = Instant.now();
-                            model = Model.getInstance(getActivity());
-                            model.addOrUpdateReadingHitory(new History(mangaDataViewModel.getManga(), i.getEpochSecond()));
-                        }
-                    }.start();
-
-                    isLoadingNewChapter = false;
-                    Instant now = Instant.now();
-                    initialTime = now.getEpochSecond();
-
-                    int numPages = msg.getData().getInt("numPages");
-
-                    imageURI = new ArrayList<>();
-                    for (int i = 0; i < numPages + 2; i++) imageURI.add(null);
-                    binding.numPages.setText(String.format("%d / %d",1,imageURI.size()-2));
-
-                    adapterPages = new AdapterPages(getActivity(), imageURI);
-                    adapterPages.setLogoManga(mangaDataViewModel.getManga().getId());
-
-                    adapterPages.setAlpha(alpha);
-
-                    adapterPagesCascade = new AdapterPagesCascade(requireContext(), imageURI, ReaderMangaFragment.this);
-                    adapterPagesCascade.setLogoManga(mangaDataViewModel.getManga().getId());
-                    adapterPages.setFragment(ReaderMangaFragment.this);
-                    adapterPages.setLogoManga(mangaDataViewModel.getManga().getId());
-                    if (chapterIndex == chapters.size() - 1) {
-                        adapterPages.setIslastChapter(true);
-                        adapterPagesCascade.setLastChapter(true);
-                        binding.nextChap.setVisibility(View.GONE);
-                    }
-                    if (chapterIndex == 0) {
-                        adapterPages.setIsFirstChapter(true);
-                        adapterPagesCascade.setFirstChapter(true);
-                        binding.prevChap.setVisibility(View.GONE);
-                    }
-                    if (chapterIndex > 0 && chapterIndex < chapters.size() - 1) {
-                        binding.nextChap.setVisibility(View.VISIBLE);
-                        binding.nextChap.setVisibility(View.VISIBLE);
-                    }
-                    binding.seekBar.setEndText(String.valueOf(imageURI.size()));
-                    binding.seekBar.setStartText("1");
-
-                    binding.pageContainer.setAdapter(adapterPages);
-
-                    binding.cascadeRead.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false) {
-                        @Override
-                        public boolean supportsPredictiveItemAnimations() {
-                            return false;
-                        }
-                    });
-                    binding.cascadeRead.setAdapter(adapterPagesCascade);
-                    binding.cascadeRead.setHasFixedSize(true);
-
-                    Timer t = new Timer();
-                    t.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-
-                            ReaderMangaFragment.this.getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    binding.pageContainer.setCurrentItem(startPage != 0 ? startPage : 0);
-                                    binding.cascadeRead.scrollToPosition(startPage != 0 ? startPage : 0);
-                                    binding.seekBar.setPosition(startPage == 0 ? 1 : startPage + 1);
-                                    if (startPage != 0) {
-                                        binding.numPages.setText((startPage + 1) + " / " + (imageURI.size()-2));
-                                    }
-                                    startPage = 0;
-                                }
-                            });
-                        }
-                    }, 500);
-
-                    adapterPages.notifyItemChanged(startPage);
-                    adapterPages.setReverseStartReadLogo(readDirection == 2);
-
-                    binding.pageContainer.setLayoutDirection(readDirection == 1 ? View.LAYOUT_DIRECTION_LTR : View.LAYOUT_DIRECTION_RTL);
-                    binding.numPages.bringToFront();
-                    binding.errorContainer.setVisibility(View.GONE);
-                    binding.numPages.setText("1 / " + (imageURI.size()-2));
-
-                    binding.seekBar.setBeginTrackingListener(() -> {
-                        binding.seekBar.setAlpha(1f);
-                        binding.nextChap.setAlpha(1f);
-                        binding.prevChap.setAlpha(1f);
-
-                        return Unit.INSTANCE;
-                    });
-                    binding.seekBar.setEndTrackingListener(() -> {
-                        ValueAnimator valueAnimator = ValueAnimator.ofFloat(1f, 0.1f);
-                        valueAnimator.setDuration(500);
-
-
-
-                        binding.pageContainer.setCurrentItem((int)(binding.seekBar.getPosition()*imageURI.size()), true);
-                        valueAnimator.addUpdateListener((@NonNull ValueAnimator animation)-> {
-                                binding.seekBar.setAlpha((float) animation.getAnimatedValue());
-                                binding.nextChap.setAlpha((float) animation.getAnimatedValue());
-                                binding.prevChap.setAlpha((float) animation.getAnimatedValue());
-                                System.out.println((float) animation.getAnimatedValue());
-                                if((float) animation.getAnimatedValue() - 0.1f < 0.05)binding.seekBar.setVisibility(View.GONE);
-                        });
-
-                        valueAnimator.start();
-
-                        return Unit.INSTANCE;
-                    });
-                    binding.seekBar.setPositionListener((aFloat) -> {
-                        binding.numPages.setText(String.format("%d / %d", binding.pageContainer.getCurrentItem(), imageURI.size()-2));
-                        binding.seekBar.setBubbleText(String.valueOf((int)(binding.seekBar.getPosition()*imageURI.size()) == 0?1:(int)(binding.seekBar.getPosition()*imageURI.size())));
-                        return Unit.INSTANCE;
-                    });
-
-                } else if (msg.what == Extensions.RESPONSE_PAGE) {
-                    vm.cancel();
-                    binding.animationContainer.setVisibility(View.GONE);
-                    if (animatorLeft != null) {
-                        if (animatorLeft.isRunning()) animatorLeft.cancel();
-                    }
-                    if (animatorRight != null) {
-                        if (animatorRight.isRunning()) animatorRight.cancel();
-                    }
-                    binding.errorContainer.setVisibility(View.GONE);
-                    String bit = msg.getData().getString("img");
-
-                    imageURI.set(msg.getData().getInt("index"), bit);
-
-                    adapterPagesCascade.notifyItemChanged(msg.getData().getInt("index"));
-
-                    adapterPages.notifyItemChanged(msg.getData().getInt("index"));
-                    binding.seekBar.bringToFront();
-
-                } else if (msg.what == Extensions.RESPONSE_ERROR) {
-                    binding.errorContainer.setVisibility(View.VISIBLE);
-                } else if (msg.what == Extensions.RESPONSE_COUNT_ITENS_DECREASED_BY_ONE) {
-                    adapterPagesCascade.ignorePage(adapterPages.ignorePage());
-                    binding.numPages.setText(String.format("%d / %d",readDirection == 3?pageCascadeItem:binding.pageContainer.getCurrentItem()+1, imageURI.size()-2));
-                    binding.seekBar.setEndText(String.valueOf(imageURI.size()));
-                }
-
-            }
-        };
+        startUpHandler();
 
         binding.goBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1082,7 +930,163 @@ public class ReaderMangaFragment extends Fragment {
         animatorRight.start();
 
     }
+    void startUpHandler(){
+        mainHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
 
+                if (msg.what == Extensions.RESPONSE_ITEM) {
+
+                    Glide.get(requireActivity()).clearMemory();
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            Glide.get(requireActivity()).clearDiskCache();
+                            Instant i = Instant.now();
+                            model = Model.getInstance(getActivity());
+                            model.addOrUpdateReadingHitory(new History(mangaDataViewModel.getManga(), i.getEpochSecond()));
+                        }
+                    }.start();
+
+                    isLoadingNewChapter = false;
+                    Instant now = Instant.now();
+                    initialTime = now.getEpochSecond();
+
+                    int numPages = msg.getData().getInt("numPages");
+
+                    imageURI = new ArrayList<>();
+                    for (int i = 0; i < numPages + 2; i++) imageURI.add(null);
+                    binding.numPages.setText(String.format("%d / %d",1,imageURI.size()-2));
+
+                    adapterPages = new AdapterPages(getActivity(), imageURI);
+                    adapterPages.setLogoManga(mangaDataViewModel.getManga().getId());
+
+                    adapterPages.setAlpha(alpha);
+
+                    adapterPagesCascade = new AdapterPagesCascade(requireContext(), imageURI, ReaderMangaFragment.this);
+                    adapterPagesCascade.setLogoManga(mangaDataViewModel.getManga().getId());
+                    adapterPages.setFragment(ReaderMangaFragment.this);
+                    adapterPages.setLogoManga(mangaDataViewModel.getManga().getId());
+                    if (chapterIndex == chapters.size() - 1) {
+                        adapterPages.setIslastChapter(true);
+                        adapterPagesCascade.setLastChapter(true);
+                        binding.nextChap.setVisibility(View.GONE);
+                    }
+                    if (chapterIndex == 0) {
+                        adapterPages.setIsFirstChapter(true);
+                        adapterPagesCascade.setFirstChapter(true);
+                        binding.prevChap.setVisibility(View.GONE);
+                    }
+                    if (chapterIndex > 0 && chapterIndex < chapters.size() - 1) {
+                        binding.nextChap.setVisibility(View.VISIBLE);
+                        binding.nextChap.setVisibility(View.VISIBLE);
+                    }
+                    adapterPages.previousCurrentAndNextChapter = new ChapterManga[]{chapterIndex-1 == -1?null:chapters.get(chapterIndex-1),chapters.get(chapterIndex),chapterIndex+1 == chapters.size()?null:chapters.get(chapterIndex+1)};
+
+                    binding.seekBar.setEndText(String.valueOf(imageURI.size()));
+                    binding.seekBar.setStartText("1");
+
+                    binding.pageContainer.setAdapter(adapterPages);
+
+                    binding.cascadeRead.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false) {
+                        @Override
+                        public boolean supportsPredictiveItemAnimations() {
+                            return false;
+                        }
+                    });
+                    binding.cascadeRead.setAdapter(adapterPagesCascade);
+                    binding.cascadeRead.setHasFixedSize(true);
+
+                    Timer t = new Timer();
+                    t.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+
+                            ReaderMangaFragment.this.getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    binding.pageContainer.setCurrentItem(startPage != 0 ? startPage : 0);
+                                    binding.cascadeRead.scrollToPosition(startPage != 0 ? startPage : 0);
+                                    binding.seekBar.setPosition(startPage == 0 ? 1 : startPage + 1);
+                                    if (startPage != 0) {
+                                        binding.numPages.setText((startPage + 1) + " / " + (imageURI.size()-2));
+                                    }
+                                    startPage = 0;
+                                }
+                            });
+                        }
+                    }, 500);
+
+                    adapterPages.notifyItemChanged(startPage);
+                    adapterPages.setReverseStartReadLogo(readDirection == 2);
+
+                    binding.pageContainer.setLayoutDirection(readDirection == 1 ? View.LAYOUT_DIRECTION_LTR : View.LAYOUT_DIRECTION_RTL);
+                    binding.numPages.bringToFront();
+                    binding.errorContainer.setVisibility(View.GONE);
+                    binding.numPages.setText("1 / " + (imageURI.size()-2));
+
+                    binding.seekBar.setBeginTrackingListener(() -> {
+                        binding.seekBar.setAlpha(1f);
+                        binding.nextChap.setAlpha(1f);
+                        binding.prevChap.setAlpha(1f);
+
+                        return Unit.INSTANCE;
+                    });
+                    binding.seekBar.setEndTrackingListener(() -> {
+                        ValueAnimator valueAnimator = ValueAnimator.ofFloat(1f, 0.1f);
+                        valueAnimator.setDuration(500);
+
+
+
+                        binding.pageContainer.setCurrentItem((int)(binding.seekBar.getPosition()*imageURI.size()), true);
+                        valueAnimator.addUpdateListener((@NonNull ValueAnimator animation)-> {
+                            binding.seekBar.setAlpha((float) animation.getAnimatedValue());
+                            binding.nextChap.setAlpha((float) animation.getAnimatedValue());
+                            binding.prevChap.setAlpha((float) animation.getAnimatedValue());
+                            System.out.println((float) animation.getAnimatedValue());
+                            if((float) animation.getAnimatedValue() - 0.1f < 0.05)binding.seekBar.setVisibility(View.GONE);
+                        });
+
+                        valueAnimator.start();
+
+                        return Unit.INSTANCE;
+                    });
+                    binding.seekBar.setPositionListener((aFloat) -> {
+                        binding.numPages.setText(String.format("%d / %d", binding.pageContainer.getCurrentItem(), imageURI.size()-2));
+                        binding.seekBar.setBubbleText(String.valueOf((int)(binding.seekBar.getPosition()*imageURI.size()) == 0?1:(int)(binding.seekBar.getPosition()*imageURI.size())));
+                        return Unit.INSTANCE;
+                    });
+
+                } else if (msg.what == Extensions.RESPONSE_PAGE) {
+                    vm.cancel();
+                    binding.animationContainer.setVisibility(View.GONE);
+                    if (animatorLeft != null) {
+                        if (animatorLeft.isRunning()) animatorLeft.cancel();
+                    }
+                    if (animatorRight != null) {
+                        if (animatorRight.isRunning()) animatorRight.cancel();
+                    }
+                    binding.errorContainer.setVisibility(View.GONE);
+                    String bit = msg.getData().getString("img");
+
+                    imageURI.set(msg.getData().getInt("index"), bit);
+
+                    adapterPagesCascade.notifyItemChanged(msg.getData().getInt("index"));
+
+                    adapterPages.notifyItemChanged(msg.getData().getInt("index"));
+                    binding.seekBar.bringToFront();
+
+                } else if (msg.what == Extensions.RESPONSE_ERROR) {
+                    binding.errorContainer.setVisibility(View.VISIBLE);
+                } else if (msg.what == Extensions.RESPONSE_COUNT_ITENS_DECREASED_BY_ONE) {
+                    adapterPagesCascade.ignorePage(adapterPages.ignorePage());
+                    binding.numPages.setText(String.format("%d / %d",readDirection == 3?pageCascadeItem:binding.pageContainer.getCurrentItem()+1, imageURI.size()-2));
+                    binding.seekBar.setEndText(String.valueOf(imageURI.size()));
+                }
+
+            }
+        };
+    }
     @Override
     public void onStart() {
         super.onStart();

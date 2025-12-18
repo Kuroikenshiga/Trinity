@@ -110,9 +110,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
                 ((StartReadViewHolder)(holder)).binding.actionPrev.setVisibility(View.GONE);
 
             }
-            Glide.with(context)
-                    .load(logoMangaStorage.getLogoFromStorage(LogoManga).isEmpty()?logoMangaStorageTemp.getLogoFromTempStorage(LogoManga):logoMangaStorage.getLogoFromStorage(LogoManga))
-                    .into(((StartReadViewHolder)(holder)).binding.backGroundManga);
+
             ((StartReadViewHolder)(holder)).binding.actionPrev.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -120,13 +118,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
                     f.previousChapter();
                 }
             });
-            ((StartReadViewHolder)(holder)).binding.startReadLogo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ReaderMangaFragment f = (ReaderMangaFragment) fragment;
-                    f.nextPageCascade();
-                }
-            });
+
             ((StartReadViewHolder)(holder)).binding.startRead.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

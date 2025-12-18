@@ -25,12 +25,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            />
-
-
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
 
         <com.example.trinity.custom_components.LoadingView
@@ -48,51 +45,50 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/nextChapterContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
         android:visibility="gone">
-
-        <ImageView
-            android:id="@+id/endLogo"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:src="@drawable/end_read"
-            app:layout_constraintBottom_toTopOf="@id/endWarning"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-
-            />
-
         <TextView
-            android:id="@+id/endWarning"
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_black"
-            android:text="@string/fim_do_cap"
+            android:text="Próximo capítulo: Ch 1"
+            android:fontFamily="@font/noto_sans"
+            android:textSize="15sp"
+            android:id="@+id/nextChapter"
+            android:ellipsize="end"
             android:textColor="?attr/colorTertiary"
-            android:textSize="19sp"
-            app:layout_constraintBottom_toTopOf="@id/actionEnd"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/endLogo" />
-
+            />
         <TextView
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cápitulo atual: Ch 1"
+            android:fontFamily="@font/noto_sans"
+            android:textSize="15sp"
+            android:id="@+id/currentChapterEnd"
+            android:ellipsize="end"
+            android:textColor="?attr/colorTertiary"
+            />
+        <TextView
+            android:layout_marginTop="10dp"
             android:id="@+id/timeWaste"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_black"
+            android:fontFamily="@font/open_sans"
             android:text="Tempo gasto: "
             android:textColor="?attr/colorTertiary"
-            android:textSize="17sp"
+            android:textSize="15sp"
             app:layout_constraintBottom_toTopOf="@id/actionEnd"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/endWarning" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.appcompat.widget.AppCompatButton
+            android:layout_marginTop="10dp"
             android:id="@+id/actionEnd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -108,52 +104,54 @@
             app:layout_constraintTop_toBottomOf="@id/timeWaste" />
 
         <TextView
+            android:layout_marginTop="10dp"
             android:id="@+id/lastChap"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp"
             android:fontFamily="@font/roboto_black"
             android:text="Não há mais capítulos desta obra "
             android:textColor="?attr/colorTertiary"
-            android:textSize="17sp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="15sp"
             app:layout_constraintTop_toBottomOf="@id/timeWaste" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+    <LinearLayout
         android:id="@+id/startRead"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
         android:visibility="gone">
 
-        <ImageView
-            android:id="@+id/backGroundManga"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:alpha="0.5"
-            android:scaleType="fitCenter" />
+        <TextView
+            android:id="@+id/previousChapter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:ellipsize="end"
+            android:textColor="?attr/colorTertiary"
+            android:fontFamily="@font/noto_sans"
+            android:text="Cápitulo anterior: Ch 1"
+            android:textSize="15sp" />
 
-        <ImageView
-            android:id="@+id/startReadLogo"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:src="@drawable/start_read"
-            app:layout_constraintBottom_toTopOf="@id/actionPrev"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-
-            />
+        <TextView
+            android:id="@+id/currentChapter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/noto_sans"
+            android:textColor="?attr/colorTertiary"
+            android:text="Cápitulo atual: Ch 1"
+            android:textSize="15sp" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/actionPrev"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/next_chapter_buttom_shape"
             android:fontFamily="@font/roboto_black"
             android:padding="10dp"
@@ -164,6 +162,5 @@
             app:layout_constraintStart_toStartOf="parent" />
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
