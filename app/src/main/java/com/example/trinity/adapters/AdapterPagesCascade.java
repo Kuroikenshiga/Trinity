@@ -33,6 +33,7 @@ import com.example.trinity.databinding.StartReadItemBinding;
 import com.example.trinity.fragments.ReaderMangaFragment;
 import com.example.trinity.storageAcess.LogoMangaStorage;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
+import com.example.trinity.valueObject.ChapterManga;
 
 import java.util.ArrayList;
 
@@ -49,7 +50,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
     private boolean isFirstChapter = false;
     private float screenWidth,screenHeight;
     private GestureDetector gestureDetector;
-
+    public ChapterManga[] previousCurrentAndNextChapter = new ChapterManga[3];
     public static int VIEW_TYPE_HEADER = 0;
     public static int VIEW_TYPE_ITEM = 1;
     public static int VIEW_TYPE_FOOTER = 2;
@@ -105,11 +106,16 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
         if(position >= this.imagesResource.size())return;
 
         if(position == 0){
+            ((StartReadViewHolder)(holder)).binding.getRoot().setOnClickListener((v)->{((ReaderMangaFragment)fragment).controllShowBottomTopBar();});
             ((StartReadViewHolder)(holder)).position = holder.getAdapterPosition();
             if (this.isFirstChapter) {
                 ((StartReadViewHolder)(holder)).binding.actionPrev.setVisibility(View.GONE);
-
+                ((StartReadViewHolder)(holder)).binding.previousChapter.setVisibility(View.GONE);
+            }else{
+                ((StartReadViewHolder)(holder)).binding.previousChapter.setText(String.format("Capítulo anterior: %s - %s", previousCurrentAndNextChapter[0].getChapter(), previousCurrentAndNextChapter[0].title));
             }
+            ((StartReadViewHolder)(holder)).binding.currentChapter.setText(String.format("Capítulo atual: %s - %s", previousCurrentAndNextChapter[1].getChapter(), previousCurrentAndNextChapter[1].title));
+
 
             ((StartReadViewHolder)(holder)).binding.actionPrev.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -129,6 +135,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
             return;
         }
         if(holder.getAdapterPosition() == imagesResource.size()-1){
+            ((EndReadViewHolder)(holder)).binding.getRoot().setOnClickListener((v)->{((ReaderMangaFragment)fragment).controllShowBottomTopBar();});
             ((EndReadViewHolder)(holder)).binding.timeWaste.setText(timeWasteString);
             ((EndReadViewHolder)(holder)).binding.nextChapterContainer.setVisibility(View.VISIBLE);
             ((EndReadViewHolder)(holder)).binding.actionEnd.setOnClickListener(new View.OnClickListener() {
@@ -139,11 +146,16 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
                 }
             });
             if (this.isLastChapter) {
-                ((EndReadViewHolder)(holder)).binding.endLogo.setImageResource(R.drawable.end_chapters);
                 ((EndReadViewHolder)(holder)).binding.actionEnd.setVisibility(View.GONE);
                 ((EndReadViewHolder)(holder)).binding.lastChap.setVisibility(View.VISIBLE);
                 ((EndReadViewHolder)(holder)).position = holder.getAdapterPosition();
+                ((EndReadViewHolder)(holder)).binding.nextChapter.setVisibility(View.GONE);
             }
+            else{
+                ((EndReadViewHolder)(holder)).binding.nextChapter.setText(String.format("Próximo capítulo: %s - %s", previousCurrentAndNextChapter[2].getChapter(), previousCurrentAndNextChapter[2].title));
+            }
+            ((EndReadViewHolder)(holder)).binding.currentChapterEnd.setText(String.format("Capítulo atual: %s - %s", previousCurrentAndNextChapter[1].getChapter(), previousCurrentAndNextChapter[1].title));
+
             ((EndReadViewHolder)(holder)).binding.nextChapterContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -178,15 +190,7 @@ public class AdapterPagesCascade extends RecyclerView.Adapter<RecyclerView.ViewH
                         img.setImage(ImageSource.bitmap(resource));
                         img.setDoubleTapZoomScale(2f);
                         img.setMinScale(1f);
-//                        if(resource.getWidth() < resource.getHeight() && resource.getHeight() > screenHeight && ((float) resource.getHeight() /resource.getWidth())>1.5f){
-//
-////                            img.setScaleAndCenter(1,new PointF((float)screenWidth/2,0));
-//
-//                        }
-
                         ((ViewHolderItem)(holder)).binding.progressTop.setVisibility(View.GONE);
-//                        holder.binding.nextChapterContainer.setVisibility(View.GONE);
-//                        holder.binding.startRead.setVisibility(View.GONE);
                     }
 
                     @Override

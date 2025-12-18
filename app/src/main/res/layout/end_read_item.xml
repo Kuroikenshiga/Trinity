@@ -2,49 +2,50 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/nextChapterContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         app:layout_constraintTop_toTopOf="parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
         >
 
-        <ImageView
-            android:id="@+id/endLogo"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:src="@drawable/end_read"
-            app:layout_constraintBottom_toTopOf="@id/endWarning"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-
-            />
-
         <TextView
-            android:id="@+id/endWarning"
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_black"
-            android:text="@string/fim_do_cap"
+            android:text="Próximo capítulo: Ch 1"
+            android:fontFamily="@font/noto_sans"
+            android:textSize="15sp"
+            android:id="@+id/nextChapter"
+            android:ellipsize="end"
             android:textColor="?attr/colorTertiary"
-            android:textSize="19sp"
-            app:layout_constraintBottom_toTopOf="@id/actionEnd"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/endLogo" />
+            />
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cápitulo atual: Ch 1"
+            android:fontFamily="@font/noto_sans"
+            android:textSize="15sp"
+            android:id="@+id/currentChapterEnd"
+            android:ellipsize="end"
+            android:textColor="?attr/colorTertiary"
+            />
 
         <TextView
             android:id="@+id/timeWaste"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_black"
+            android:fontFamily="@font/open_sans"
             android:text="Tempo gasto: "
             android:textColor="?attr/colorTertiary"
-            android:textSize="17sp"
+            android:textSize="15sp"
             app:layout_constraintBottom_toTopOf="@id/actionEnd"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -82,5 +83,5 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/timeWaste" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

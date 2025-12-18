@@ -159,7 +159,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
                 holder.binding.previousChapter.setVisibility(View.GONE);
             }
             else{
-                holder.binding.nextChapter.setText(String.format("Capítulo anterior: %s - %s", previousCurrentAndNextChapter[0].getChapter(), previousCurrentAndNextChapter[0].title));
+                holder.binding.previousChapter.setText(String.format("Capítulo anterior: %s - %s", previousCurrentAndNextChapter[0].getChapter(), previousCurrentAndNextChapter[0].title));
             }
             holder.binding.currentChapter.setText(String.format("Capítulo atual: %s - %s", previousCurrentAndNextChapter[1].getChapter(), previousCurrentAndNextChapter[1].title));
             holder.binding.actionPrev.setOnClickListener(new View.OnClickListener() {

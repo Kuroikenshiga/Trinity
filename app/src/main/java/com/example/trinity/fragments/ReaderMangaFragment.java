@@ -982,6 +982,7 @@ public class ReaderMangaFragment extends Fragment {
                         binding.nextChap.setVisibility(View.VISIBLE);
                     }
                     adapterPages.previousCurrentAndNextChapter = new ChapterManga[]{chapterIndex-1 == -1?null:chapters.get(chapterIndex-1),chapters.get(chapterIndex),chapterIndex+1 == chapters.size()?null:chapters.get(chapterIndex+1)};
+                    adapterPagesCascade.previousCurrentAndNextChapter = adapterPages.previousCurrentAndNextChapter;
 
                     binding.seekBar.setEndText(String.valueOf(imageURI.size()));
                     binding.seekBar.setStartText("1");
