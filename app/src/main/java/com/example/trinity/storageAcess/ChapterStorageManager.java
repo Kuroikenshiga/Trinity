@@ -1,18 +1,27 @@
 package com.example.trinity.storageAcess;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
+import android.widget.Toast;
 
 import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.models.Model;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -134,4 +143,52 @@ public final class ChapterStorageManager {
 
         return true;
     }
+
+    public boolean pageDownload(String imageName,String url){
+        if (url == null) {
+            return false;
+        }
+        Bitmap image = null;
+        try (FileInputStream fileInputStream = new FileInputStream(new File(url))) {
+
+            image = BitmapFactory.decodeStream(fileInputStream);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+
+        if (image == null) {
+            return false;
+        }
+
+        ContentValues imageValue = new ContentValues();
+        imageValue.put(MediaStore.MediaColumns.DISPLAY_NAME, imageName);
+        imageValue.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
+        imageValue.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+
+        ContentResolver contentResolver = context.getContentResolver();
+
+        Uri uri = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, imageValue);
+        }
+
+        if (uri == null) return false;
+
+        try (OutputStream outputStream = contentResolver.openOutputStream(uri)) {
+
+            if (outputStream == null) return false;
+
+            image.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            outputStream.flush();
+
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+
+        }
+    return true;
+    }
+
 }
