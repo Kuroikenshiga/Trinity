@@ -233,10 +233,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateToLibrary() {
-//        navController.popBackStack(R.id.library, false);
-//        navController.navigate(R.id.library);
+
         binding.hostFragmentMain.setCurrentItem(0);
     }
+
+    public void navigateInContextFragments(int fragmentPosition) {
+        if( fragmentPosition < 0 || fragmentPosition > 4)return;
+        binding.hostFragmentMain.setCurrentItem(fragmentPosition);
+    }
+
 
 
     public void checkPermission() {

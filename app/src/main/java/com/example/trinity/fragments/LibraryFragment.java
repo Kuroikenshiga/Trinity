@@ -80,6 +80,7 @@ public class LibraryFragment extends Fragment {
     private boolean isSearching = false;
     private boolean supressManyLoad = false;
     private boolean isLoadingLibrary = false;
+    private boolean ignoreFirstCall = true;
     public LibraryFragment() {
         // Required empty public constructor
     }
@@ -120,6 +121,7 @@ public class LibraryFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         this.mangasFromDataBaseViewModel = new ViewModelProvider(requireActivity()).get(MangasFromDataBaseViewModel.class);
+
         binding = FragmentLibraryBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
         recyclerView = binding.reciclerViewMangas;
@@ -129,6 +131,8 @@ public class LibraryFragment extends Fragment {
         mangasFromDataBaseViewModel.getMangaMutableLiveData().observe(requireActivity(), new Observer<ArrayList<Manga>>() {
             @Override
             public void onChanged(ArrayList<Manga> mangas) {
+                if(!ignoreFirstCall)showEmptyMessage(mangas.isEmpty());
+                ignoreFirstCall = false;
                 adapter = new AdapterMangas(requireActivity(), mangas);
                 recyclerView.setAdapter(adapter);
             }
@@ -277,6 +281,8 @@ public class LibraryFragment extends Fragment {
             OFF_SET = 21;
         });
 
+
+
         return view;
     }
 
@@ -304,6 +310,7 @@ public class LibraryFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+
     }
 
     @Override
@@ -324,8 +331,8 @@ public class LibraryFragment extends Fragment {
     private void loadLibrary(int limit, int offSet) {
         if(mangasFromDataBaseViewModel.getMangas().size() > 50){
             binding.backToTop.setVisibility(View.VISIBLE);
-            mangasFromDataBaseViewModel.getMangas().subList(0, 25).clear();
-            adapter.notifyItemRangeRemoved(0,25);
+//            mangasFromDataBaseViewModel.getMangas().subList(0, 25).clear();
+//            adapter.notifyItemRangeRemoved(0,25);
         }
         if(isLoadingLibrary)return;
 
@@ -376,5 +383,16 @@ public class LibraryFragment extends Fragment {
 
             });
         }).start();
+    }
+    public void showEmptyMessage(boolean show){
+        if(show){
+            binding.emptyLibrary.setVisibility(View.VISIBLE);
+            binding.toExtensionsList.setOnClickListener((v)->{
+                ((MainActivity) getActivity()).navigateInContextFragments(2);
+            });
+            return;
+            }
+        binding.emptyLibrary.setVisibility(View.GONE);
+
     }
 }

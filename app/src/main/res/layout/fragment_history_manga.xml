@@ -7,6 +7,31 @@
     android:layout_height="match_parent"
     tools:context=".fragments.HistoryMangaFragment"
     android:background="?attr/colorSurface">
+    <LinearLayout
+        android:id="@+id/emptyHistory"
+        android:visibility="visible"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        >
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/history_off_24dp_e8eaed_fill0_wght400_grad0_opsz24"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text="As últimas obras salvas que você interagiu\nestarão listadas aqui"/>
+
+
+    </LinearLayout>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"

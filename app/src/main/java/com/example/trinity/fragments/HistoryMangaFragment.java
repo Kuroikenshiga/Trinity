@@ -89,6 +89,11 @@ public class HistoryMangaFragment extends Fragment {
                    adapterHistory = new AdapterHistory(getActivity(),histories,HistoryMangaFragment.this);
                    binding.reciclerViewHistory.setAdapter(adapterHistory);
                    binding.reciclerViewHistory.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL,false));
+                   if(histories.isEmpty()){
+                       binding.emptyHistory.setVisibility(View.VISIBLE);
+                   }else{
+                       binding.emptyHistory.setVisibility(View.GONE);
+                   }
                }
            });
        });
@@ -120,6 +125,11 @@ public class HistoryMangaFragment extends Fragment {
                         adapterHistory = new AdapterHistory(getActivity(), histories, HistoryMangaFragment.this);
                         binding.reciclerViewHistory.setAdapter(adapterHistory);
                         binding.reciclerViewHistory.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
+                        if(histories.isEmpty()){
+                            binding.emptyHistory.setVisibility(View.VISIBLE);
+                        }else{
+                            binding.emptyHistory.setVisibility(View.GONE);
+                        }
                     }
                 });
             });

@@ -15,6 +15,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.MainActivity;
 
@@ -72,6 +73,7 @@ public class AdapterUpdates extends RecyclerView.Adapter<RecyclerView.ViewHolder
             if ((fragment).getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
                 Glide.with(fragment)
                         .load(storage.getLogoFromStorage(this.chapterUpdateds.get(holder.getAdapterPosition()).getManga().getId()))
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                         .override((int) context.getResources().getDisplayMetrics().density * 50, (int) context.getResources().getDisplayMetrics().density * 50)
                         .into(((UpdatesViewHolder)holder).binding.mangaCover);
 

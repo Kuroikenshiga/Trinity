@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.ReaderConfigsFragment"
+    android:background="@drawable/header_and_footer_background_reader"
+    android:paddingBottom="15dp"
+    >
+
+    <View
+        android:id="@+id/dragHandle"
+        android:layout_width="80dp"
+        android:layout_height="9dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/drag_handle_shape"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/dragHandle"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/download"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="15dp"
+            android:gravity="center_vertical"
+            android:clickable="true"
+
+            >
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/save_24dp_e8eaed_fill0_wght400_grad0_opsz24"
+                app:tint="?attr/colorTertiary"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="Salvar página"
+                android:fontFamily="@font/noto_sans"
+                android:textSize="15sp"
+                android:textColor="?attr/colorTertiary"
+                />
+
+        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="15dp"
+            android:text="Modo de leitura"
+            android:fontFamily="@font/noto_sans"
+            android:textSize="15sp"
+            android:textColor="?attr/colorTertiary"
+            />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="15dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/select_read_mode_shape"
+            >
+            <LinearLayout
+                android:id="@+id/standard"
+                android:layout_width="100dp"
+                android:layout_height="80dp"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                >
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/dir1"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/back"
+                    app:tint="?attr/colorTertiary"
+                    />
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/pan1"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/pan_animation"
+                    app:tint="?attr/colorTertiary"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Direira para esquerda"
+                    android:fontFamily="@font/noto_sans"
+                    android:textSize="11sp"
+                    android:textAlignment="center"
+                    android:textColor="?attr/colorTertiary"
+                    />
+            </LinearLayout>
+            <View
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:background="?attr/colorTertiary"
+                />
+            <LinearLayout
+                android:id="@+id/reverse"
+                android:layout_width="100dp"
+                android:layout_height="80dp"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                >
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/dir2"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:scaleX="-1"
+                    android:src="@drawable/back"
+                    app:tint="?attr/colorTertiary"/>
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/pan2"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/pan_animation"
+                    app:tint="?attr/colorTertiary"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Esquerda para direita"
+                    android:fontFamily="@font/noto_sans"
+                    android:textSize="11sp"
+                    android:textAlignment="center"
+                    android:textColor="?attr/colorTertiary"
+                    />
+            </LinearLayout>
+            <View
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:background="?attr/colorTertiary"
+                />
+            <LinearLayout
+                android:id="@+id/cascade"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+
+                >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal">
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/dir3"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:src="@drawable/back"
+                        android:rotation="-90"
+                        app:tint="?attr/colorTertiary"/>
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/pan3"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:src="@drawable/pan_animation"
+                        app:tint="?attr/colorTertiary"
+                        android:rotation="-90"/>
+                </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Webtoon"
+                    android:fontFamily="@font/noto_sans"
+                    android:textSize="11sp"
+                    android:textColor="?attr/colorTertiary"
+                    android:layout_gravity="center"
+                    />
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="15dp"
+            android:text="Brilho de leitura"
+            android:fontFamily="@font/noto_sans"
+            android:textSize="15sp"
+            android:textColor="?attr/colorTertiary"
+            />
+        <com.ramotion.fluidslider.FluidSlider
+            android:id="@+id/alphaController"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bar_color="?attr/colorPrimary"
+            app:bar_text_color="?attr/colorSecondary"
+            app:bubble_color="?attr/colorSecondary"
+            app:bubble_text_color="?attr/colorTertiary"
+            app:initial_position=".0"
+            app:size="small" />
+    </LinearLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

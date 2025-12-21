@@ -1,43 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/startRead"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+
         >
-
-        <ImageView
-            android:id="@+id/backGroundManga"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.5" />
-
-        <ImageView
-            android:id="@+id/startReadLogo"
-            app:layout_constraintBottom_toTopOf="@id/actionPrev"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:rotation="90"
-            android:src="@drawable/start_read"
-
-            />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/actionPrev"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+        <TextView
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp"
+            android:text="Cápitulo anterior: Ch 1"
+            android:fontFamily="@font/noto_sans"
+            android:textSize="15sp"
+            android:id="@+id/previousChapter"
+            android:ellipsize="end"
+            />
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cápitulo atual: Ch 1"
+            android:fontFamily="@font/noto_sans"
+            android:textSize="15sp"
+            android:id="@+id/currentChapter"
+            android:ellipsize="end"
+            />
+        <androidx.appcompat.widget.AppCompatButton
+            android:layout_marginTop="10dp"
+            android:id="@+id/actionPrev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:background="@drawable/next_chapter_buttom_shape"
             android:fontFamily="@font/roboto_black"
             android:padding="10dp"
@@ -45,5 +46,5 @@
             android:textColor="?attr/colorTertiary" />
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

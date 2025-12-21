@@ -58,6 +58,7 @@ import com.example.trinity.fragments.ReaderMangaFragment;
 import com.example.trinity.storageAcess.LogoMangaStorage;
 import com.example.trinity.storageAcess.LogoMangaStorageTemp;
 import com.example.trinity.storageAcess.PageCacheManager;
+import com.example.trinity.valueObject.ChapterManga;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,7 +77,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
     private double screenWidth, screenHeight;
     private double screenRatio;
     public int currentItem = 0;
-    private boolean isFavorited = false;
+    public ChapterManga[] previousCurrentAndNextChapter = new ChapterManga[3];
     private LogoMangaStorage logoMangaStorage;
     private LogoMangaStorageTemp logoMangaStorageTemp;
     private int numPagesIgnored = 0;
@@ -117,6 +118,8 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
             holder.binding.imgContainer.setVisibility(View.GONE);
             holder.binding.startRead.setVisibility(View.GONE);
             holder.binding.nextChapterContainer.setVisibility(View.VISIBLE);
+            holder.binding.progressTop.setVisibility(View.GONE);
+
             holder.binding.actionEnd.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -125,11 +128,15 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
                 }
             });
             if (this.isLastChapter) {
-                holder.binding.endLogo.setImageResource(R.drawable.end_chapters);
                 holder.binding.actionEnd.setVisibility(View.GONE);
                 holder.binding.lastChap.setVisibility(View.VISIBLE);
-
+                holder.binding.nextChapter.setVisibility(View.GONE);
+                holder.binding.nextChapter.setVisibility(View.GONE);
             }
+            else{
+                holder.binding.nextChapter.setText(String.format("Próximo capítulo: %s - %s", previousCurrentAndNextChapter[2].getChapter(), previousCurrentAndNextChapter[2].title));
+            }
+            holder.binding.currentChapter.setText(String.format("Capítulo atual: %s - %s", previousCurrentAndNextChapter[1].getChapter(), previousCurrentAndNextChapter[1].title));
             holder.binding.nextChapterContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -141,30 +148,20 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
         }
         if (holder.getAdapterPosition() == 0) {
 
-
+            holder.binding.progressTop.setVisibility(View.GONE);
             holder.binding.imgContainer.setVisibility(View.GONE);
             holder.binding.nextChapterContainer.setVisibility(View.GONE);
             holder.binding.startRead.setVisibility(View.VISIBLE);
-            if(fragment.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)){
-                Glide.with(fragment)
-                        .load(logoMangaStorage.getLogoFromStorage(LogoManga).isEmpty()?logoMangaStorageTemp.getLogoFromTempStorage(LogoManga):logoMangaStorage.getLogoFromStorage(LogoManga))
-                        .into(holder.binding.backGroundManga);
 
-
-            }
-
-            if (isReverseStartReadLogo) {
-                holder.binding.startReadLogo.setScaleX(-1);
-                holder.binding.startReadLogo.setScaleY(-1);
-            } else {
-                holder.binding.startReadLogo.setScaleX(1);
-                holder.binding.startReadLogo.setScaleY(1);
-            }
 
             if (this.isFirstChapter) {
                 holder.binding.actionPrev.setVisibility(View.GONE);
-
+                holder.binding.previousChapter.setVisibility(View.GONE);
             }
+            else{
+                holder.binding.previousChapter.setText(String.format("Capítulo anterior: %s - %s", previousCurrentAndNextChapter[0].getChapter(), previousCurrentAndNextChapter[0].title));
+            }
+            holder.binding.currentChapter.setText(String.format("Capítulo atual: %s - %s", previousCurrentAndNextChapter[1].getChapter(), previousCurrentAndNextChapter[1].title));
             holder.binding.actionPrev.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -172,13 +169,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
                     f.previousChapter();
                 }
             });
-            holder.binding.startReadLogo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ReaderMangaFragment f = (ReaderMangaFragment) fragment;
-                    f.nextPage();
-                }
-            });
+
             holder.binding.startRead.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
