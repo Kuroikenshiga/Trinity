@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
@@ -203,18 +204,20 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                 ExtensionShowContentActivity.this.finish();
             }
         });
-
+        extension = getIntent().getParcelableExtra("Extension");
         adapter = new AdapterMangas(ExtensionShowContentActivity.this, mangasFromDataBaseViewModel.getMangas(), this.language);
+        adapter.setExtension(extension);
         adapter.setFromUpdates(true);
         startUphandler();
-        extension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) :getIntent().getStringExtra("Extension").equals(Extensions.MANGALIVRE)? new MangaLivreExtension() : new MangakakalotExtension(null);
+//        extension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) :getIntent().getStringExtra("Extension").equals(Extensions.MANGALIVRE)? new MangaLivreExtension() : new MangakakalotExtension(null);
+
         binding.searchAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ExtensionShowContentActivity.this, SearchResultActivity.class);
                 intent.putExtra("language", language);
                 intent.putExtra("SearchField", binding.searchField.getText().toString());
-                intent.putExtra("Extension", extension instanceof MangaDexExtension ? Extensions.MANGADEX : extension instanceof MangaLivreExtension?Extensions.MANGALIVRE:Extensions.MANGAKAKALOT);
+                intent.putExtra("Extension", (Parcelable) extension);
                 ExtensionShowContentActivity.this.startActivity(intent);
             }
         });
@@ -498,7 +501,7 @@ public class ExtensionShowContentActivity extends AppCompatActivity {
                     Intent intent = new Intent(ExtensionShowContentActivity.this, SearchResultActivity.class);
                     intent.putExtra("language", language);
                     intent.putExtra("SearchField", binding.searchField.getText().toString());
-                    intent.putExtra("Extension", extension instanceof MangaDexExtension ? Extensions.MANGADEX : extension instanceof MangaLivreExtension?Extensions.MANGALIVRE:Extensions.MANGAKAKALOT);
+                    intent.putExtra("Extension", (Parcelable) extension);
                     ExtensionShowContentActivity.this.startActivity(intent);
                 }
                 return true;

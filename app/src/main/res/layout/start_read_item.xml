@@ -22,6 +22,7 @@
             android:fontFamily="@font/noto_sans"
             android:textSize="15sp"
             android:id="@+id/previousChapter"
+            android:textColor="?attr/colorTertiary"
             android:ellipsize="end"
             />
         <TextView
@@ -33,6 +34,7 @@
             android:textSize="15sp"
             android:id="@+id/currentChapter"
             android:ellipsize="end"
+            android:textColor="?attr/colorTertiary"
             />
         <androidx.appcompat.widget.AppCompatButton
             android:layout_marginTop="10dp"

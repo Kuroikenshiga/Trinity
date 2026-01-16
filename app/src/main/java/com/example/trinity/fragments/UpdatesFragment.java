@@ -148,12 +148,12 @@ public class UpdatesFragment extends Fragment {
         this.chapContainer.setAdapter(adapter);
 
 
-        this.updatesViewModel.getItem().observe(getViewLifecycleOwner(), new Observer<ChapterUpdated>() {
-            @Override
-            public void onChanged(ChapterUpdated chapterUpdated) {
-                adapter.notifyDataSetChanged();
-            }
-        });
+//        this.updatesViewModel.getItem().observe(getViewLifecycleOwner(), new Observer<ChapterUpdated>() {
+//            @Override
+//            public void onChanged(ChapterUpdated chapterUpdated) {
+//                adapter.notifyItemInserted(updatesViewModel.getPositionInsertion());
+//            }
+//        });
 
 
         this.chapContainer.setLayoutManager(new LinearLayoutManager(myActivity));
@@ -165,7 +165,12 @@ public class UpdatesFragment extends Fragment {
 
     private void loadUpdates() {
         if (Objects.requireNonNull(updatesViewModel.getChapterUpdatedLiveData().getValue()).isEmpty() || wasReloaded) {
+//            if(wasReloaded){
+//                updatesViewModel.getChapterUpdatedLiveData().getValue().clear();
+//                adapter.notifyItemRangeRemoved(0, updatesViewModel.getChapterUpdatedLiveData().getValue().size());
+//            }
             wasReloaded = false;
+            this.updatesViewModel.resetPositionInsertion();
             if (!isUpdatingLibray) {
                 new Thread() {
                     @Override
@@ -203,13 +208,13 @@ public class UpdatesFragment extends Fragment {
                             mangas = model.selectAllMangas(false, 10, offSet);
                         }
                         chapterUpdateds.sort(Comparator.comparingLong((ChapterUpdated c) -> OffsetDateTime.parse(c.getChapterManga().getDateRFC3339()).toEpochSecond()).reversed());
-                        requireActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                for (ChapterUpdated c : chapterUpdateds) {
-                                    updatesViewModel.addChapterInLiveData(c);
-                                }
+                        requireActivity().runOnUiThread(()->{
+                            int i = 0;
+                            for (ChapterUpdated c : chapterUpdateds) {
+                                updatesViewModel.addChapterInLiveData(c,i);
+                                i++;
                             }
+                            binding.updatesConteiner.setAdapter(new AdapterUpdates(requireContext(),updatesViewModel.getChapterUpdatedLiveData().getValue(),UpdatesFragment.this));
                         });
                         isUpdatingLibray = false;
                     }
@@ -219,47 +224,43 @@ public class UpdatesFragment extends Fragment {
     }
 
     private void realodUpdates() {
-        binding.swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
+        binding.swipe.setOnRefreshListener(()->{
+            if (workRequest != null){
+                binding.swipe.setRefreshing(false);
+                return;
+            }
 
-                if (workRequest != null){
-                    binding.swipe.setRefreshing(false);
-                    return;
-                }
+            lastUpadate = Instant.now().getEpochSecond();
+            editor.putLong(ConfigClass.ConfigUpdates.LAST_UPDATE, lastUpadate);
+            editor.apply();
+            if (!isUpdatingLibray) {
 
-                lastUpadate = Instant.now().getEpochSecond();
-                editor.putLong(ConfigClass.ConfigUpdates.LAST_UPDATE, lastUpadate);
-                editor.apply();
-                if (!isUpdatingLibray) {
+                isUpdatingLibray = true;
 
-                    isUpdatingLibray = true;
+                workRequest = new OneTimeWorkRequest.Builder(UpdateWork.class).addTag(ActionsPending.UPDATE_WORK_TAG).build();
 
-                    workRequest = new OneTimeWorkRequest.Builder(UpdateWork.class).addTag(ActionsPending.UPDATE_WORK_TAG).build();
-
-                    workManager.enqueueUniqueWork(UpdateWork.WORK_NAME, ExistingWorkPolicy.KEEP, workRequest);
+                workManager.enqueueUniqueWork(UpdateWork.WORK_NAME, ExistingWorkPolicy.KEEP, workRequest);
 //                    workManager.enqueue(workRequest);
 
-                    workManager.getWorkInfoByIdLiveData(workRequest.getId()).observe(UpdatesFragment.this.requireActivity(), new Observer<WorkInfo>() {
-                        @Override
-                        public void onChanged(WorkInfo workInfo) {
+                workManager.getWorkInfoByIdLiveData(workRequest.getId()).observe(UpdatesFragment.this.requireActivity(), new Observer<WorkInfo>() {
+                    @Override
+                    public void onChanged(WorkInfo workInfo) {
 
-                            if (workInfo == null) return;
+                        if (workInfo == null) return;
 
-                            if (workInfo.getState().isFinished()) {
-                                isUpdatingLibray = false;
-                                binding.swipe.setRefreshing(false);
-                                workManager.cancelAllWork();
-                                wasReloaded = true;
-                                loadUpdates();
-                                binding.lastUpdate.setText("Última atualização feita " + returnLastUpdateTime(lastUpadate, Instant.now().getEpochSecond()));
+                        if (workInfo.getState().isFinished()) {
+                            isUpdatingLibray = false;
+                            binding.swipe.setRefreshing(false);
+                            workManager.cancelAllWork();
+                            wasReloaded = true;
+                            loadUpdates();
+                            binding.lastUpdate.setText("Última atualização feita " + returnLastUpdateTime(lastUpadate, Instant.now().getEpochSecond()));
 
-                                workRequest = null;
-                            }
-
+                            workRequest = null;
                         }
-                    });
-                }
+
+                    }
+                });
             }
         });
     }

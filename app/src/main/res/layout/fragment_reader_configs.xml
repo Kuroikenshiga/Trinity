@@ -75,22 +75,24 @@
             <LinearLayout
                 android:id="@+id/standard"
                 android:layout_width="100dp"
-                android:layout_height="80dp"
+                android:layout_height="90dp"
+                android:padding="5dp"
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
+
                 >
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/dir1"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:src="@drawable/back"
+                    android:src="@drawable/animated_vector_translation_x_to_left"
                     app:tint="?attr/colorTertiary"
                     />
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/pan1"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:src="@drawable/pan_animation"
+                    android:src="@drawable/animated_vector_pan_motion_to_left"
                     app:tint="?attr/colorTertiary"/>
                 <TextView
                     android:layout_width="wrap_content"
@@ -110,7 +112,8 @@
             <LinearLayout
                 android:id="@+id/reverse"
                 android:layout_width="100dp"
-                android:layout_height="80dp"
+                android:layout_height="90dp"
+                android:padding="5dp"
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
                 >
@@ -118,14 +121,13 @@
                     android:id="@+id/dir2"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:scaleX="-1"
-                    android:src="@drawable/back"
+                    android:src="@drawable/animated_vector_translation_x_to_right"
                     app:tint="?attr/colorTertiary"/>
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/pan2"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:src="@drawable/pan_animation"
+                    android:src="@drawable/animated_vector_pan_motion_to_right"
                     app:tint="?attr/colorTertiary"/>
                 <TextView
                     android:layout_width="wrap_content"
@@ -159,14 +161,13 @@
                         android:id="@+id/dir3"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
-                        android:src="@drawable/back"
-                        android:rotation="-90"
+                        android:src="@drawable/animated_vector_translation_y"
                         app:tint="?attr/colorTertiary"/>
                     <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/pan3"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
-                        android:src="@drawable/pan_animation"
+                        android:src="@drawable/animated_vector_pan_motion_to_right"
                         app:tint="?attr/colorTertiary"
                         android:rotation="-90"/>
                 </LinearLayout>

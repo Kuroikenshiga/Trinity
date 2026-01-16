@@ -82,6 +82,18 @@ public class UpdateWork extends Worker {
 
         ArrayList<Manga> mangas = model.selectAllMangas(false,10,offSet);
         while(!mangas.isEmpty()){
+            if(CancelCurrentWorkReceiver.isIsWorkUpdatesLibraryCanceled()){
+                notification = new NotificationCompat.Builder(context, CHANNEL_NOTIFICATION_ID)
+                        .setSmallIcon(R.drawable.app_icon)
+                        .setContentTitle("Atualização cancelada 😢")
+                        .setContentText("A biblioteca não foi totalmente atualizada. Pode haver capítulos não rastreados")
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setProgress(0, 0, false);
+
+
+                this.notify(notification);
+                return Result.failure();
+            }
             for (Manga m : mangas) {
                 isAlredyChecked = false;
                 notification.setContentTitle("Atualizando biblioteca ("+(progress+1)+" de "+tableSize+")");
@@ -109,6 +121,18 @@ public class UpdateWork extends Worker {
                 }
                 m.setChapters(model.getAllChapterByMangaID(m.getId(), m.getLanguage()));
                 for (ChapterManga chapterManga : chaptersFromApi) {
+                    if(CancelCurrentWorkReceiver.isIsWorkUpdatesLibraryCanceled()){
+                        notification = new NotificationCompat.Builder(context, CHANNEL_NOTIFICATION_ID)
+                                .setSmallIcon(R.drawable.app_icon)
+                                .setContentTitle("Atualização cancelada 😢")
+                                .setContentText("A biblioteca não foi totalmente atualizada. Pode haver capítulos não rastreados")
+                                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                .setProgress(0, 0, false);
+
+
+                        this.notify(notification);
+                        return Result.failure();
+                    }
                     if (!m.isChapterAlredySaved(chapterManga.getId())) {
                         ChapterUpdated chapterUpdated = new ChapterUpdated(m, chapterManga);
                         model.addNewChapter(chapterUpdated);

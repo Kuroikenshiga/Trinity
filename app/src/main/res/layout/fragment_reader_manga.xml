@@ -126,7 +126,7 @@
             android:layout_height="30dp"
             android:src="@drawable/arrow_down"
             android:rotation="180"
-            />
+            app:tint="?attr/colorTertiary" />
         <!--        <View-->
         <!--            android:layout_width="match_parent"-->
         <!--            android:layout_height="match_parent"-->
@@ -257,7 +257,7 @@
         android:layout_width="match_parent"
         android:background="@drawable/dialog_shape"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="-350dp"
+        android:layout_marginBottom="-370dp"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:layout="@layout/fragment_reader_configs"
 

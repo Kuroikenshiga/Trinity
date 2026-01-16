@@ -32,6 +32,8 @@ import com.example.trinity.R;
 import com.example.trinity.adapters.AdapterMangas;
 import com.example.trinity.databinding.FragmentExtensionsShowBinding;
 import com.example.trinity.extensions.MangaDexExtension;
+import com.example.trinity.extensions.MangaLivreExtension;
+import com.example.trinity.extensions.MangakakalotExtension;
 import com.example.trinity.valueObject.Manga;
 
 import java.util.ArrayList;
@@ -139,7 +141,7 @@ public class ExtensionsShowFragment extends Fragment {
                 i.putExtra("Logo", R.drawable.mangadex_logo);
                 i.putExtra("Titulo", "MangaDex - pt-br");
                 i.putExtra("Language", languages[0]);
-                i.putExtra("Extension",Extensions.MANGADEX);
+                i.putExtra("Extension",new MangaDexExtension(languages[0],""));
 
                 startActivity(i);
 
@@ -155,7 +157,7 @@ public class ExtensionsShowFragment extends Fragment {
                 i.putExtra("Logo", R.drawable.mangadex_logo);
                 i.putExtra("Titulo", "MangaDex - Espanhol");
                 i.putExtra("Language", languages[2]);
-                i.putExtra("Extension",Extensions.MANGADEX);
+                i.putExtra("Extension",new MangaDexExtension(languages[2],""));
                 startActivity(i);
 
             }
@@ -169,7 +171,7 @@ public class ExtensionsShowFragment extends Fragment {
                 i.putExtra("Logo", R.drawable.mangadex_logo);
                 i.putExtra("Titulo", "MangaDex - en");
                 i.putExtra("Language", languages[1]);
-                i.putExtra("Extension",Extensions.MANGADEX);
+                i.putExtra("Extension",new MangaDexExtension(languages[1],""));
                 startActivity(i);
 
 
@@ -182,11 +184,20 @@ public class ExtensionsShowFragment extends Fragment {
                 i.putExtra("Logo", R.drawable.mangakakalot_svg);
                 i.putExtra("Titulo", "Mangakakalot - en");
                 i.putExtra("Language", languages[2]);
-                i.putExtra("Extension",Extensions.MANGAKAKALOT);
+                i.putExtra("Extension",new MangakakalotExtension(null));
                 startActivity(i);
 
 
             }
+        });
+        binding.mangaLivreClickable.setOnClickListener((v)->{
+            Intent i = new Intent(getActivity(), ExtensionShowContentActivity.class);
+//            i.putExtra("Logo", R.drawable.mangakakalot_svg);
+
+            i.putExtra("Titulo", "MANGALIVRE - pt br");
+            i.putExtra("Language", languages[0]);
+            i.putExtra("Extension",new MangaLivreExtension());
+            startActivity(i);
         });
 
 
@@ -220,15 +231,7 @@ public class ExtensionsShowFragment extends Fragment {
             binding.img5.getPaint().setShader(shader);
             binding.img5.invalidate();
         });
-        binding.mangaLivreClickable.setOnClickListener((v)->{
-            Intent i = new Intent(getActivity(), ExtensionShowContentActivity.class);
-//            i.putExtra("Logo", R.drawable.mangakakalot_svg);
 
-            i.putExtra("Titulo", "MANGALIVRE - pt br");
-            i.putExtra("Language", languages[0]);
-            i.putExtra("Extension",Extensions.MANGALIVRE);
-            startActivity(i);
-        });
 
 
         return binding.getRoot();

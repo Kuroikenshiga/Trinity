@@ -41,7 +41,7 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
     private LogoMangaStorageTemp storageTemp;
     private boolean isFromUpdates = false;
     private Fragment fragment;
-
+    private Extensions extension;
 
     public AdapterMangas(Context c, ArrayList<Manga> mangaModels) {
         this.c = c;
@@ -73,6 +73,10 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
 
         MangaItemLayoutBinding mangaItemBinding = MangaItemLayoutBinding.inflate(LayoutInflater.from(c), parent, false);
         return new MangaViewHolder(mangaItemBinding);
+    }
+
+    public void setExtension(Extensions extension) {
+        this.extension = extension;
     }
 
     @Override
@@ -117,7 +121,8 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
                         else{
                             intent.putExtra("Item", (Serializable) mangaArrayList.get(holder.getAdapterPosition()));
                         }
-                        intent.putExtra("Extension",mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangakakalot")?Extensions.MANGAKAKALOT:mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangalivre")?Extensions.MANGALIVRE:Extensions.MANGADEX);
+//                        intent.putExtra("Extension",mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangakakalot")?Extensions.MANGAKAKALOT:mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangalivre")?Extensions.MANGALIVRE:Extensions.MANGADEX);
+                        intent.putExtra("Extension",(Parcelable) extension);
                         intent.putExtra("Language", language == null ? mangaArrayList.get(holder.getAdapterPosition()).getLanguage() : language);
                         intent.putExtra("FromMain", c instanceof MainActivity);
                         c.startActivity(intent);
@@ -130,6 +135,7 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
 //                System.out.println("Context");
                 Glide.with(c).load(!isFromUpdates ? storage.getLogoFromStorage(mangaArrayList.get(holder.getAdapterPosition()).getId()) : storageTemp.getLogoFromTempStorage(mangaArrayList.get(holder.getAdapterPosition()).getId()))
 //                    .override((int) c.getResources().getDisplayMetrics().density * 120, (int) c.getResources().getDisplayMetrics().density * 170)
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                         .into(holder.binding.mangaLogo);
             }else {
 //                System.out.println("Fragment");
@@ -170,7 +176,7 @@ public class AdapterMangas extends RecyclerView.Adapter<AdapterMangas.MangaViewH
                     }else{
                         intent.putExtra("Item", (Serializable) mangaArrayList.get(holder.getAdapterPosition()));
                     }
-                    intent.putExtra("Extension",mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangakakalot")?Extensions.MANGAKAKALOT:mangaArrayList.get(holder.getAdapterPosition()).getId().contains("mangalivre")?Extensions.MANGALIVRE:Extensions.MANGADEX);
+                    intent.putExtra("Extension",(Parcelable) extension);
                     intent.putExtra("Language", language == null ? mangaArrayList.get(holder.getAdapterPosition()).getLanguage() : language);
                     intent.putExtra("FromMain", c instanceof MainActivity);
                     c.startActivity(intent);

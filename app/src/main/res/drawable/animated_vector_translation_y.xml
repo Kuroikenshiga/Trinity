@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    >
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="960"
+            android:viewportHeight="960">
+            <group
+                android:name="backPath"
+                android:pivotX="480"
+                android:pivotY="480"
+                android:rotation="90"
+                >
+                <path
+                    android:fillColor="#FFF"
+                    android:pathData="m313,520 l224,224 -57,56 -320,-320 320,-320 57,56 -224,224h487v80L313,520Z" />
+
+            </group>
+        </vector>
+    </aapt:attr>
+    <target
+        android:name="backPath"
+        android:animation="@animator/tranlate_y" />
+
+</animated-vector>

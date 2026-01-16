@@ -12,7 +12,15 @@ import java.util.ArrayList;
 public class UpdatesViewModel extends ViewModel {
     private MutableLiveData<ArrayList<ChapterUpdated>>chapterUpdatedLiveData = new MutableLiveData<>();
     private MutableLiveData<ChapterUpdated> item = new MutableLiveData<>();
-//    private int v = 1;
+    private int positionInsertion = 0;
+
+    public int getPositionInsertion() {
+        return positionInsertion;
+    }
+    public void resetPositionInsertion(){
+        this.positionInsertion = 0;
+    }
+    //    private int v = 1;
     public UpdatesViewModel(){
         this.item.setValue(new ChapterUpdated(null,null));
         this.chapterUpdatedLiveData.setValue(new ArrayList<ChapterUpdated>());
@@ -22,9 +30,9 @@ public class UpdatesViewModel extends ViewModel {
     public MutableLiveData<ArrayList<ChapterUpdated>> getChapterUpdatedLiveData() {
         return chapterUpdatedLiveData;
     }
-    public void addChapterInLiveData(ChapterUpdated c){
+    public void addChapterInLiveData(ChapterUpdated c,int position){
         this.item.setValue(c);
-
+        this.positionInsertion = position;
         if(this.chapterUpdatedLiveData.getValue().isEmpty()){
             this.chapterUpdatedLiveData.getValue().add(null);
             this.chapterUpdatedLiveData.getValue().add(this.item.getValue());
