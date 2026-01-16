@@ -111,6 +111,7 @@
             android:fontFamily="@font/roboto_black"
             android:text="Não há mais capítulos desta obra "
             android:textColor="?attr/colorTertiary"
+            android:visibility="gone"
             android:textSize="15sp"
             app:layout_constraintTop_toBottomOf="@id/timeWaste" />
 

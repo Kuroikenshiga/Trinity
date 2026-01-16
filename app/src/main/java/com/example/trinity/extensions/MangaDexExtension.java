@@ -8,7 +8,11 @@ import android.graphics.ColorSpace;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.Interfaces.PageStorage;
@@ -47,7 +51,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class MangaDexExtension implements Extensions {
+public class MangaDexExtension implements Extensions, Parcelable {
 
 
     private int updateOffSet = 0;
@@ -72,6 +76,28 @@ public class MangaDexExtension implements Extensions {
 //        this.imageQuality = imageQuality;
 //
 //    }
+
+    protected MangaDexExtension(Parcel in) {
+        updateOffSet = in.readInt();
+        UpdateTotalItens = in.readInt();
+        limit = in.readInt();
+        language = in.readString();
+        tags = in.readString();
+        imageQuality = in.readString();
+        status = in.readString();
+    }
+
+    public static final Creator<MangaDexExtension> CREATOR = new Creator<MangaDexExtension>() {
+        @Override
+        public MangaDexExtension createFromParcel(Parcel in) {
+            return new MangaDexExtension(in);
+        }
+
+        @Override
+        public MangaDexExtension[] newArray(int size) {
+            return new MangaDexExtension[size];
+        }
+    };
 
     public void setUpdateTotalItens(int updateTotalItens) {
         UpdateTotalItens = updateTotalItens;
@@ -794,6 +820,22 @@ public class MangaDexExtension implements Extensions {
     @Override
     public ArrayList<ChapterManga> viewChapters(String mangaId, Handler h) {
         return null;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(updateOffSet);
+        dest.writeInt(UpdateTotalItens);
+        dest.writeInt(limit);
+        dest.writeString(language);
+        dest.writeString(tags);
+        dest.writeString(imageQuality);
+        dest.writeString(status);
     }
 }
 

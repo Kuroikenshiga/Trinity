@@ -391,7 +391,16 @@ public class InfoMangaFragment extends Fragment {
                 });
             }
         };
-        mangaDexExtension = requireActivity() instanceof MangaShowContentActivity ? (((MangaShowContentActivity) requireActivity()).getExtension().equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) :((MangaShowContentActivity) requireActivity()).getExtension().equals(Extensions.MANGALIVRE)? new MangaLivreExtension(onMangaLoaded) : new MangakakalotExtension(onMangaLoaded)) : new MangaDexExtension(this.language, imageQuality);
+
+//        System.out.println(((MangaShowContentActivity) requireActivity()).getExtension());
+//        mangaDexExtension = requireActivity() instanceof MangaShowContentActivity ? (((MangaShowContentActivity) requireActivity()).getExtension().equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) :((MangaShowContentActivity) requireActivity()).getExtension().equals(Extensions.MANGALIVRE)? new MangaLivreExtension(onMangaLoaded) : new MangakakalotExtension(onMangaLoaded)) : null;
+        mangaDexExtension  = requireActivity().getIntent().getParcelableExtra("Extension");
+        if(mangaDexExtension instanceof MangaLivreExtension ){
+            ((MangaLivreExtension)mangaDexExtension).setOnMangaLoaded(onMangaLoaded);
+        }
+        if(mangaDexExtension instanceof MangakakalotExtension){
+            ((MangakakalotExtension)mangaDexExtension).setOnMangaLoaded(onMangaLoaded);
+        }
 
         favorite();
         loadChapters();

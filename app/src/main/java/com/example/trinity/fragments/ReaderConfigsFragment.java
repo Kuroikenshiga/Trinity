@@ -1,5 +1,6 @@
 package com.example.trinity.fragments;
 
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.AppCompatImageView;
@@ -33,7 +34,9 @@ public class ReaderConfigsFragment extends Fragment {
     public static final int REVERSE = 1;
     public static final int CASCADE = 2;
     private Runnable runnable;
+    private boolean isInUserWindow = false;
     OnSeekBarChangeListener onSeekBarChangeListener;
+
     public ReaderConfigsFragment() {
         // Required empty public constructor
     }
@@ -64,44 +67,53 @@ public class ReaderConfigsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentReaderConfigsBinding.inflate(inflater, container, false);
-        radio = new boolean[]{true,false,false};
-        imageViews = new AppCompatImageView[][]{{binding.dir1,binding.pan1},{binding.dir2,binding.pan2},{binding.dir3,binding.pan3}};
+        radio = new boolean[]{true, false, false};
+        imageViews = new AppCompatImageView[][]{{binding.dir1, binding.pan1}, {binding.dir2, binding.pan2}, {binding.dir3, binding.pan3}};
         selectedRadioButton();
         configSeekbar();
         binding.alphaController.setStartText("0");
         binding.alphaController.setEndText("100");
+
         return binding.getRoot();
     }
-    private void selectedRadioButton(){
-        binding.standard.setOnClickListener((v)->{
-            radio[0] = true;radio[1] = false;radio[2] = false;
+
+    private void selectedRadioButton() {
+        binding.standard.setOnClickListener((v) -> {
+            radio[0] = true;
+            radio[1] = false;
+            radio[2] = false;
             configViewRadioButton(0);
-            if(onReadModeSelected != null)onReadModeSelected.onStandardModeSelected();
+            if (onReadModeSelected != null) onReadModeSelected.onStandardModeSelected();
         });
-        binding.reverse.setOnClickListener((v)->{
-            radio[0] = false;radio[1] = true;radio[2] = false;
+        binding.reverse.setOnClickListener((v) -> {
+            radio[0] = false;
+            radio[1] = true;
+            radio[2] = false;
             configViewRadioButton(1);
-            if(onReadModeSelected != null)onReadModeSelected.onReverseModeSelected();
+            if (onReadModeSelected != null) onReadModeSelected.onReverseModeSelected();
         });
-        binding.cascade.setOnClickListener((v)->{
-            radio[0] = false;radio[1] = false;radio[2] = true;
+        binding.cascade.setOnClickListener((v) -> {
+            radio[0] = false;
+            radio[1] = false;
+            radio[2] = true;
             configViewRadioButton(2);
-            if(onReadModeSelected != null)onReadModeSelected.onCascadeModeSelected();
+            if (onReadModeSelected != null) onReadModeSelected.onCascadeModeSelected();
         });
     }
-    private void configViewRadioButton(int indexButton){
-        if(indexButton >= radio.length)return;
+
+    private void configViewRadioButton(int indexButton) {
+        if (indexButton >= radio.length) return;
 
         TypedValue typedValue = new TypedValue();
         requireContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorTertiary, typedValue, true);
 
-        for(int i = 0;i < imageViews.length;i++){
-            for(int j = 0;j < imageViews[0].length;j++){
+        for (int i = 0; i < imageViews.length; i++) {
+            for (int j = 0; j < imageViews[0].length; j++) {
                 imageViews[i][j].getDrawable().setTint(typedValue.data);
             }
         }
         requireContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
-        for(int i = 0;i < imageViews[indexButton].length;i++) {
+        for (int i = 0; i < imageViews[indexButton].length; i++) {
             imageViews[indexButton][i].getDrawable().setTint(typedValue.data);
         }
     }
@@ -110,47 +122,80 @@ public class ReaderConfigsFragment extends Fragment {
         this.onReadModeSelected = onReadModeSelected;
     }
 
-    public void setRadioValue(int readMode){
-        if(readMode < 0 || readMode > 2)return;
+    public void setRadioValue(int readMode) {
+        if (readMode < 0 || readMode > 2) return;
         configViewRadioButton(readMode);
     }
 
-    public interface OnReadModeSelected{
+    public interface OnReadModeSelected {
         void onStandardModeSelected();
+
         void onReverseModeSelected();
+
         void onCascadeModeSelected();
     }
-    public interface OnSeekBarChangeListener{
+
+    public interface OnSeekBarChangeListener {
         void onChanged(int value);
+
         void onEndChange(int value);
 
     }
-    private void configSeekbar(){
-        binding.alphaController.setPositionListener((F)->{
+
+    private void configSeekbar() {
+        binding.alphaController.setPositionListener((F) -> {
             System.out.println(binding.alphaController.getBubbleText());
-            if(onSeekBarChangeListener != null)onSeekBarChangeListener.onChanged((int)(binding.alphaController.getPosition()*100));
+            if (onSeekBarChangeListener != null)
+                onSeekBarChangeListener.onChanged((int) (binding.alphaController.getPosition() * 100));
             return Unit.INSTANCE;
         });
-        binding.alphaController.setEndTrackingListener(()->{
-            if(onSeekBarChangeListener != null)onSeekBarChangeListener.onEndChange((int)(binding.alphaController.getPosition()*100));
+        binding.alphaController.setEndTrackingListener(() -> {
+            if (onSeekBarChangeListener != null)
+                onSeekBarChangeListener.onEndChange((int) (binding.alphaController.getPosition() * 100));
             return Unit.INSTANCE;
         });
     }
-    public void setAlphaValue(float f){
+
+    public void setAlphaValue(float f) {
         binding.alphaController.setPosition(f);
 
     }
-    public void setOnSeekBarChangeListener (OnSeekBarChangeListener onSeekBarChangeListener){
+
+    public void setOnSeekBarChangeListener(OnSeekBarChangeListener onSeekBarChangeListener) {
         this.onSeekBarChangeListener = onSeekBarChangeListener;
 
     }
 
     public void setRunnable(Runnable runnable) {
         this.runnable = runnable;
-        if(runnable != null){
-            binding.download.setOnClickListener((v)->{
+        if (runnable != null) {
+            binding.download.setOnClickListener((v) -> {
                 runnable.run();
             });
+        }
+    }
+
+    public void animations(boolean startAnimation) {
+        for (int i = 0; i < imageViews.length; i++) {
+            for (int j = 0; j < imageViews[0].length; j++) {
+                if (imageViews[i][j].getDrawable() instanceof AnimatedVectorDrawable) {
+                    if (startAnimation) {
+                        ((AnimatedVectorDrawable) imageViews[i][j].getDrawable()).start();
+                    } else {
+                        ((AnimatedVectorDrawable) imageViews[i][j].getDrawable()).stop();
+                    }
+                }
+            }
+        }
+    }
+
+
+    public void setInUserWindow(boolean inUserWindow) {
+        isInUserWindow = inUserWindow;
+        if(isInUserWindow){
+            animations(true);
+        }else{
+            animations(false);
         }
     }
 }

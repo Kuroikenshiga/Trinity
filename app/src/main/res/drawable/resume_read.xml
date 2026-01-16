@@ -8,9 +8,7 @@
         android:pivotX="480"
         android:pivotY="480"
         >
-
       <path
-
           android:pathData="M240,720v-480h80v480h-80ZM400,720 L800,480 400,240v480ZM480,579v-198l165,99 -165,99ZM480,480Z"
           android:fillColor="#e8eaed"/>
 

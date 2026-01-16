@@ -27,6 +27,8 @@ public interface Extensions {
     public final int RESPONSE_REQUEST_NEW_CONTENT_CALL = 6;
     public final int RESPONSE_REQUEST_BYPASS = 7;
     public final int RESPONSE_COUNT_ITENS_DECREASED_BY_ONE = 8;
+    public final int RESPONSE_CLOSE_CALLS = 9;
+    public final int RESPONSE_SIZE = 10;
 
     void updates( Handler h);
     void loadMangaLogo(Handler h, ArrayList<Manga> mangaArrayList);

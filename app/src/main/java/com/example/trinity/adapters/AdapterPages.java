@@ -136,7 +136,7 @@ public class AdapterPages extends RecyclerView.Adapter<AdapterPages.ImageViewHol
             else{
                 holder.binding.nextChapter.setText(String.format("Próximo capítulo: %s - %s", previousCurrentAndNextChapter[2].getChapter(), previousCurrentAndNextChapter[2].title));
             }
-            holder.binding.currentChapter.setText(String.format("Capítulo atual: %s - %s", previousCurrentAndNextChapter[1].getChapter(), previousCurrentAndNextChapter[1].title));
+            holder.binding.currentChapterEnd.setText(String.format("Capítulo atual: %s - %s", previousCurrentAndNextChapter[1].getChapter(), previousCurrentAndNextChapter[1].title));
             holder.binding.nextChapterContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

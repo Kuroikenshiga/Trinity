@@ -31,7 +31,7 @@ public class SearchResultActivity extends AppCompatActivity {
     private boolean supressManyLoad = true;
     private Extensions mangaDexExtension;
     private boolean controllEnter = false;
-
+    private int responseSize = 15;
     Thread workerThread;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +48,12 @@ public class SearchResultActivity extends AppCompatActivity {
         this.binding.searchField.setText(getIntent().getStringExtra("SearchField"));
         SharedPreferences sharedPreferences = getSharedPreferences(ConfigClass.TAG_PREFERENCE,MODE_PRIVATE);
         String imageQuality = sharedPreferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY,"dataSaver");
-        System.out.println("-------------"+getIntent().getStringExtra("Extension"));
-        mangaDexExtension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX)?new MangaDexExtension(language,imageQuality):getIntent().getStringExtra("Extension").equals(Extensions.MANGALIVRE)?new MangaLivreExtension(null) :new MangakakalotExtension(null);
+//        System.out.println("-------------"+getIntent().getStringExtra("Extension"));
+//        mangaDexExtension = getIntent().getStringExtra("Extension").equals(Extensions.MANGADEX)?new MangaDexExtension(language,imageQuality):getIntent().getStringExtra("Extension").equals(Extensions.MANGALIVRE)?new MangaLivreExtension(null) :new MangakakalotExtension(null);
+        mangaDexExtension = getIntent().getParcelableExtra("Extension");
         final ArrayList<Manga>[] mangaListedModelsAll = new ArrayList[]{new ArrayList()};
         AdapterMangas adapter = new AdapterMangas(SearchResultActivity.this, mangaListedModelsAll[0],this.language);
+        adapter.setExtension(mangaDexExtension);
         adapter.setShowLanguageIcon(true);
         adapter.setFromUpdates(true);
         final int[] controllLoad = {0};
@@ -70,7 +72,7 @@ public class SearchResultActivity extends AppCompatActivity {
                     binding.progressTop.setVisibility(View.GONE);
 
                     controllLoad[0]++;
-                    if(controllLoad[0] == 15){
+                    if(controllLoad[0] == responseSize){
                         supressManyLoad = false;
                         controllLoad[0] = 0;
                         binding.progressBotton.setVisibility(View.GONE);
@@ -87,6 +89,13 @@ public class SearchResultActivity extends AppCompatActivity {
                     binding.resultContainer.setVisibility(View.GONE);
                     binding.ErrorOnResult.setVisibility(View.VISIBLE);
                     binding.errorText.setText("Nenhum resultado encontrado para "+binding.searchField.getText().toString().toString());
+                }
+                else if(msg.what == Extensions.RESPONSE_CLOSE_CALLS){
+                    binding.progressTop.setVisibility(View.GONE);
+                    supressManyLoad = true;
+                }
+                else if(msg.what == Extensions.RESPONSE_SIZE){
+                    responseSize = msg.getData().getInt("size_response");
                 }
 
             }
@@ -129,7 +138,7 @@ public class SearchResultActivity extends AppCompatActivity {
                 if(workerThread != null && workerThread.isAlive()){
                     workerThread.interrupt();
                 }
-                mangaDexExtension = new MangaDexExtension(language,imageQuality);
+//                mangaDexExtension = new MangaDexExtension(language,imageQuality);
                 mangaListedModelsAll[0].clear();
                 adapter.notifyDataSetChanged();
                 binding.progressTop.setVisibility(View.VISIBLE);
@@ -147,7 +156,7 @@ public class SearchResultActivity extends AppCompatActivity {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if(keyCode == KeyEvent.KEYCODE_ENTER){
-                    mangaDexExtension = new MangaDexExtension(language,imageQuality);
+//                    mangaDexExtension = new MangaDexExtension(language,imageQuality);
                   
                    if(!controllEnter){
                        controllEnter = true;

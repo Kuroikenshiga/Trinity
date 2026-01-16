@@ -7,6 +7,10 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
 
 import com.example.trinity.Interfaces.Extensions;
 import com.example.trinity.Interfaces.PageStorage;
@@ -45,7 +49,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class MangaLivreExtension implements Extensions {
+public class MangaLivreExtension implements Extensions, Parcelable {
     private int currentPage = 1;
     private Context context;
     private MangakakalotExtension.OnMangaLoaded onMangaLoaded;
@@ -58,6 +62,30 @@ public class MangaLivreExtension implements Extensions {
     public MangaLivreExtension() {
 
     }
+
+    public void setOnMangaLoaded(MangakakalotExtension.OnMangaLoaded onMangaLoaded) {
+        this.onMangaLoaded = onMangaLoaded;
+    }
+
+    protected MangaLivreExtension(Parcel in) {
+        currentPage = in.readInt();
+        BASE_URL = in.readString();
+        BASE_URL_SEARCH = in.readString();
+        switchStatus = in.readByte() != 0;
+    }
+
+    public static final Creator<MangaLivreExtension> CREATOR = new Creator<MangaLivreExtension>() {
+        @Override
+        public MangaLivreExtension createFromParcel(Parcel in) {
+            return new MangaLivreExtension(in);
+        }
+
+        @Override
+        public MangaLivreExtension[] newArray(int size) {
+            return new MangaLivreExtension[size];
+        }
+    };
+
     @Override
     public void updates(Handler h) {
         String url = String.format(!switchStatus?"https://mangalivre.blog/page/%d/":"https://mangalivre.blog/manga/page/%d/?manga_status=completo&orderby=title",currentPage);
@@ -495,4 +523,16 @@ public class MangaLivreExtension implements Extensions {
     }
     public boolean getStatus(){return this.switchStatus;}
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(currentPage);
+        dest.writeString(BASE_URL);
+        dest.writeString(BASE_URL_SEARCH);
+        dest.writeByte((byte) (switchStatus ? 1 : 0));
+    }
 }

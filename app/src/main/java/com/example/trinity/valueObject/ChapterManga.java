@@ -20,9 +20,9 @@ public class ChapterManga implements Parcelable {
     private  String id;
     public String title;
     private String chapter;
-    private String scan;
+    private String scan = "";
     private Calendar data;
-    private String dateRFC3339;
+    private String dateRFC3339 = "";
     private boolean alredyRead;
     private int currentPage;
     private boolean isDownloaded;

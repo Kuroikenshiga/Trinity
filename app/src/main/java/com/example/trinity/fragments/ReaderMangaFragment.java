@@ -888,8 +888,11 @@ public class ReaderMangaFragment extends Fragment {
 
     private void showConfigOptions() {
         if (!isConfigShow) {
+            ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(binding.show,"rotation",180,0);
+            objectAnimator.setDuration(300);
+            objectAnimator.start();
             if(binding.seekBar.getVisibility() == View.VISIBLE)binding.seekBar.setVisibility(View.GONE);
-            ValueAnimator animator = ValueAnimator.ofInt(-350, 50);
+            ValueAnimator animator = ValueAnimator.ofInt(-370, 50);
             animator.setRepeatCount(0);
             animator.setDuration(300);
             animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -902,10 +905,14 @@ public class ReaderMangaFragment extends Fragment {
                 }
             });
             isConfigShow = true;
+            configFragment.setInUserWindow(isConfigShow);
             animator.start();
             return;
         }
-        ValueAnimator animator = ValueAnimator.ofInt(50, -350);
+        ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(binding.show,"rotation",0,180);
+        objectAnimator.setDuration(300);
+        objectAnimator.start();
+        ValueAnimator animator = ValueAnimator.ofInt(50, -370);
         animator.setRepeatCount(0);
         animator.setDuration(300);
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -918,6 +925,7 @@ public class ReaderMangaFragment extends Fragment {
             }
         });
         isConfigShow = false;
+        configFragment.setInUserWindow(isConfigShow);
         animator.start();
 
 
@@ -965,9 +973,7 @@ public class ReaderMangaFragment extends Fragment {
             public void onChanged(int value) {
                 binding.alphaDealer.setAlpha((100 - value)/100f);
                 alpha = value;
-
             }
-
             @Override
             public void onEndChange(int value) {
                 preferencesEditor.putInt(ConfigClass.ConfigReader.ALPHA_CONFIG, alpha);
