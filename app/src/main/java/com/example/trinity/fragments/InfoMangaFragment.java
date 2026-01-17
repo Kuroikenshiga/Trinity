@@ -50,6 +50,7 @@ import com.example.trinity.R;
 import com.example.trinity.adapters.AdapterChapters;
 import com.example.trinity.adapters.AdapterGenres;
 import com.example.trinity.databinding.FragmentInfoMangaBinding;
+import com.example.trinity.dialogs.SetGrayScaleDialog;
 import com.example.trinity.extensions.MangaDexExtension;
 import com.example.trinity.extensions.MangaLivreExtension;
 import com.example.trinity.extensions.MangakakalotExtension;
@@ -395,6 +396,7 @@ public class InfoMangaFragment extends Fragment {
 //        System.out.println(((MangaShowContentActivity) requireActivity()).getExtension());
 //        mangaDexExtension = requireActivity() instanceof MangaShowContentActivity ? (((MangaShowContentActivity) requireActivity()).getExtension().equals(Extensions.MANGADEX) ? new MangaDexExtension(this.language, imageQuality) :((MangaShowContentActivity) requireActivity()).getExtension().equals(Extensions.MANGALIVRE)? new MangaLivreExtension(onMangaLoaded) : new MangakakalotExtension(onMangaLoaded)) : null;
         mangaDexExtension  = requireActivity().getIntent().getParcelableExtra("Extension");
+        System.out.println(mangaDexExtension);
         if(mangaDexExtension instanceof MangaLivreExtension ){
             ((MangaLivreExtension)mangaDexExtension).setOnMangaLoaded(onMangaLoaded);
         }
@@ -468,6 +470,23 @@ public class InfoMangaFragment extends Fragment {
             binding.numChapters.setText((isFilterChaptersOn?allChapters.stream().mapToInt((c)->{return c.isDownloaded()?1:0;}).sum():allChapters.size()) + " Capítulos");
         });
 
+        binding.grayScale.setOnClickListener((v)->{
+            SetGrayScaleDialog setGrayScaleDialog = new SetGrayScaleDialog(()->{
+                binding.scaleIndicator.setText("60%");
+                mangaDataViewModel.setGrayScale(0.6f);
+
+            },()->{
+                binding.scaleIndicator.setText("40%");
+                mangaDataViewModel.setGrayScale(0.4f);
+            },()->{
+                binding.scaleIndicator.setText("85%");
+                mangaDataViewModel.setGrayScale(0.85f);
+            });
+
+            setGrayScaleDialog.show(requireActivity().getSupportFragmentManager(),"setGrayScale");
+        });
+        if(!(manga.getId().contains("mangakakalot")))binding.grayScaleContainer.setVisibility(View.GONE);
+        mangaDataViewModel.setGrayScale(0.85f);
         return v;
     }
     @Override

@@ -72,6 +72,11 @@ public class MangakakalotExtension implements Extensions, Parcelable {
     public static String CHAPMANGANATO = "chapmanganato";
     public static String MANGAKAKALOT = "mangakakalot";
     private String status = "latest-manga";
+    private float grayScale = 0.85f;
+
+    public void setGrayScale(float grayScale) {
+        this.grayScale = grayScale;
+    }
 
     protected MangakakalotExtension(Parcel in) {
         currentPage = in.readInt();
@@ -179,7 +184,7 @@ public class MangakakalotExtension implements Extensions, Parcelable {
                             h.sendMessage(msg);
                             if (executor.getQueue().size() == 1) {
                                 Message msgResp = Message.obtain();
-                                msgResp.what = RESPONSE_CLOSE_CALLS;
+                                msgResp.what = RESPONSE_FINAL;
                                 h.sendMessage(msgResp);
                             }
                         }
@@ -502,6 +507,7 @@ public class MangakakalotExtension implements Extensions, Parcelable {
     }
 
     public ArrayList<ChapterManga> viewChapters(String mangaId,Handler h) {
+        mangaId = mangaId.toLowerCase();
         mangaId = mangaId.replace("@", "/");
         String urlApi = mangaId.contains(BASE_URL) ? mangaId : (BASE_URL + mangaId);
         String html = loadMangaInfo(mangaId,h);
@@ -581,7 +587,7 @@ public class MangakakalotExtension implements Extensions, Parcelable {
                     if(countImageControl > 1 || continueVerification){
 
 //                        assert bitAux != null;
-                        if(bitAux != null && ImageValidate.isSubImage(bit,bitAux)){
+                        if(bitAux != null && ImageValidate.isSubImage(bit,bitAux,grayScale)){
                             String urlImage = pageStorage.insertBitmapInFolder(ImageValidate.BitmapConcat(bit,bitAux), String.valueOf(index) + ".jpeg");
 
                             Message msg = Message.obtain();

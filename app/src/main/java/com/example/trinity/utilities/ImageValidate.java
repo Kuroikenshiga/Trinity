@@ -16,12 +16,13 @@ public abstract class ImageValidate {
     private static final float minHorizontalRatioForCompute = 1.2f;
     private static final float maxHorizontalRatioForCompute = 1.6f;
 
-    private static final float minGrayPixelsPercentage = 0.85f;
+    private static final float minGrayPixelsPercentage = 0.4f;
 
-    public static boolean isSubImage(@NonNull Bitmap originalImage, Bitmap subImage) {
+    public static boolean isSubImage(@NonNull Bitmap originalImage, Bitmap subImage,float colorScale) {
 //        System.out.println("altura° - "+(originalImage.getHeight()+subImage.getHeight()));
 //        System.out.println("largura° - "+originalImage.getWidth());
 
+        if(originalImage.getWidth() != subImage.getWidth())return false;
 
         float imageRatio = (float) originalImage.getWidth() /(subImage.getHeight()+originalImage.getHeight());
         boolean initialTest;
@@ -32,7 +33,7 @@ public abstract class ImageValidate {
         }
 
         if(!initialTest)return false;
-        return verifyColorScale(originalImage,subImage);
+        return verifyColorScale(originalImage,subImage,colorScale);
 
     }
 
@@ -44,7 +45,7 @@ public abstract class ImageValidate {
         canvas.drawBitmap(subImage, 0, originalImage.getHeight(), null);
         return bitmap;
     }
-    private static boolean verifyColorScale(@NonNull Bitmap originalImage, Bitmap subImage){
+    private static boolean verifyColorScale(@NonNull Bitmap originalImage, Bitmap subImage,float colorScale){
         int totalPixelsOriginalImage = 0,totalPixelsSubImage = 0,totalGrayPixelsOriginalImage = 0,totalGrayPixelsSubImage = 0;
         boolean isOriginalImageGrayScale = true;
         List<Palette.Swatch>list = Palette.from(originalImage).generate().getSwatches();
@@ -55,9 +56,9 @@ public abstract class ImageValidate {
             }
             totalPixelsOriginalImage += swatch.getPopulation();
         }
-        isOriginalImageGrayScale = (float)totalGrayPixelsOriginalImage / totalPixelsOriginalImage >= minGrayPixelsPercentage;
+        isOriginalImageGrayScale = (float)totalGrayPixelsOriginalImage / totalPixelsOriginalImage >= colorScale;
 
-        System.out.println("1 - "+((float)totalGrayPixelsOriginalImage / totalPixelsOriginalImage));
+//        System.out.println("1 - "+((float)totalGrayPixelsOriginalImage / totalPixelsOriginalImage));
 
         boolean isSubImageGrayScale = true;
         list = Palette.from(subImage).generate().getSwatches();
@@ -67,8 +68,8 @@ public abstract class ImageValidate {
             }
             totalPixelsSubImage += swatch.getPopulation();
         }
-        isSubImageGrayScale = (float)totalGrayPixelsSubImage / totalPixelsSubImage >= minGrayPixelsPercentage;
-        System.out.println("2 - "+((float)totalGrayPixelsSubImage / totalPixelsSubImage));
+        isSubImageGrayScale = (float)totalGrayPixelsSubImage / totalPixelsSubImage >= colorScale;
+//        System.out.println("2 - "+((float)totalGrayPixelsSubImage / totalPixelsSubImage));
 
 
         return isOriginalImageGrayScale == isSubImageGrayScale;

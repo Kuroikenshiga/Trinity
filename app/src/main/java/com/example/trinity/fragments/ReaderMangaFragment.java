@@ -210,7 +210,7 @@ public class ReaderMangaFragment extends Fragment {
         preferencesEditor = preferences.edit();
         String imageQuality = preferences.getString(ConfigClass.ConfigContent.IMAGE_QUALITY, "dataSaver");
 
-        this.alpha = preferences.getInt(ConfigClass.ConfigReader.ALPHA_CONFIG, 0);
+        this.alpha = preferences.getInt(ConfigClass.ConfigReader.ALPHA_CONFIG, 100);
 //        this.binding.alphaController.setProgress(this.alpha);
         binding.alphaDealer.setAlpha((100 - alpha)/100f);
 
@@ -330,6 +330,7 @@ public class ReaderMangaFragment extends Fragment {
             }
         });
         mangaDexExtension = mangaDataViewModel.getManga().getId().contains(MangakakalotExtension.MANGAKAKALOT) ? new MangakakalotExtension(null) : mangaDataViewModel.getManga().getId().contains("mangalivre") ? new MangaLivreExtension(null) : new MangaDexExtension(mangaLanguage, imageQuality);
+        if(mangaDexExtension instanceof MangakakalotExtension)((MangakakalotExtension)mangaDexExtension).setGrayScale(mangaDataViewModel.getGrayScale());
         mangaDexExtension.setContext(getActivity());
         workThread = new Thread() {
             @Override

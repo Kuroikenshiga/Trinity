@@ -8,7 +8,7 @@ import com.example.trinity.valueObject.Manga;
 public class MangaDataViewModel extends ViewModel {
     private MutableLiveData<Manga> manga = new MutableLiveData<>();
     private MutableLiveData<String> idChap = new MutableLiveData<>();
-
+    private MutableLiveData<Float> grayScale = new MutableLiveData<>();
 
     public void setManga(Manga manga) {
         this.manga.setValue(manga);
@@ -24,5 +24,11 @@ public class MangaDataViewModel extends ViewModel {
         return this.idChap.getValue();
     }
 
+    public void setGrayScale(float grayScale){
+        this.grayScale.setValue(grayScale);
+    }
+    public float getGrayScale(){
+        return this.grayScale.getValue()==null?85:this.grayScale.getValue();
+    }
 
 }

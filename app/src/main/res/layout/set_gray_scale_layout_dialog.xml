@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:background="@drawable/dialog_shape"
+    android:gravity="center"
+    android:paddingBottom="10dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="Escala minima de cinza das páginas"
+        android:fontFamily="@font/noto_sans"
+        android:textSize="15sp"
+        android:textColor="?attr/colorTertiary"
+        />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="15dp"
+        android:layout_gravity="center_horizontal"
+        >
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/percent40"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="40%"
+            android:background="@drawable/next_chapter_buttom_shape"
+            />
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/percent60"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="60%"
+            android:background="@drawable/next_chapter_buttom_shape"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            />
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/percent85"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="85%"
+            android:background="@drawable/next_chapter_buttom_shape"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>
